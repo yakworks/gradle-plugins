@@ -1,0 +1,122 @@
+{
+    "default": {
+        "com.diffplug.spotless:spotless-plugin-gradle": {
+            "locked": "3.10.0",
+            "requested": "+"
+        },
+        "gradle.plugin.com.energizedwork:idea-gradle-plugins": {
+            "locked": "1.4",
+            "requested": "+"
+        },
+        "gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin": {
+            "locked": "0.2.0",
+            "requested": "0.2.0"
+        },
+        "org.ajoberstar:gradle-git-publish": {
+            "locked": "0.4.0-rc.2",
+            "requested": "+"
+        },
+        "org.ajoberstar:grgit": {
+            "locked": "2.1.1",
+            "requested": "+"
+        }
+    },
+    "jacocoAgent": {
+        "org.jacoco:org.jacoco.agent": {
+            "locked": "0.7.8"
+        }
+    },
+    "jacocoAnt": {
+        "org.jacoco:org.jacoco.ant": {
+            "locked": "0.7.8"
+        }
+    },
+    "runtime": {
+        "com.diffplug.spotless:spotless-plugin-gradle": {
+            "locked": "3.10.0",
+            "requested": "+"
+        },
+        "gradle.plugin.com.energizedwork:idea-gradle-plugins": {
+            "locked": "1.4",
+            "requested": "+"
+        },
+        "gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin": {
+            "locked": "0.2.0",
+            "requested": "0.2.0"
+        },
+        "org.ajoberstar:gradle-git-publish": {
+            "locked": "0.4.0-rc.2",
+            "requested": "+"
+        },
+        "org.ajoberstar:grgit": {
+            "locked": "2.1.1",
+            "requested": "+"
+        }
+    },
+    "runtimeClasspath": {
+        "com.diffplug.spotless:spotless-plugin-gradle": {
+            "locked": "3.10.0",
+            "requested": "+"
+        },
+        "gradle.plugin.com.energizedwork:idea-gradle-plugins": {
+            "locked": "1.4",
+            "requested": "+"
+        },
+        "gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin": {
+            "locked": "0.2.0",
+            "requested": "0.2.0"
+        },
+        "org.ajoberstar:gradle-git-publish": {
+            "locked": "0.4.0-rc.2",
+            "requested": "+"
+        },
+        "org.ajoberstar:grgit": {
+            "locked": "2.1.1",
+            "requested": "+"
+        }
+    },
+    "testRuntime": {
+        "com.diffplug.spotless:spotless-plugin-gradle": {
+            "locked": "3.10.0",
+            "requested": "+"
+        },
+        "gradle.plugin.com.energizedwork:idea-gradle-plugins": {
+            "locked": "1.4",
+            "requested": "+"
+        },
+        "gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin": {
+            "locked": "0.2.0",
+            "requested": "0.2.0"
+        },
+        "org.ajoberstar:gradle-git-publish": {
+            "locked": "0.4.0-rc.2",
+            "requested": "+"
+        },
+        "org.ajoberstar:grgit": {
+            "locked": "2.1.1",
+            "requested": "+"
+        }
+    },
+    "testRuntimeClasspath": {
+        "com.diffplug.spotless:spotless-plugin-gradle": {
+            "locked": "3.10.0",
+            "requested": "+"
+        },
+        "gradle.plugin.com.energizedwork:idea-gradle-plugins": {
+            "locked": "1.4",
+            "requested": "+"
+        },
+        "gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin": {
+            "locked": "0.2.0",
+            "requested": "0.2.0"
+        },
+        "org.ajoberstar:gradle-git-publish": {
+            "locked": "0.4.0-rc.2",
+            "requested": "+"
+        },
+        "org.ajoberstar:grgit": {
+            "locked": "2.1.1",
+            "requested": "+"
+        }
+    }
+}

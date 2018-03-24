@@ -1,0 +1,90 @@
+plugins {
+  id 'org.ajoberstar.defaults' version '0.8.3'
+  id 'groovy'
+  id 'java-gradle-plugin'
+  id "org.shipkit.gradle-plugin" //version '2.0.12'
+}
+
+//apply plugin: 'maven'
+//reckon.stage='final'
+version = '0.1.0'
+group = 'org.yakworks'
+
+reckon {
+  normal = scopeFromProp()
+  preRelease = snapshotFromProp()
+}
+
+repositories {
+  maven {
+    name = 'Plugin Portal'
+    url = 'https://plugins.gradle.org/m2/'
+  }
+  jcenter()
+}
+
+dependencies {
+  // gradle
+  compile gradleApi()
+  compile localGroovy()
+
+  //runtime 'org.shipkit:shipkit:2.0.8'
+  // my plugins
+  runtime 'org.ajoberstar:grgit:+'
+  runtime 'org.ajoberstar:gradle-git-publish:+'
+//  runtime 'org.ajoberstar:gradle-stutter:+'
+//  runtime 'org.ajoberstar:gradle-bintray:+'
+
+  // 3rd party plugins
+  //runtime 'com.gradle.publish:plugin-publish-plugin:0.9.9'
+  runtime 'com.diffplug.spotless:spotless-plugin-gradle:+'
+  //compile "com.jfrog.bintray.gradle:gradle-bintray-plugin:+"
+  runtime "gradle.plugin.com.energizedwork:idea-gradle-plugins:+"//1.4
+  runtime "gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.2.0"
+  runtime 'com.netflix.nebula:gradle-dependency-lock-plugin:+'
+  //runtime 'com.netflix.nebula:gradle-lint-plugin:+'
+  //runtime 'com.netflix.nebula:nebula-publishing-plugin:+'
+}
+
+model {
+  bintray {
+    owner = '9ci'
+    repo = 'maven'
+    pkg = project.name //'gradle-plugins'
+  }
+}
+
+println "project.version " + project.version
+pluginBundle {
+    website = 'https://github.com/yakworks/gradle-plugins'
+    vcsUrl = 'https://github.com/yakworks/gradle-plugins.git'
+    description = 'Plugin providing opinionated defaults for setups in Groovy, Grails and Gradle library/plugin projects'
+    // plugins {
+    //     publishPlugin {
+    //         id = 'org.ajoberstar.defaults'
+    //         displayName = 'ajoberstar Defaults Plugin'
+    //         tags = ['defaults']
+    //     }
+    // }
+    mavenCoordinates {
+        groupId = project.group
+        artifactId = project.name
+        version = project.version
+    }
+}
+
+wrapper {
+  gradleVersion = '4.0.2'
+}
+
+spotless.formats.groovy.target 'src/main/groovy/**/*.groovy'
+gradleLint.excludedRules = ['transitive-duplicate-dependency-class']
+
+//remove doclint warnings that pollute javadoc logs when building with java8
+if (JavaVersion.current().isJava8Compatible()) {
+  allprojects {
+    tasks.withType(Javadoc) {
+      options.addStringOption('Xdoclint:none', '-quiet')
+    }
+  }
+}
