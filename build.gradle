@@ -1,13 +1,15 @@
 // First, apply the publishing plugin
 buildscript {
-    repositories {
-        mavenLocal()        // for downstream test
-        maven { url "https://plugins.gradle.org/m2/" }
-    }
-    dependencies {
-        classpath 'org.shipkit:shipkit:+'
-        classpath 'ru.vyarus:gradle-animalsniffer-plugin:+'
-    }
+  repositories {
+    mavenLocal()        // for downstream test
+    maven { url "https://plugins.gradle.org/m2/" }
+  }
+  dependencies {
+    classpath 'org.shipkit:shipkit:+'
+    classpath 'ru.vyarus:gradle-animalsniffer-plugin:+'
+    //see https://jkutner.github.io/2017/03/29/locking-gradle-dependencies.html
+    classpath "com.netflix.nebula:gradle-dependency-lock-plugin:5.+"
+  }
 }
 // plugins {
 //   id 'org.ajoberstar.defaults' version '0.8.3'
@@ -17,6 +19,7 @@ buildscript {
 //   id "com.gradle.plugin-publish" version "0.9.10"
 // }
 //apply plugin: 'maven'
+apply plugin: "nebula.dependency-lock"
 apply plugin: 'idea'
 apply plugin: 'groovy'
 apply plugin: 'org.shipkit.gradle-plugin'
