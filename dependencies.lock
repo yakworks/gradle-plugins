@@ -1,4 +1,16 @@
 {
+    "compile": {
+        "org.shipkit:shipkit": {
+            "locked": "2.0.16",
+            "requested": "2.+"
+        }
+    },
+    "compileClasspath": {
+        "org.shipkit:shipkit": {
+            "locked": "2.0.16",
+            "requested": "2.+"
+        }
+    },
     "default": {
         "com.diffplug.spotless:spotless-plugin-gradle": {
             "locked": "3.10.0",
@@ -23,6 +35,10 @@
         "org.ajoberstar:grgit": {
             "locked": "2.1.1",
             "requested": "+"
+        },
+        "org.shipkit:shipkit": {
+            "locked": "2.0.16",
+            "requested": "2.+"
         }
     },
     "runtime": {
@@ -49,6 +65,10 @@
         "org.ajoberstar:grgit": {
             "locked": "2.1.1",
             "requested": "+"
+        },
+        "org.shipkit:shipkit": {
+            "locked": "2.0.16",
+            "requested": "2.+"
         }
     },
     "runtimeClasspath": {
@@ -75,6 +95,22 @@
         "org.ajoberstar:grgit": {
             "locked": "2.1.1",
             "requested": "+"
+        },
+        "org.shipkit:shipkit": {
+            "locked": "2.0.16",
+            "requested": "2.+"
+        }
+    },
+    "testCompile": {
+        "org.shipkit:shipkit": {
+            "locked": "2.0.16",
+            "requested": "2.+"
+        }
+    },
+    "testCompileClasspath": {
+        "org.shipkit:shipkit": {
+            "locked": "2.0.16",
+            "requested": "2.+"
         }
     },
     "testRuntime": {
@@ -101,6 +137,10 @@
         "org.ajoberstar:grgit": {
             "locked": "2.1.1",
             "requested": "+"
+        },
+        "org.shipkit:shipkit": {
+            "locked": "2.0.16",
+            "requested": "2.+"
         }
     },
     "testRuntimeClasspath": {
@@ -127,6 +167,10 @@
         "org.ajoberstar:grgit": {
             "locked": "2.1.1",
             "requested": "+"
+        },
+        "org.shipkit:shipkit": {
+            "locked": "2.0.16",
+            "requested": "2.+"
         }
     }
 }
