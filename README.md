@@ -2,6 +2,7 @@
 Inspired and initially forked from https://github.com/ajoberstar/gradle-defaults
 **DISCLAIMER:** This project tracks _yakworks_ preferences for defaults. It will follow SemVer for breaking changes (prior to 1.0.0, minors may include breaking changes).
 
+See it in action here https://github.com/yakworks/gorm-tools
 
 ## What does it do?
 
