@@ -4,7 +4,7 @@ ruleset {
     }
 
     ruleset('rulesets/braces.xml'){
-        exclude 'IfStatementBraces'
+        // exclude 'IfStatementBraces'
     }
 
     ruleset('rulesets/concurrency.xml')
@@ -123,9 +123,10 @@ ruleset {
         exclude 'UnnecessaryGetter'
         exclude 'UnnecessaryPublicModifier'
         exclude 'UnnecessaryReturnKeyword'
-        exclude 'UnnecessaryDotClass' //FIXME this should be enabled
+        //exclude 'UnnecessaryDotClass' //FIXME this should be enabled
         exclude 'UnnecessarySetter' //FIXME this should be enabled
-        exclude 'UnnecessarySubstring' //FIXME this should be enabled
+        exclude 'UnnecessarySubstring'
+        exclude 'UnnecessaryElseStatement'
     }
 
     ruleset('rulesets/unused.xml'){

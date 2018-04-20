@@ -19,7 +19,7 @@ In the root project apply the defaults plugin:
 
 ```groovy
 plugins {
-  id 'org.yakworks.defaults' version '0.1.0'
+  id 'org.yakworks.defaults' version '0.1.3'
 }
 ```
 
@@ -45,7 +45,6 @@ Applied in the root project:
     - "build/mkdocs/site" to `/`
     - `groovydoc` task to `/api` from all projects
     - if version is snapshot then it puts it all under `/snapshots/
-- `org.ajoberstar.semver-vcs-grgit` applied
 
 Tasks in the root project:
 
@@ -53,7 +52,7 @@ Tasks in the root project:
 - **update-readme-versions**
 - **groovydocMerge**
 
-In all publishable projects:
+In all "publishable" projects:
 
 - `codenarc`
 - `com.diffplug.spotless` applied

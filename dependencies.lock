@@ -1,13 +1,13 @@
 {
     "compile": {
         "org.shipkit:shipkit": {
-            "locked": "2.0.16",
+            "locked": "2.0.21",
             "requested": "2.+"
         }
     },
     "compileClasspath": {
         "org.shipkit:shipkit": {
-            "locked": "2.0.16",
+            "locked": "2.0.21",
             "requested": "2.+"
         }
     },
@@ -33,11 +33,11 @@
             "requested": "+"
         },
         "org.ajoberstar:grgit": {
-            "locked": "2.1.1",
+            "locked": "2.2.0-beta.1",
             "requested": "+"
         },
         "org.shipkit:shipkit": {
-            "locked": "2.0.16",
+            "locked": "2.0.21",
             "requested": "2.+"
         }
     },
@@ -63,11 +63,11 @@
             "requested": "+"
         },
         "org.ajoberstar:grgit": {
-            "locked": "2.1.1",
+            "locked": "2.2.0-beta.1",
             "requested": "+"
         },
         "org.shipkit:shipkit": {
-            "locked": "2.0.16",
+            "locked": "2.0.21",
             "requested": "2.+"
         }
     },
@@ -93,23 +93,23 @@
             "requested": "+"
         },
         "org.ajoberstar:grgit": {
-            "locked": "2.1.1",
+            "locked": "2.2.0-beta.1",
             "requested": "+"
         },
         "org.shipkit:shipkit": {
-            "locked": "2.0.16",
+            "locked": "2.0.21",
             "requested": "2.+"
         }
     },
     "testCompile": {
         "org.shipkit:shipkit": {
-            "locked": "2.0.16",
+            "locked": "2.0.21",
             "requested": "2.+"
         }
     },
     "testCompileClasspath": {
         "org.shipkit:shipkit": {
-            "locked": "2.0.16",
+            "locked": "2.0.21",
             "requested": "2.+"
         }
     },
@@ -135,11 +135,11 @@
             "requested": "+"
         },
         "org.ajoberstar:grgit": {
-            "locked": "2.1.1",
+            "locked": "2.2.0-beta.1",
             "requested": "+"
         },
         "org.shipkit:shipkit": {
-            "locked": "2.0.16",
+            "locked": "2.0.21",
             "requested": "2.+"
         }
     },
@@ -165,11 +165,11 @@
             "requested": "+"
         },
         "org.ajoberstar:grgit": {
-            "locked": "2.1.1",
+            "locked": "2.2.0-beta.1",
             "requested": "+"
         },
         "org.shipkit:shipkit": {
-            "locked": "2.0.16",
+            "locked": "2.0.21",
             "requested": "2.+"
         }
     }
