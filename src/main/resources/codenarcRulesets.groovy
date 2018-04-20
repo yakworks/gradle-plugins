@@ -4,7 +4,7 @@ ruleset {
     }
 
     ruleset('rulesets/braces.xml'){
-        // exclude 'IfStatementBraces'
+        exclude 'IfStatementBraces' //FIXME add a new rule that does if statment braces unless its a single line
     }
 
     ruleset('rulesets/concurrency.xml')
