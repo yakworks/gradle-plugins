@@ -11,59 +11,48 @@ ruleset {
 
     ruleset('rulesets/convention.xml'){
         ['CouldBeElvis', 'NoDef', 'ParameterReassignment', 'MethodParameterTypeRequired',
-         'MethodReturnTypeRequired', 'CouldBeSwitchStatement', 'InvertedCondition','TrailingComma',
+         'MethodReturnTypeRequired', 'CouldBeSwitchStatement', 'InvertedCondition', 'TrailingComma',
          'VariableTypeRequired'
         ].each{
             exclude it
         }
     }
     // convention
-    NoTabCharacter
+    // NoTabCharacter
 
     ruleset('rulesets/design.xml'){
-        ['BuilderMethodWithSideEffects', 'Instanceof',
-         'NestedForLoop', 'PrivateFieldCouldBeFinal', 'SimpleDateFormatMissingLocale'
+        [
+         'NestedForLoop', 'Instanceof',
+         'AbstractClassWithoutAbstractMethod'
         ].each{
             exclude it
         }
+        BuilderMethodWithSideEffects{
+            methodNameRegex = '(make.*|build.*)'
+        }
     }
 
-    //ruleset('rulesets/dry.xml')
+    //ruleset('rulesets/dry.xml') // doesn't do much for us
 
     //ruleset('rulesets/enhanced.xml')//FIXME try adding in the src to classpath so theese work
 
     ruleset('rulesets/exceptions.xml')
 
-    // rulesets/formatting.xml
-    BlankLineBeforePackage
-    BracesForClass
-    BracesForForLoop
-    BracesForIfElse
-    BracesForMethod
-    BracesForTryCatchFinally
-    //ClassJavadoc
-    ClosureStatementOnOpeningLineOfMultipleLineClosure
-    ConsecutiveBlankLines
-    Indentation
-    //FileEndsWithoutNewline
-    //'LineLength' doNotApplyToFilesMatching: '*Spec.groovy'
-    MissingBlankLineAfterImports
-    MissingBlankLineAfterPackage
-    //SpaceAfterCatch
-    //SpaceAfterFor
-    //SpaceAfterIf
-    //SpaceAfterSwitch
-    //SpaceAfterWhile
-    //SpaceAroundClosureArrow
-    //SpaceAroundMapEntryColon
-    //SpaceAroundOperator
-    //SpaceAfterClosingBrace
-    SpaceAfterComma
-    //SpaceAfterOpeningBrace
-    SpaceAfterSemicolon
-    //SpaceBeforeClosingBrace
-    //SpaceBeforeOpeningBrace
-    //TrailingWhitespace
+    // ruleset('rulesets/formatting.xml')
+    ruleset('rulesets/formatting.xml'){
+        LineLength(doNotApplyToFilesMatching: '.*Spec.groovy', length:160)
+        //'BlockEndsWithBlankLine' doNotApplyToFilesMatching: '*Spec.groovy'
+
+        ['ClassJavadoc', //FIXME this should be enabled
+         'BlockEndsWithBlankLine', 'BlockStartsWithBlankLine',
+         'SpaceAfterCatch', 'SpaceAfterFor', 'SpaceAfterIf', 'SpaceAfterSwitch', 'SpaceAfterWhile',
+         'SpaceAroundClosureArrow', 'SpaceAroundMapEntryColon', 'SpaceAroundOperator',
+         'SpaceAfterOpeningBrace', 'SpaceAfterClosingBrace', 'SpaceBeforeOpeningBrace', 'SpaceBeforeClosingBrace',
+         'TrailingWhitespace'
+        ].each{
+            exclude it
+        }
+    }
 
     ruleset('rulesets/generic.xml')
 
@@ -92,14 +81,23 @@ ruleset {
     ruleset('rulesets/naming.xml'){
         'MethodName' doNotApplyToFilesMatching: '.*Spec.groovy'
         PropertyName {
+            staticFinalRegex='[A-Z][a-zA-Z0-9_]*'
             ignorePropertyNames='_*'
         }
-        exclude 'ConfusingMethodName'
+        FieldName {
+            staticFinalRegex='[A-Z][a-zA-Z0-9_]*'
+        }
+        VariableName {
+            finalRegex='[a-zA-Z][a-zA-Z0-9_]*'
+        }
+        //exclude 'ConfusingMethodName'
         exclude 'FactoryMethodName'
     }
 
     ruleset('rulesets/security.xml'){
         exclude 'JavaIoPackageAccess'
+        exclude 'FileCreateTempFile'
+        exclude 'NonFinalPublicField'
     }
 
     ruleset('rulesets/serialization.xml'){

@@ -29,11 +29,11 @@
             "requested": "0.2.0"
         },
         "org.ajoberstar:gradle-git-publish": {
-            "locked": "0.4.0-rc.2",
+            "locked": "0.4.0",
             "requested": "+"
         },
         "org.ajoberstar:grgit": {
-            "locked": "2.2.0-beta.1",
+            "locked": "2.2.0",
             "requested": "+"
         },
         "org.shipkit:shipkit": {
@@ -59,11 +59,11 @@
             "requested": "0.2.0"
         },
         "org.ajoberstar:gradle-git-publish": {
-            "locked": "0.4.0-rc.2",
+            "locked": "0.4.0",
             "requested": "+"
         },
         "org.ajoberstar:grgit": {
-            "locked": "2.2.0-beta.1",
+            "locked": "2.2.0",
             "requested": "+"
         },
         "org.shipkit:shipkit": {
@@ -89,11 +89,11 @@
             "requested": "0.2.0"
         },
         "org.ajoberstar:gradle-git-publish": {
-            "locked": "0.4.0-rc.2",
+            "locked": "0.4.0",
             "requested": "+"
         },
         "org.ajoberstar:grgit": {
-            "locked": "2.2.0-beta.1",
+            "locked": "2.2.0",
             "requested": "+"
         },
         "org.shipkit:shipkit": {
@@ -131,11 +131,11 @@
             "requested": "0.2.0"
         },
         "org.ajoberstar:gradle-git-publish": {
-            "locked": "0.4.0-rc.2",
+            "locked": "0.4.0",
             "requested": "+"
         },
         "org.ajoberstar:grgit": {
-            "locked": "2.2.0-beta.1",
+            "locked": "2.2.0",
             "requested": "+"
         },
         "org.shipkit:shipkit": {
@@ -161,11 +161,11 @@
             "requested": "0.2.0"
         },
         "org.ajoberstar:gradle-git-publish": {
-            "locked": "0.4.0-rc.2",
+            "locked": "0.4.0",
             "requested": "+"
         },
         "org.ajoberstar:grgit": {
-            "locked": "2.2.0-beta.1",
+            "locked": "2.2.0",
             "requested": "+"
         },
         "org.shipkit:shipkit": {

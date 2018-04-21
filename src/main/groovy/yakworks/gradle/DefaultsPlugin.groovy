@@ -15,6 +15,7 @@
  */
 package yakworks.gradle
 
+import com.jfrog.bintray.gradle.BintrayPlugin
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -36,27 +37,33 @@ class DefaultsPlugin implements Plugin<Project> {
         }
         //setup defaults props
         setupProperties(rootProject)
-        //apply idea plugin to root
+        //apply default plugins
         rootProject.plugins.apply('com.energizedwork.idea-project-components')
+        //rootProject.plugins.apply('com.dorongold.task-tree')
         addSpotless(rootProject)
 
-        rootProject.allprojects { prj ->
-            //this is for CI to cache dependencies see https://github.com/palantir/gradle-configuration-resolver-plugin
-            prj.plugins.apply('com.palantir.configuration-resolver')
-            //add our default repositories to search.
-            RepositoryHandler rh = prj.repositories
-            rh.jcenter()
-            rh.mavenCentral()
-            rh.maven { url "https://repo.grails.org/grails/core" }
-            rh.maven { url "https://dl.bintray.com/9ci/grails-plugins"}
-        }
         //gets all projects that don't start with ':examples' as they are considered "publishable"
         getPubSubprojects(rootProject).each { prj ->
+            //println "prj.path " + prj.path
             prj.plugins.apply('groovy')
             //addGrailsPublishConfig(prj)
             //addGroovydocDefaults(prj)
             addSpotless(prj)
-            addCodenarc(prj)
+            prj.plugins.apply(CodenarcPlugin)
+        }
+
+        rootProject.allprojects { prj ->
+            prj.plugins.withId('java') {
+                //this is for CI to cache dependencies see https://github.com/palantir/gradle-configuration-resolver-plugin
+                prj.plugins.apply('com.palantir.configuration-resolver')
+
+                //add our default repositories to search.
+                RepositoryHandler rh = prj.repositories
+                rh.jcenter()
+                rh.mavenCentral()
+                rh.maven { url "https://repo.grails.org/grails/core" }
+                rh.maven { url "https://dl.bintray.com/9ci/grails-plugins"}
+            }
         }
 
         //do after groovy is applied to pubProjects above
@@ -238,7 +245,10 @@ class DefaultsPlugin implements Plugin<Project> {
 
 
     private Set<Project> getPubSubprojects(Project rootProject) {
-        rootProject.subprojects.findAll { prj -> !prj.path.startsWith(":examples") }
+        rootProject.subprojects.findAll { prj ->
+            println "${prj.path} hasPlugin yakworks.grails-plugin " + prj.plugins.hasPlugin('yakworks.grails-plugin')
+            !prj.path.startsWith(":examples")
+        }
         //rootProject.allprojects.findAll { prj -> prj.plugins.hasPlugin(BintrayPlugin) }
     }
 
@@ -246,19 +256,19 @@ class DefaultsPlugin implements Plugin<Project> {
         project.plugins.apply('com.diffplug.gradle.spotless')
         project.spotless {
             groovyGradle {
-                target '**/*.gradle', 'build.gradle'
+                target '**/*.gradle', 'build.gradle', 'gradle/*.gradle'
                 trimTrailingWhitespace()
                 indentWithSpaces(2)
                 endWithNewline()
             }
             project.plugins.withId('groovy') {
-                java {
+                //java {
                     //googleJavaFormat()
-                    licenseHeader "/* Copyright \$YEAR. ${project.author}. Licensed under the Apache License, Version 2.0 */"
-                    target project.fileTree('.') {
-                        include 'src/main/groovy/gorm/**/*.java'
-                    }
-                }
+                //    licenseHeader "/* Copyright \$YEAR. ${project.author}. Licensed under the Apache License, Version 2.0 */"
+                //    target project.fileTree('.') {
+                //        include 'src/main/groovy/gorm/**/*.java'
+                //    }
+                // }
                 groovy {
                     target project.fileTree('.') {
                         include 'src/main/groovy/**/*.groovy', 'grails-app/**/*.groovy'
@@ -273,21 +283,5 @@ class DefaultsPlugin implements Plugin<Project> {
         }
     }
 
-    private void addCodenarc(Project prj) {
-        prj.plugins.apply('codenarc')
-        if(!prj.hasProperty('yakworks')) prj.ext.yakworks = [:]
-        prj.yakworks.getCodenarcRuleSet = { ->
-            return prj.resources.text.fromString(this.getClass().getResource('/codenarcRulesets.groovy').text)
-        }
 
-        prj.codenarc {
-            toolVersion = '1.1'
-            config = prj.yakworks.getCodenarcRuleSet()
-            reportFormat = 'html'
-            //ignoreFailures = true
-            maxPriority1Violations = 0
-            maxPriority2Violations = 4
-            maxPriority3Violations = 4
-        }
-    }
 }
