@@ -21,6 +21,7 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.javadoc.Groovydoc
 import org.gradle.api.tasks.javadoc.Javadoc
+import org.shipkit.internal.gradle.java.JavaLibraryPlugin
 
 import static ProjectUtils.searchProps
 import static ProjectUtils.setPropIfEmpty
@@ -41,14 +42,14 @@ class DefaultsPlugin implements Plugin<Project> {
         addSpotless(rootProject)
 
         //gets all projects that don't start with ':examples' as they are considered "publishable"
-        getPubSubprojects(rootProject).each { prj ->
-            //println "prj.path " + prj.path
-            prj.plugins.apply('groovy')
-            //addGrailsPublishConfig(prj)
-            //addGroovydocDefaults(prj)
-            addSpotless(prj)
-            prj.plugins.apply(CodenarcPlugin)
-        }
+//        getPubSubprojects(rootProject).each { prj ->
+//            //println "prj.path " + prj.path
+//            prj.plugins.apply('groovy')
+//            //addGrailsPublishConfig(prj)
+//            //addGroovydocDefaults(prj)
+//            addSpotless(prj)
+//            prj.plugins.apply(CodenarcPlugin)
+//        }
 
         rootProject.allprojects { prj ->
             prj.plugins.withId('java') {
@@ -63,13 +64,13 @@ class DefaultsPlugin implements Plugin<Project> {
                 rh.maven { url "https://dl.bintray.com/9ci/grails-plugins"}
 
                 silentJavadocWarnings(prj)
+                addSpotless(prj)
+            }
+            prj.plugins.withType(JavaLibraryPlugin){
+                prj.plugins.apply(CodenarcPlugin)
             }
         }
-
-        //do after groovy is applied to pubProjects above
-        addCombineGroovyDocsTask(rootProject)
-        addMkdocsTasks(rootProject)
-        addGitPublish(rootProject)
+        rootProject.plugins.apply(DocmarkPlugin)
     }
 
     void setupProperties(Project prj) {
@@ -104,113 +105,8 @@ class DefaultsPlugin implements Plugin<Project> {
         //** Helpful dir params
         setPropIfEmpty prj, 'gradleDir', "${prj.rootDir}/gradle"
 
-        println "isSnapshot " + prj.isSnapshot
-        println "prj.version " + prj.version
-    }
-
-    private void addMkdocsTasks(Project prj) {
-        Task copyTask = prj.tasks.create('mkdocsCopy')
-        copyTask.with {
-            group = 'publishing'
-            description = 'Copy contents to be published to git.'
-            doLast {
-                prj.copy {
-                    from 'docs'
-                    into 'build/mkdocs/docs'
-                }
-                //Copy the README in as index
-                prj.copy {
-                    from '.'
-                    into "$prj.buildDir/mkdocs/docs"
-                    include 'README.md'
-                    rename { 'index.md' }
-                    filter { line ->
-                        //replace links like [foo]( docs/foo.md ) -> [foo](foo.md) and [foo]: docs/foo.md  -> [foo]: foo.md
-                        def newl = line.replaceAll(/\(\s*docs\//, '(').replaceAll(/\:\s*docs\//, ': ')
-                        return replaceVersionRegex(prj, newl)
-                    }
-                }
-                //Copy the mkdocs.yml and replace the tokens
-                prj.copy {
-                    from '.'
-                    into "$prj.buildDir/mkdocs"
-                    include 'mkdocs.yml'
-                    filter { line ->
-                        String siteUrl = prj.isSnapshot ? "$prj.websiteUrl/snapshot" : prj.websiteUrl //prj.property('websiteUrl')
-                        def newline = line.startsWith('repo_url:') ? "repo_url: ${prj.property('githubUrl')}" : line
-                        newline.startsWith('site_url:') ? "site_url: $siteUrl" : newline
-                    }
-                    filter(ReplaceTokens,
-                        tokens: ['version', 'title', 'description', 'githubSlug', 'author'].collectEntries {
-                            [it, prj."$it".toString()]
-                        }
-                    )
-                }
-            }
-        }
-
-        Task mkdocsBuildTask = prj.task('mkdocsBuild', type: Exec)
-        mkdocsBuildTask.with {
-            dependsOn copyTask
-            workingDir 'build/mkdocs'
-            commandLine 'mkdocs', 'build'
-        }
-    }
-
-    private void addGitPublish(Project project) {
-        project.plugins.apply('org.ajoberstar.grgit')
-        project.plugins.apply('org.ajoberstar.git-publish')
-
-        project.gitPublish {
-            branch = 'gh-pages'
-            contents {
-                from "$project.buildDir/mkdocs/site"
-                if (project.property('isSnapshot')) { //put in own dir and update relative path
-                    into 'snapshot'  //this sets the base relative dir for the rest of the inserts
-                }
-                from(project.groovydocMerge){ //project.groovydocMerge.outputs.files) {
-                    into 'api'
-                }
-            }
-
-            // (include=keep) if its a snapshot preserve is all, otherwise wipe it
-            preserve {
-                if (project.property('isSnapshot')) {
-                    include "*/**"
-                    exclude "snapshot"
-                }
-            }
-
-            // message used when committing changes
-            commitMessage = 'git-publish doc updates [skip ci]'
-        }
-
-        project.gitPublishCopy.dependsOn 'mkdocsBuild'
-        project.gitPublishCopy.mustRunAfter 'mkdocsBuild'
-        project.gitPublishCopy.inputs.files project.groovydocMerge //forces the copy task to depend on up to date groovydoc
-    }
-
-    /** Updates the version in the README.md */
-    //https://stackoverflow.com/questions/17465353/how-to-replace-a-string-for-a-buildvariant-with-gradle-in-android-studio/17572644#17572644
-    private void addUpdateReadmeVersions(Project prj, String fileName) {
-        Task copyTask = prj.tasks.create('update-readme-versions')
-        copyTask.with {
-            doLast {
-                //updates the Version: 6.1.x-whatever in the first yakworks logo part
-                def updatedContent = new File('README.md').getText('UTF-8')
-                updatedContent = replaceVersionRegex(prj, updatedContent)
-                new File('README.md').write(updatedContent, 'UTF-8')
-            }
-        }
-    }
-
-    String replaceVersionRegex(Project prj, String content) {
-        String updatedContent = content.replaceFirst(/(?i)version:\s*[\d\.]+[^\s]+/, "Version: $prj.version")
-        //update any subproject dependencies examples, ie `gorm-tools:6.1.0-SNAPSHOT"`
-        getPubSubprojects(prj).each { p ->
-            updatedContent = updatedContent.replaceFirst(/${p.name}:[\d\.]+[^"]+/, "${p.name}:${prj.version.trim()}")
-        }
-        return updatedContent
+        //println "isSnapshot " + prj.isSnapshot
+        //println "prj.version " + prj.version
     }
 
     /**
@@ -224,45 +120,6 @@ class DefaultsPlugin implements Plugin<Project> {
         }
     }
 
-    private void addGroovydocDefaults(Project project) {
-        project.plugins.withId('groovy') {
-            groovydocLinks(project.tasks.groovydoc)
-        }
-    }
-
-    private void addCombineGroovyDocsTask(Project rootProject) {
-        //modeled from here https://github.com/nebula-plugins/gradle-aggregate-javadocs-plugin/blob/master/src/main/groovy/nebula/plugin/javadoc/NebulaAggregateJavadocPlugin.groovy
-        //println "addCombineGroovyDocsTask"
-        Set<Project> pubProjects = getPubSubprojects(rootProject)
-        //println "addCombineGroovyDocsTask - " + pubProjects
-        Task tsk = rootProject.task("groovydocMerge", type:Groovydoc , overwrite:true){
-            description = 'Aggregates groovydoc API documentation .'
-            //group = JavaBasePlugin.DOCUMENTATION_GROUP
-            docTitle rootProject.version
-            dependsOn pubProjects.groovydoc
-            source pubProjects.groovydoc.source
-            destinationDir rootProject.file("$rootProject.buildDir/docs/groovydoc")
-            classpath = rootProject.files(pubProjects.groovydoc.classpath)
-            groovyClasspath = rootProject.files(pubProjects.groovydoc.groovyClasspath)
-        }
-        groovydocLinks(tsk)
-    }
-
-    private void groovydocLinks(Task tsk) {
-        tsk.with {
-            noTimestamp = true
-            noVersionStamp = true
-            excludes = ['**/*GrailsPlugin.groovy', '**/Application.groovy']
-            link('http://download.oracle.com/javase/8/docs/api/', 'java.', 'org.xml', 'javax.', 'org.xml.')
-            link("https://docs.spring.io/spring/docs/4.2.x/javadoc-api/", 'org.springframework')
-            link('http://groovy.codehaus.org/api/', 'groovy.', 'org.codehaus.groovy.')
-            link('http://gorm.grails.org/latest/hibernate/api/', 'grails.gorm.', 'grails.orm', 'org.grails.datastore.', 'org.grails.orm.')
-            link('https://docs.grails.org/latest/api', 'grails.', 'org.grails.')
-            link('https://testing.grails.org/latest/api', 'grails.testing.', 'org.grails.testing.')
-        }
-    }
-
-
     private Set<Project> getPubSubprojects(Project rootProject) {
         rootProject.subprojects.findAll { prj ->
             //println "${prj.path} hasPlugin yakworks.grails-plugin " + prj.plugins.hasPlugin('yakworks.grails-plugin')
@@ -273,31 +130,29 @@ class DefaultsPlugin implements Plugin<Project> {
 
     private void addSpotless(Project project) {
         project.plugins.apply('com.diffplug.gradle.spotless')
-        project.spotless {
-            groovyGradle {
-                target '**/*.gradle', 'build.gradle', 'gradle/*.gradle'
-                trimTrailingWhitespace()
-                indentWithSpaces(2)
-                endWithNewline()
-            }
-            project.plugins.withId('groovy') {
-                //java {
-                    //googleJavaFormat()
-                //    licenseHeader "/* Copyright \$YEAR. ${project.author}. Licensed under the Apache License, Version 2.0 */"
-                //    target project.fileTree('.') {
-                //        include 'src/main/groovy/gorm/**/*.java'
-                //    }
-                // }
-                groovy {
-                    target project.fileTree('.') {
-                        include 'src/main/groovy/**/*.groovy', 'grails-app/**/*.groovy'
-                        exclude '**/*.java', '**/conf/*.groovy'
-                    }
-                    licenseHeader "/* Copyright \$YEAR. ${project.author}. Licensed under the Apache License, Version 2.0 */"
-                    trimTrailingWhitespace()
-                    indentWithSpaces(4) // this only checks for tabs and can replace with 4 spaces it it finds them
-                    endWithNewline()
+        project.spotless.groovyGradle {
+            target '**/*.gradle', 'build.gradle', 'gradle/*.gradle'
+            trimTrailingWhitespace()
+            indentWithSpaces(2)
+            endWithNewline()
+        }
+        project.plugins.withId('groovy') {
+            //java {
+                //googleJavaFormat()
+            //    licenseHeader "/* Copyright \$YEAR. ${project.author}. Licensed under the Apache License, Version 2.0 */"
+            //    target project.fileTree('.') {
+            //        include 'src/main/groovy/gorm/**/*.java'
+            //    }
+            // }
+            project.spotless.groovy {
+                target project.fileTree('.') {
+                    include 'src/main/groovy/**/*.groovy', 'grails-app/**/*.groovy'
+                    exclude '**/*.java', '**/conf/*.groovy'
                 }
+                //licenseHeader "/* Copyright \$YEAR. ${project.author}. Licensed under the Apache License, Version 2.0 */"
+                trimTrailingWhitespace()
+                indentWithSpaces(4) // this only checks for tabs and can replace with 4 spaces it it finds them
+                endWithNewline()
             }
         }
     }

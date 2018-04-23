@@ -14,9 +14,12 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.bundling.Jar
 import org.shipkit.gradle.configuration.ShipkitConfiguration
+import org.shipkit.gradle.git.GitCommitTask
+import org.shipkit.gradle.version.BumpVersionFileTask
 import org.shipkit.internal.gradle.bintray.BintrayReleasePlugin
 import org.shipkit.internal.gradle.bintray.ShipkitBintrayPlugin
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
+import org.shipkit.internal.gradle.git.GitPlugin
 import org.shipkit.internal.gradle.java.ComparePublicationsPlugin
 import org.shipkit.internal.gradle.java.JavaBintrayPlugin
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
@@ -30,10 +33,13 @@ import org.shipkit.internal.gradle.snapshot.LocalSnapshotPlugin
 import org.shipkit.internal.gradle.util.GradleDSLHelper
 import org.shipkit.internal.gradle.util.PomCustomizer
 import org.shipkit.internal.gradle.util.ProjectUtil
+import org.shipkit.internal.gradle.util.TaskMaker
 import org.shipkit.internal.gradle.version.VersionInfoFactory
 import org.shipkit.internal.gradle.version.VersioningPlugin
 import org.shipkit.internal.util.PropertiesUtil
-import org.shipkit.version.VersionInfo;
+import org.shipkit.version.VersionInfo
+
+import static java.util.Collections.singletonList;
 
 /**
  * Continuous delivery for Java/Groovy/Grails with CirclePlugin and Bintray.
@@ -51,10 +57,10 @@ public class ShipkitPlugin implements Plugin<Project> {
         //we don't apply the ShipkitBasePlugin because we don't wan't the TravisPlugin applied and instead want circle ci
         project.getPlugins().apply(CirclePlugin)
         project.getPlugins().apply(BintrayReleasePlugin)
-
         project.getPlugins().apply(PomContributorsPlugin)
-
         project.getPlugins().apply(DefaultsPlugin)
+
+        wireUpDocs(project)
 
         project.allprojects { Project subproject ->
             subproject.getPlugins().withId("yakworks.grails-plugin") {
@@ -69,6 +75,18 @@ public class ShipkitPlugin implements Plugin<Project> {
             project.task('ciPublishVersion', dependsOn: CiReleasePlugin.CI_PERFORM_RELEASE_TASK)
         }
 
+    }
+
+    //Sets dependendsOn and wires up so gitPush will take into account the README updates and the Mkdocs will get run after a release
+    void wireUpDocs(Project project){
+        final Task updateReadme = project.tasks.getByName(DocmarkPlugin.UPDATE_README_TASK)
+        final File rmeFile = project.file('README.md')
+        GitPlugin.registerChangesForCommitIfApplied([rmeFile], 'README.md versions', updateReadme)
+
+        final Task performRelease = project.getTasks().getByName(ReleasePlugin.PERFORM_RELEASE_TASK);
+        final Task gitPublishPush = project.getTasks().getByName('gitPublishPush')
+        gitPublishPush.mustRunAfter(GitPlugin.GIT_PUSH_TASK)
+        performRelease.dependsOn(gitPublishPush)
     }
 
     void setupSnaphotTaskFromVersionProp(Project project) {
@@ -91,8 +109,18 @@ public class ShipkitPlugin implements Plugin<Project> {
         if(project.snapshotVersion) {
             Task publishTask = project.tasks.findByPath('publish')
             if(publishTask){
-                project.task('publishVersion', dependsOn: publishTask)
-                project.task('ciPublishVersion', dependsOn: publishTask)
+                project.task('publishVersion') {
+                    dependsOn(publishTask)
+                    dependsOn(':gitPublishPush')
+                }
+                //only do this if it has $CIRCLE_COMPARE_URL
+                //check if has changes that are not docs. if so then dependOn publishTask
+                project.task('ciPublishVersion'){
+                    dependsOn(publishTask)
+                    dependsOn(':gitPublishPush')
+                }
+                //check if has changes that are docs, if so then dependOn gitPublishPush
+
             }
         }
     }

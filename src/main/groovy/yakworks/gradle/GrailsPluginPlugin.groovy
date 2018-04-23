@@ -17,6 +17,7 @@ package yakworks.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.shipkit.internal.gradle.java.JavaLibraryPlugin
 
 //@CompileStatic
 class GrailsPluginPlugin implements Plugin<Project> {
@@ -25,6 +26,8 @@ class GrailsPluginPlugin implements Plugin<Project> {
         //setup defaults props
         //setupProperties(project)
         project.plugins.apply('groovy')
+        project.plugins.apply(JavaLibraryPlugin)
+        project.plugins.apply("org.grails.grails-plugin")
         //project.plugins.apply('org.grails.grails-plugin')
         //addGrailsPublishConfig(project)
     }
