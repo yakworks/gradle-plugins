@@ -54,6 +54,8 @@ public class ShipkitPlugin implements Plugin<Project> {
 
         project.getPlugins().apply(PomContributorsPlugin)
 
+        project.getPlugins().apply(DefaultsPlugin)
+
         project.allprojects { Project subproject ->
             subproject.getPlugins().withId("yakworks.grails-plugin") {
                 subproject.getPlugins().apply(GrailsPluginPublishPlugin)
@@ -67,7 +69,7 @@ public class ShipkitPlugin implements Plugin<Project> {
             project.task('ciPublishVersion', dependsOn: CiReleasePlugin.CI_PERFORM_RELEASE_TASK)
         }
 
-        project.getPlugins().apply(DefaultsPlugin)
+
 
     }
 
