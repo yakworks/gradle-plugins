@@ -15,15 +15,12 @@
  */
 package yakworks.gradle
 
-import com.jfrog.bintray.gradle.BintrayPlugin
 import org.apache.tools.ant.filters.ReplaceTokens
-import org.gradle.api.GradleException
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-import org.gradle.api.Task
+import org.gradle.api.*
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.javadoc.Groovydoc
+import org.gradle.api.tasks.javadoc.Javadoc
 
 import static ProjectUtils.searchProps
 import static ProjectUtils.setPropIfEmpty
@@ -35,6 +32,7 @@ class DefaultsPlugin implements Plugin<Project> {
         if (rootProject.rootProject != rootProject) {
             throw new GradleException('yakworks.defaults must only be applied to the root project')
         }
+        //final ShipkitConfiguration conf = project.getPlugins().apply(ShipkitConfigurationPlugin.class).getConfiguration()
         //setup defaults props
         setupProperties(rootProject)
         //apply default plugins
@@ -63,6 +61,8 @@ class DefaultsPlugin implements Plugin<Project> {
                 rh.mavenCentral()
                 rh.maven { url "https://repo.grails.org/grails/core" }
                 rh.maven { url "https://dl.bintray.com/9ci/grails-plugins"}
+
+                silentJavadocWarnings(prj)
             }
         }
 
@@ -77,6 +77,12 @@ class DefaultsPlugin implements Plugin<Project> {
         //!!!properties should go there, not here!!
         // its assumed that certain props exists already as base lines to use
         //** Github props used for both doc generation links, publishing docs to gh-pages and maven/bintray publish
+        String gslug = prj.findProperty("githubSlug")
+        if (gslug){
+            def repoAndOrg = gslug.split("/")
+            setPropIfEmpty prj, 'githubOrg', repoAndOrg[0]
+            setPropIfEmpty prj, 'githubRepo', repoAndOrg[1]
+        }
         setPropIfEmpty prj, 'githubRepo', prj.name //defualts to project name
         setPropIfEmpty prj, 'githubSlug', "${prj['githubOrg']}/${prj['githubRepo']}".toString()
         setPropIfEmpty prj, 'githubUrl', "https://github.com/${prj['githubSlug']}".toString()
@@ -97,6 +103,9 @@ class DefaultsPlugin implements Plugin<Project> {
 
         //** Helpful dir params
         setPropIfEmpty prj, 'gradleDir', "${prj.rootDir}/gradle"
+
+        println "isSnapshot " + prj.isSnapshot
+        println "prj.version " + prj.version
     }
 
     private void addMkdocsTasks(Project prj) {
@@ -204,6 +213,16 @@ class DefaultsPlugin implements Plugin<Project> {
         return updatedContent
     }
 
+    /**
+     * remove doclint warnings that pollute javadoc logs when building with java8
+     */
+    private void silentJavadocWarnings(Project project) {
+        if (JavaVersion.current().isJava8Compatible()) {
+            project.tasks.withType(Javadoc) {
+                options.addStringOption('Xdoclint:none', '-quiet')
+            }
+        }
+    }
 
     private void addGroovydocDefaults(Project project) {
         project.plugins.withId('groovy') {
@@ -246,7 +265,7 @@ class DefaultsPlugin implements Plugin<Project> {
 
     private Set<Project> getPubSubprojects(Project rootProject) {
         rootProject.subprojects.findAll { prj ->
-            println "${prj.path} hasPlugin yakworks.grails-plugin " + prj.plugins.hasPlugin('yakworks.grails-plugin')
+            //println "${prj.path} hasPlugin yakworks.grails-plugin " + prj.plugins.hasPlugin('yakworks.grails-plugin')
             !prj.path.startsWith(":examples")
         }
         //rootProject.allprojects.findAll { prj -> prj.plugins.hasPlugin(BintrayPlugin) }

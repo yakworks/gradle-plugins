@@ -25,8 +25,8 @@ class GrailsPluginPlugin implements Plugin<Project> {
         //setup defaults props
         //setupProperties(project)
         project.plugins.apply('groovy')
-        project.plugins.apply('org.grails.grails-plugin')
-        addGrailsPublishConfig(project)
+        //project.plugins.apply('org.grails.grails-plugin')
+        //addGrailsPublishConfig(project)
     }
 
     private void addGrailsPublishConfig(Project project) {

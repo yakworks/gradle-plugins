@@ -13,6 +13,7 @@ import org.shipkit.internal.gradle.git.GitBranchPlugin;
 import org.shipkit.internal.gradle.git.GitSetupPlugin;
 import org.shipkit.internal.gradle.git.tasks.GitCheckOutTask;
 import org.shipkit.internal.gradle.release.CiReleasePlugin;
+import org.shipkit.internal.gradle.release.ReleaseNeededPlugin;
 import org.shipkit.internal.gradle.util.StringUtil;
 
 /**
@@ -44,7 +45,7 @@ public class CirclePlugin implements Plugin<Project> {
         final String branch = System.getenv("CIRCLE_BRANCH");
         LOG.info("Branch from 'CIRCLE_BRANCH' env variable: {}", branch);
 
-        //configure branch based on Travis' env variable
+        //configure branch based on env variable
         IdentifyGitBranchTask identifyBranch = (IdentifyGitBranchTask) project.getTasks().getByName(GitBranchPlugin.IDENTIFY_GIT_BRANCH);
         if (!StringUtil.isEmpty(branch)) {
             identifyBranch.setBranch(branch);
@@ -73,11 +74,15 @@ public class CirclePlugin implements Plugin<Project> {
         //https://discuss.circleci.com/t/git-commit-message-in-environment-variable/533/3
         // git log --format="%s" -n 1 $CIRCLE_SHA1
         // http://ajoberstar.org/grgit/grgit-log.html
-        // project.getTasks().withType(ReleaseNeededTask.class, new Action<ReleaseNeededTask>() {
-        //     public void execute(ReleaseNeededTask t) {
-        //         t.setCommitMessage(System.getenv("TRAVIS_COMMIT_MESSAGE"));
-        //         t.setPullRequest(isPullRequest);
-        //     }
-        // });
+
+        //the following assumes that this is run in CI script before gradle since circleCI doesn't have the equivalent
+        //export CI_COMMIT_MESSAGE=`git log --format="%s" -n 1 $CIRCLE_SHA1`
+
+        project.getTasks().withType(ReleaseNeededTask.class, new Action<ReleaseNeededTask>() {
+            public void execute(ReleaseNeededTask t) {
+                t.setCommitMessage(System.getenv("CI_COMMIT_MESSAGE"));
+                t.setPullRequest(isPullRequest);
+            }
+        });
     }
 }

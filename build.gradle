@@ -7,76 +7,46 @@ buildscript {
   dependencies {
     classpath 'org.shipkit:shipkit:2.+'
     classpath 'ru.vyarus:gradle-animalsniffer-plugin:+'
-    //see https://jkutner.github.io/2017/03/29/locking-gradle-dependencies.html
-    classpath "com.netflix.nebula:gradle-dependency-lock-plugin:5.+"
+    classpath 'io.spring.gradle:dependency-lock:latest.release'
   }
 }
 plugins {
   id "com.dorongold.task-tree" version "1.3"
 }
-
-// plugins {
-//   id 'org.ajoberstar.defaults' version '0.8.3'
-//   //id 'groovy'
-//   //id 'java-gradle-plugin'
-//   id "org.shipkit.gradle-plugin" version "2.0.12"
-//   id "com.gradle.plugin-publish" version "0.9.10"
-// }
-//apply plugin: 'maven'
-apply plugin: "nebula.dependency-lock"
+apply plugin: 'spring.lock' //run gradle updateLocks
 apply plugin: 'idea'
 apply plugin: 'groovy'
 apply plugin: 'org.shipkit.gradle-plugin'
 apply plugin: 'com.gradle.plugin-publish'
 
-//version = '0.1.0'
 group = 'org.yakworks'
-
-// reckon {
-//   normal = scopeFromProp()
-//   preRelease = snapshotFromProp()
-// }
-//reckon.stage='final'
 
 repositories {
   jcenter()
   maven { url "https://plugins.gradle.org/m2/" }
 }
 
+//run `gradle updateLocks` to update the locks below to highest versionusing the + notation
 dependencies {
   // gradle
   compile gradleApi()
   compile localGroovy()
 
-  runtime 'org.ajoberstar:grgit:+'
-  runtime 'org.ajoberstar:gradle-git-publish:+'
+  runtime 'org.ajoberstar:grgit:+' lock '2.2.0'
+  runtime 'org.ajoberstar:gradle-git-publish:+' lock '0.4.0'
   // 3rd party plugins
-  //runtime 'com.gradle.publish:plugin-publish-plugin:0.9.9'
-  runtime 'com.diffplug.spotless:spotless-plugin-gradle:+'
-  //compile "com.jfrog.bintray.gradle:gradle-bintray-plugin:+"
-  runtime "gradle.plugin.com.energizedwork:idea-gradle-plugins:+"//1.4
+  runtime 'com.diffplug.spotless:spotless-plugin-gradle:+' lock '3.10.0'
+  runtime "gradle.plugin.com.energizedwork:idea-gradle-plugins:+" lock '1.4'
   runtime "gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.2.0"
-  runtime 'com.netflix.nebula:gradle-dependency-lock-plugin:+'
-  compile 'org.shipkit:shipkit:2.+'
+  compile 'org.shipkit:shipkit:2.+' lock '2.0.21'
   //runtime 'com.netflix.nebula:gradle-lint-plugin:+'
-  //runtime 'com.netflix.nebula:nebula-publishing-plugin:+'
 }
-
-// model {
-//   bintray {
-//     owner = '9ci'
-//     repo = 'maven'
-//     pkg = project.name //'gradle-plugins'
-//   }
-// }
-
-println "project.version - " + project.version
 
 pluginBundle {
   website = 'https://github.com/yakworks/gradle-plugins'
   vcsUrl = 'https://github.com/yakworks/gradle-plugins.git'
-  description = 'Plugin providing opinionated defaults for setups in Groovy, Grails and Gradle library/plugin projects'
-  tags = ['shipkit', 'continuous delivery', 'release', 'grails', 'defaults']
+  description = 'Plugin providing opinionated defaults and shipkit setup for Groovy, Grails and Gradle library/plugin projects. Enables hooks for automated releases and versioning and tags with CircleCI. '
+  tags = ['grails', 'groovy', 'shipkit', 'circleCI', 'continuous delivery', 'release', 'defaults']
   // plugins {
   //     publishPlugin {
   //         id = 'org.ajoberstar.defaults'
@@ -98,11 +68,3 @@ wrapper {
 // spotless.formats.groovy.target 'src/main/groovy/**/*.groovy'
 // gradleLint.excludedRules = ['transitive-duplicate-dependency-class']
 
-//remove doclint warnings that pollute javadoc logs when building with java8
-if (JavaVersion.current().isJava8Compatible()) {
-  allprojects {
-    tasks.withType(Javadoc) {
-      options.addStringOption('Xdoclint:none', '-quiet')
-    }
-  }
-}
