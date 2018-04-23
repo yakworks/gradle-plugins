@@ -22,6 +22,7 @@ import org.shipkit.internal.gradle.java.JavaBintrayPlugin
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
 import org.shipkit.internal.gradle.java.JavaPublishPlugin
 import org.shipkit.internal.gradle.java.PomContributorsPlugin
+import org.shipkit.internal.gradle.release.CiReleasePlugin
 import org.shipkit.internal.gradle.release.ReleasePlugin;
 import org.shipkit.internal.gradle.release.ShipkitBasePlugin
 import org.shipkit.internal.gradle.release.TravisPlugin
@@ -63,6 +64,7 @@ public class ShipkitPlugin implements Plugin<Project> {
         //setup publishVersion that depends on performRelease for root when its not a snapshot
         if(!project.snapshotVersion) {
             project.task('publishVersion', dependsOn: ReleasePlugin.PERFORM_RELEASE_TASK)
+            project.task('ciPublishVersion', dependsOn: CiReleasePlugin.CI_PERFORM_RELEASE_TASK)
         }
 
         project.getPlugins().apply(DefaultsPlugin)
@@ -90,6 +92,7 @@ public class ShipkitPlugin implements Plugin<Project> {
             Task publishTask = project.tasks.findByPath('publish')
             if(publishTask){
                 project.task('publishVersion', dependsOn: publishTask)
+                project.task('ciPublishVersion', dependsOn: publishTask)
             }
         }
     }
