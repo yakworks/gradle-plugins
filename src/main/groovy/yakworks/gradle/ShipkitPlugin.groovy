@@ -69,8 +69,6 @@ public class ShipkitPlugin implements Plugin<Project> {
             project.task('ciPublishVersion', dependsOn: CiReleasePlugin.CI_PERFORM_RELEASE_TASK)
         }
 
-
-
     }
 
     void setupSnaphotTaskFromVersionProp(Project project) {

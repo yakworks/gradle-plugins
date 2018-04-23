@@ -46,8 +46,8 @@ class GrailsPluginPublishPlugin implements Plugin<Project> {
                 maven {
                     url project.artifactoryUrl
                     credentials {
-                        username project.artifactoryUser
-                        password project.artifactoryPassword
+                        username project.findProperty("artifactoryUser")
+                        password project.findProperty("artifactoryPassword")
                     }
                 }
             }
