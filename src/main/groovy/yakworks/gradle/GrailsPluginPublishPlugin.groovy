@@ -21,20 +21,12 @@ import org.gradle.api.internal.ClosureBackedAction
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
-import org.shipkit.gradle.configuration.ShipkitConfiguration
-import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.java.JavaBintrayPlugin
-import org.shipkit.internal.gradle.java.JavaLibraryPlugin
-import org.shipkit.internal.gradle.snapshot.LocalSnapshotPlugin
 
 //@CompileStatic
 class GrailsPluginPublishPlugin implements Plugin<Project> {
 
     void apply(Project project) {
-        //minor hack here, load JavaLibraryPlugin first for jar and sources tasks that will then get used in
-        //the grails-plugin task. then when JavaBintrayPlugin applies it again its fine.
-        //project.getPlugins().apply(JavaLibraryPlugin)
-        //project.getPlugins().apply("org.grails.grails-plugin")
         project.getPlugins().apply(JavaBintrayPlugin)
         cleanDepsInPom(project)
         configBintray(project)

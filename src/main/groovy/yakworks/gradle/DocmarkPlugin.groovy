@@ -38,9 +38,6 @@ class DocmarkPlugin implements Plugin<Project> {
         addMkdocsTasks(rootProject)
         addGitPublish(rootProject)
         addUpdateReadmeVersions(rootProject)
-
-//        def foo = ['sh', '-c', 'git diff --name-only'].execute().text.trim().split( '\n' )
-//        println "git diff " + foo
     }
 
     //this should be called from inside of an afterEvaluate so the JavaLibraryPlugin will have been applied properly to subs

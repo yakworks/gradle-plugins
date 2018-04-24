@@ -15,24 +15,16 @@ import org.shipkit.internal.gradle.git.tasks.GitCheckOutTask;
 import org.shipkit.internal.gradle.release.CiReleasePlugin;
 import org.shipkit.internal.gradle.release.ReleaseNeededPlugin;
 import org.shipkit.internal.gradle.util.StringUtil;
+import org.shipkit.internal.exec.Exec;
+
+import java.util.List;
+
+import static java.util.Arrays.asList;
 
 /**
- * Configures the release automation to be used with Travis CI.
+ * Configures the release automation to be used with Circle CI.
  * Intended for root project.
- * <p>
- * Applies:
- * <ul>
- *     <li>{@link CiReleasePlugin}</li>
- * </ul>
- * Adds behavior:
- * <ul>
- * <li>Configures {@link GitBranchPlugin}/{@link IdentifyGitBranchTask}
- *      so that the branch information is taken from 'TRAVIS_BRANCH' env variable.</li>
- * <li>Configures {@link GitSetupPlugin}/{@link GitCheckOutTask}
- *      so that it checks out the branch specified in env variable.</li>
- * <li>Configures {@link ReleaseNeededPlugin}/{@link ReleaseNeededTask}
- *      so that it uses information from 'TRAVIS_PULL_REQUEST' and 'TRAVIS_COMMIT_MESSAGE' env variables.</li>
- * </ul>
+ * BASED most of the logic was copied from the TravisPlugin class.
  */
 public class CirclePlugin implements Plugin<Project> {
 
@@ -40,7 +32,7 @@ public class CirclePlugin implements Plugin<Project> {
 
     @Override
     public void apply(final Project project) {
-        project.getPlugins().apply(CiReleasePlugin.class);
+        //project.getPlugins().apply(CiReleasePlugin.class);
 
         final String branch = System.getenv("CIRCLE_BRANCH");
         LOG.info("Branch from 'CIRCLE_BRANCH' env variable: {}", branch);
@@ -75,12 +67,11 @@ public class CirclePlugin implements Plugin<Project> {
         // git log --format="%s" -n 1 $CIRCLE_SHA1
         // http://ajoberstar.org/grgit/grgit-log.html
 
-        //the following assumes that this is run in CI script before gradle since circleCI doesn't have the equivalent
-        //export CI_COMMIT_MESSAGE=`git log --format="%s" -n 1 $CIRCLE_SHA1`
-
+        List<String> commandLine = asList("git", "log", "--format=\"%s\"", "-n", "1", "$CIRCLE_SHA1");
+        String commitMessage = Exec.getProcessRunner(project.getProjectDir()).run(commandLine).trim();
         project.getTasks().withType(ReleaseNeededTask.class, new Action<ReleaseNeededTask>() {
             public void execute(ReleaseNeededTask t) {
-                t.setCommitMessage(System.getenv("CI_COMMIT_MESSAGE"));
+                t.setCommitMessage(commitMessage);
                 t.setPullRequest(isPullRequest);
             }
         });
