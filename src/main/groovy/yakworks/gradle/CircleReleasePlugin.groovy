@@ -48,6 +48,7 @@ public class CircleReleasePlugin implements Plugin<Project> {
             //add a check shell command. simply depending on it does not seem to fire it so we hard wire it this way
             //down the line, during snapshot, we check for code changes that are not just docs changes
             //and have the root ciPublish depend on this if there are.
+            //NOT USED, Works locally but not on circle
             ShipkitExecTask ciCheckTask = project.task(CI_CHECK_TASK, type:ShipkitExecTask){
                 description = "Runs the `gradle check` in a sep command process"
                 execCommands.add(execCommand("check tests", ["./gradlew", 'check', '--no-daemon']))
@@ -62,7 +63,7 @@ public class CircleReleasePlugin implements Plugin<Project> {
                 }
             } else {
                 //runs the normal ciPerformRelease after it runs a check
-                ciPubTask.dependsOn(ciCheckTask)
+                //ciPubTask.dependsOn(ciCheckTask)
                 ciPubTask.dependsOn(CiReleasePlugin.CI_PERFORM_RELEASE_TASK)
             }
 
@@ -123,7 +124,7 @@ public class CircleReleasePlugin implements Plugin<Project> {
             LOG.lifecycle(" - Has application changes and will run publish: " + hasAppChanges + "\n" +
                 " - Docs have changed will run `:gitPublishPush` : " + hasDocChanges)
             if(hasAppChanges){
-                rootPubTask.dependsOn(CI_CHECK_TASK)
+                //rootPubTask.dependsOn(CI_CHECK_TASK)
                 ciPublishTask.dependsOn('publish')
             }
             if(hasDocChanges) ciPublishTask.dependsOn(':gitPublishPush')
