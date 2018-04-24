@@ -123,7 +123,7 @@ class DocmarkPlugin implements Plugin<Project> {
             }
 
             // message used when committing changes
-            commitMessage = 'git-publish doc updates [skip ci]'
+            commitMessage = "publish ${project.version} doc updates [skip ci]"
         }
 
         project.gitPublishCopy.dependsOn 'mkdocsBuild'
