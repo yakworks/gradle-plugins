@@ -81,7 +81,9 @@ public class CircleReleasePlugin implements Plugin<Project> {
         List startTasks = project.gradle.startParameter.taskNames
         project.ext.snapshotVersion = startTasks.contains('snapshot') || bSnapshot
 
-        if(project.snapshotVersion && !startTasks.contains('snapshot')) {
+        boolean excludedTasks = startTasks.any { ['resolveConfigurations', 'clean'].contains(it)}
+
+        if(project.snapshotVersion && !excludedTasks) {
             startTasks.add(0, 'snapshot')
             project.gradle.startParameter.taskNames = startTasks
             LOG.lifecycle("  Snapshot set in versions file. Added snapshot task.")
@@ -103,7 +105,7 @@ public class CircleReleasePlugin implements Plugin<Project> {
         boolean skipEnvVariable = Boolean.parseBoolean(System.env['SKIP_RELEASE'])
         boolean skippedByCommitMessage = rtask.commitMessage?.contains(ReleaseNeeded.SKIP_RELEASE_KEYWORD)
 
-        LOG.lifecycle("Checking if should release SNAPSHOT on branch [${rtask.branch}] :\n" +
+        LOG.lifecycle("Should Release SNAPSHOT on branch [${rtask.branch}] :\n" +
             " - releasableBranch: " + releasableBranch + ", $branch matches (${rtask.releasableBranchRegex}) \n" +
             " - isPullRequest: " + rtask.isPullRequest() + "\n" +
             " - skipEnvVariable: " + skipEnvVariable + "\n" +
@@ -125,7 +127,7 @@ public class CircleReleasePlugin implements Plugin<Project> {
             }
             if(hasDocChanges) ciPublishTask.dependsOn(':gitPublishPush')
         } else {
-            LOG.lifecycle("Skipped SNAPSHOT publish. See Logs above")
+            LOG.lifecycle("SNAPSHOT publish will be skipped. See Logs above")
         }
 
     }
