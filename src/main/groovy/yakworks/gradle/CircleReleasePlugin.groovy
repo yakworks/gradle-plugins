@@ -79,12 +79,12 @@ public class CircleReleasePlugin implements Plugin<Project> {
      */
     void setupCiPublishForSnapshots(Project project) {
 
-        def ciPublishTask = project.task('CI_PUBLISH_TASK')
+        def ciPublishTask = project.task(CI_PUBLISH_TASK)
 
         ReleaseNeededTask rtask = project.rootProject.tasks.getByName(ReleaseNeededPlugin.ASSERT_RELEASE_NEEDED_TASK)
         String branch = System.getenv("CIRCLE_BRANCH")
         boolean releasableBranch = branch?.matches(rtask.releasableBranchRegex)
-        boolean skipEnvVariable = System.env['SKIP_RELEASE']
+        boolean skipEnvVariable = Boolean.parseBoolean(System.env['SKIP_RELEASE'])
         boolean skippedByCommitMessage = rtask.commitMessage?.contains(ReleaseNeeded.SKIP_RELEASE_KEYWORD)
 
         LOG.lifecycle("Checking if should release SNAPSHOT on branch [${rtask.branch}] :\n" +
@@ -100,9 +100,12 @@ public class CircleReleasePlugin implements Plugin<Project> {
 
             boolean hasAppChanges = ['sh', '-c', gitDiff + ' | grep --invert-match -E ' + grepReg].execute().text.trim().length() > 0
             boolean hasDocChanges = ['sh', '-c', gitDiff + ' | grep -E ' + grepReg].execute().text.trim().length() > 0
-            LOG.lifecycle("Libs have changed? - hasAppChanges: " + hasAppChanges + ", Docs have changed? - hasDocChanges: " + hasDocChanges)
+            LOG.lifecycle(" - Has application changes and will run publish: " + hasAppChanges + "\n" +
+                " - Docs have changed will run `:gitPublishPush` : " + hasDocChanges)
             if(hasAppChanges) ciPublishTask.dependsOn('publish')
             if(hasDocChanges) ciPublishTask.dependsOn(':gitPublishPush')
+        } else {
+            LOG.lifecycle("Skipped SNAPSHOT publish. See Logs above")
         }
 
     }
