@@ -67,7 +67,7 @@ public class CirclePlugin implements Plugin<Project> {
         // git log --format="%s" -n 1 $CIRCLE_SHA1
         // http://ajoberstar.org/grgit/grgit-log.html
 
-        List<String> commandLine = asList("git", "log", "--format=\"%s\"", "-n", "1", "$CIRCLE_SHA1");
+        List<String> commandLine = asList("sh", "-c", "git log --format=\"%s\" -n 1 $CIRCLE_SHA1");
         String commitMessage = Exec.getProcessRunner(project.getProjectDir()).run(commandLine).trim();
         project.getTasks().withType(ReleaseNeededTask.class, new Action<ReleaseNeededTask>() {
             public void execute(ReleaseNeededTask t) {
