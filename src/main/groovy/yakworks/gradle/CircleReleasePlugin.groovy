@@ -6,8 +6,10 @@ import org.gradle.api.Task
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.shipkit.gradle.configuration.ShipkitConfiguration
+import org.shipkit.gradle.exec.ShipkitExecTask
 import org.shipkit.gradle.release.ReleaseNeededTask
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
+import org.shipkit.internal.gradle.exec.ExecCommandFactory
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
 import org.shipkit.internal.gradle.release.CiReleasePlugin
 import org.shipkit.internal.gradle.release.ReleaseNeededPlugin
@@ -15,6 +17,8 @@ import org.shipkit.internal.gradle.release.tasks.ReleaseNeeded
 import org.shipkit.internal.gradle.util.ProjectUtil
 import org.shipkit.internal.gradle.version.VersioningPlugin
 import org.shipkit.internal.util.PropertiesUtil
+import static java.util.Arrays.asList
+import static org.shipkit.internal.gradle.exec.ExecCommandFactory.execCommand
 
 /**
  * Does special Snapshot wiring and config with CircleCI.
@@ -26,6 +30,7 @@ import org.shipkit.internal.util.PropertiesUtil
 public class CircleReleasePlugin implements Plugin<Project> {
     private final static Logger LOG = Logging.getLogger(CircleReleasePlugin)
     public static final String CI_PUBLISH_TASK = "ciPublish"
+    public static final String CI_CHECK_TASK = "ciCheck"
 
     public void apply(final Project project) {
         ProjectUtil.requireRootProject(project, this.getClass())
@@ -38,20 +43,29 @@ public class CircleReleasePlugin implements Plugin<Project> {
         project.plugins.apply(CirclePlugin)
 
         if(System.env['CI']) {
+            def ciPubTask = project.task(CI_PUBLISH_TASK)
+
+            //add a check shell command. simply depending on it does not seem to fire it so we hard wire it this way
+            //down the line, during snapshot, we check for code changes that are not just docs changes
+            //and have the root ciPublish depend on this if there are.
+            ShipkitExecTask ciCheckTask = project.task(CI_CHECK_TASK, type:ShipkitExecTask){
+                description = "Runs the `gradle check` in a sep command process"
+                execCommands.add(execCommand("check tests", ["./gradlew", 'check'], ExecCommandFactory.stopExecution()))
+            }
+
             if (project.snapshotVersion) {
                 project.allprojects { Project subproject ->
                     subproject.getPlugins().withType(JavaLibraryPlugin) {
-                        setupCiPublishForSnapshots(subproject)
+                        setupCiPublishForSnapshots(subproject, ciPubTask)
                     }
                 }
             } else {
-                //create a higher level ciPublish that depends on ciPerformRelease for root when its not a snapshot
-                def ciPubTask = project.task(CI_PUBLISH_TASK)
-                ciPubTask.dependsOn('check')
+                //runs the normal ciPerformRelease after it runs a check
+                ciPubTask.dependsOn(ciCheckTask)
                 ciPubTask.dependsOn(CiReleasePlugin.CI_PERFORM_RELEASE_TASK)
             }
 
-            addGitBotUserInfo(conf)
+            //addGitBotUserInfo(conf)
         }
 
     }
@@ -79,7 +93,7 @@ public class CircleReleasePlugin implements Plugin<Project> {
      * Checks if snapshot release is needed for the current branch.
      * checks for changes to docs and only publishes them if they are the only thing that changes
      */
-    void setupCiPublishForSnapshots(Project project) {
+    void setupCiPublishForSnapshots(Project project, Task rootTask) {
 
         def ciPublishTask = project.task(CI_PUBLISH_TASK)
 
@@ -106,7 +120,7 @@ public class CircleReleasePlugin implements Plugin<Project> {
             LOG.lifecycle(" - Has application changes and will run publish: " + hasAppChanges + "\n" +
                 " - Docs have changed will run `:gitPublishPush` : " + hasDocChanges)
             if(hasAppChanges){
-                ciPublishTask.dependsOn(':check')
+                rootPubTask.dependsOn(CI_CHECK_TASK)
                 ciPublishTask.dependsOn('publish')
             }
             if(hasDocChanges) ciPublishTask.dependsOn(':gitPublishPush')
