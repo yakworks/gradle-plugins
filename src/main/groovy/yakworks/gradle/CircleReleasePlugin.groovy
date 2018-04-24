@@ -91,11 +91,12 @@ public class CircleReleasePlugin implements Plugin<Project> {
 
         LOG.lifecycle("Checking if should release SNAPSHOT on branch [${rtask.branch}] :\n" +
             " - releasableBranch: " + releasableBranch + ", $branch matches (${rtask.releasableBranchRegex}) \n" +
+            " - isPullRequest: " + rtask.isPullRequest() + "\n" +
             " - skipEnvVariable: " + skipEnvVariable + "\n" +
             " - skippedByCommitMessage: " + skippedByCommitMessage + "\n"
         )
 
-        if(releasableBranch && !skipEnvVariable && !skippedByCommitMessage) {
+        if(releasableBranch && !rtask.isPullRequest() && !skipEnvVariable && !skippedByCommitMessage) {
             def commitRange = ['sh', '-c', 'echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev'].execute().text.trim()
             def gitDiff = "git diff --name-only $commitRange"
             def grepReg = '"(README\\.md|mkdocs\\.yml|docs/)"'
