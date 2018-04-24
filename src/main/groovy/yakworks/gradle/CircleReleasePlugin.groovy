@@ -54,6 +54,10 @@ public class CircleReleasePlugin implements Plugin<Project> {
 
     }
 
+    /**
+     * Look into version file for a snapshot property. Add the snapshot task to startParameter.taskNames
+     * if its true.
+     */
     void addSnaphotTaskFromVersionProp(Project project) {
         final File versionFile = project.file(VersioningPlugin.VERSION_FILE_NAME);
         String snapshot = PropertiesUtil.readProperties(versionFile).getProperty("snapshot")
@@ -69,17 +73,22 @@ public class CircleReleasePlugin implements Plugin<Project> {
         }
     }
 
+    /**
+     * Checks if snapshot release is needed for the current branch.
+     * checks for changes to docs and only publishes them if they are the only thing that changes
+     */
     void setupCiPublishForSnapshots(Project project) {
 
         def ciPublishTask = project.task('CI_PUBLISH_TASK')
 
         ReleaseNeededTask rtask = project.rootProject.tasks.getByName(ReleaseNeededPlugin.ASSERT_RELEASE_NEEDED_TASK)
-        boolean releasableBranch = rtask.branch?.matches(rtask.releasableBranchRegex)
+        String branch = System.getenv("CIRCLE_BRANCH")
+        boolean releasableBranch = branch?.matches(rtask.releasableBranchRegex)
         boolean skipEnvVariable = System.env['SKIP_RELEASE']
         boolean skippedByCommitMessage = rtask.commitMessage?.contains(ReleaseNeeded.SKIP_RELEASE_KEYWORD)
 
         LOG.lifecycle("Checking if should release SNAPSHOT on branch [${rtask.branch}] :\n" +
-            " - releasableBranch: " + releasableBranch + " matches (${rtask.releasableBranchRegex}) \n" +
+            " - releasableBranch: " + releasableBranch + ", $branch matches (${rtask.releasableBranchRegex}) \n" +
             " - skipEnvVariable: " + skipEnvVariable + "\n" +
             " - skippedByCommitMessage: " + skippedByCommitMessage + "\n"
         )
@@ -91,7 +100,7 @@ public class CircleReleasePlugin implements Plugin<Project> {
 
             boolean hasAppChanges = ['sh', '-c', gitDiff + ' | grep --invert-match -E ' + grepReg].execute().text.trim().length() > 0
             boolean hasDocChanges = ['sh', '-c', gitDiff + ' | grep -E ' + grepReg].execute().text.trim().length() > 0
-            LOG.lifecycle("hasAppChanges: " + hasAppChanges + " hasDocChanges: " + hasDocChanges)
+            LOG.lifecycle("Libs have changed? - hasAppChanges: " + hasAppChanges + ", Docs have changed? - hasDocChanges: " + hasDocChanges)
             if(hasAppChanges) ciPublishTask.dependsOn('publish')
             if(hasDocChanges) ciPublishTask.dependsOn(':gitPublishPush')
         }
