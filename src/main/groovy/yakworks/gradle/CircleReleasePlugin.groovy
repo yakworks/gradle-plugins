@@ -73,7 +73,7 @@ public class CircleReleasePlugin implements Plugin<Project> {
 
         def ciPublishTask = project.task('CI_PUBLISH_TASK')
 
-        ReleaseNeededTask rtask = project.getTasks().getByName(ReleaseNeededPlugin.ASSERT_RELEASE_NEEDED_TASK)
+        ReleaseNeededTask rtask = project.rootProject.tasks.getByName(ReleaseNeededPlugin.ASSERT_RELEASE_NEEDED_TASK)
         boolean releasableBranch = rtask.branch?.matches(rtask.releasableBranchRegex)
         boolean skipEnvVariable = System.env['SKIP_RELEASE']
         boolean skippedByCommitMessage = rtask.commitMessage?.contains(ReleaseNeeded.SKIP_RELEASE_KEYWORD)
