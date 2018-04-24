@@ -50,7 +50,8 @@ public class CircleReleasePlugin implements Plugin<Project> {
             //and have the root ciPublish depend on this if there are.
             ShipkitExecTask ciCheckTask = project.task(CI_CHECK_TASK, type:ShipkitExecTask){
                 description = "Runs the `gradle check` in a sep command process"
-                execCommands.add(execCommand("check tests", ["./gradlew", 'check'], ExecCommandFactory.stopExecution()))
+                execCommands.add(execCommand("check tests", ["./gradlew", 'check', '--no-daemon']))
+                //execCommands.add(execCommand("check tests", ["./gradlew", 'check', '--no-daemon'], ExecCommandFactory.stopExecution()))
             }
 
             if (project.snapshotVersion) {
@@ -95,7 +96,7 @@ public class CircleReleasePlugin implements Plugin<Project> {
      * Checks if snapshot release is needed for the current branch.
      * checks for changes to docs and only publishes them if they are the only thing that changes
      */
-    void setupCiPublishForSnapshots(Project project, Task rootTask) {
+    void setupCiPublishForSnapshots(Project project, Task rootPubTask) {
 
         def ciPublishTask = project.task(CI_PUBLISH_TASK)
 
