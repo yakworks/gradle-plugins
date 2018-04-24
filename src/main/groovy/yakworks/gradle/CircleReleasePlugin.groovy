@@ -46,7 +46,9 @@ public class CircleReleasePlugin implements Plugin<Project> {
                 }
             } else {
                 //create a higher level ciPublish that depends on ciPerformRelease for root when its not a snapshot
-                project.task(CI_PUBLISH_TASK, dependsOn: CiReleasePlugin.CI_PERFORM_RELEASE_TASK)
+                def ciPubTask = project.task(CI_PUBLISH_TASK)
+                ciPubTask.dependsOn('check')
+                ciPubTask.dependsOn(CiReleasePlugin.CI_PERFORM_RELEASE_TASK)
             }
 
             addGitBotUserInfo(conf)
@@ -102,7 +104,10 @@ public class CircleReleasePlugin implements Plugin<Project> {
             boolean hasDocChanges = ['sh', '-c', gitDiff + ' | grep -E ' + grepReg].execute().text.trim().length() > 0
             LOG.lifecycle(" - Has application changes and will run publish: " + hasAppChanges + "\n" +
                 " - Docs have changed will run `:gitPublishPush` : " + hasDocChanges)
-            if(hasAppChanges) ciPublishTask.dependsOn('publish')
+            if(hasAppChanges){
+                ciPublishTask.dependsOn('check')
+                ciPublishTask.dependsOn('publish')
+            }
             if(hasDocChanges) ciPublishTask.dependsOn(':gitPublishPush')
         } else {
             LOG.lifecycle("Skipped SNAPSHOT publish. See Logs above")
