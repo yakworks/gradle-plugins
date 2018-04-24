@@ -106,7 +106,7 @@ public class CircleReleasePlugin implements Plugin<Project> {
             LOG.lifecycle(" - Has application changes and will run publish: " + hasAppChanges + "\n" +
                 " - Docs have changed will run `:gitPublishPush` : " + hasDocChanges)
             if(hasAppChanges){
-                ciPublishTask.dependsOn('check')
+                ciPublishTask.dependsOn(':check')
                 ciPublishTask.dependsOn('publish')
             }
             if(hasDocChanges) ciPublishTask.dependsOn(':gitPublishPush')
