@@ -78,11 +78,11 @@ class DocmarkPlugin implements Plugin<Project> {
                     include 'mkdocs.yml'
                     filter { line ->
                         String siteUrl = prj.isSnapshot ? "$prj.websiteUrl/snapshot" : prj.websiteUrl //prj.property('websiteUrl')
-                        def newline = line.startsWith('repo_url:') ? "repo_url: ${prj.property('githubUrl')}" : line
+                        def newline = line.startsWith('repo_url:') ? "repo_url: ${prj.property('gitHubUrl')}" : line
                         newline.startsWith('site_url:') ? "site_url: $siteUrl" : newline
                     }
                     filter(ReplaceTokens,
-                        tokens: ['version', 'title', 'description', 'githubSlug', 'author'].collectEntries {
+                        tokens: ['version', 'title', 'description', 'gitHubSlug', 'author'].collectEntries {
                             [it, prj."$it".toString()]
                         }
                     )
@@ -123,7 +123,7 @@ class DocmarkPlugin implements Plugin<Project> {
             }
 
             // message used when committing changes
-            commitMessage = "publish ${project.version} doc updates [skip ci]".toString()
+            commitMessage = "Docs published for ${project.version} release [skip ci]".toString()
         }
 
         project.gitPublishCopy.dependsOn 'mkdocsBuild'

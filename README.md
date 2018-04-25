@@ -29,7 +29,34 @@ In a grails plugin
 apply plugin: "yakworks.grails-plugin"
 ```
 
-## Details
+## gradle.properties or ext props
+
+```
+  # author for docs and copyright, used in licenseHeader too. Can be legal Org name or user name
+author=9ci Inc
+license=Apache-2.0
+
+#### Publishing settings GitHub/Bintray/Artifactory/Maven
+group=org.yakworks
+gitHubSlug=yakworks/gradle-plugins
+ # default matches 'master', 'release/2.x', 'release/3.x', etc.
+gitReleasableBranch="master|release/.+" 
+gitConfigUser=9cibot
+gitConfigEmail=9cibot@9ci.com
+# bintray, don't set these to use standard mavenPublish settings
+bintrayOrg=9ci
+bintrayRepo=grails-plugins
+bintrayUser=
+bintrayKey=
+
+mavenPublishUrl=http://repo.9ci.com/oss-snapshots
+mavenPublishUser=should go in gradle.properties or set as env var MAVEN_PUBLISH_USER
+mavenPublishKey=should go in gradle.properties 
+# mavenSnapshotUrl= set this if different than the mavenPublishUrl
+
+developers = {"basejump": "Joshua Burnett", "snimavat": "Sudhir Nimavat", "alexeyzvegintcev": "Alexey"}
+
+```
 
 What happens when the following plugins are applied:
 

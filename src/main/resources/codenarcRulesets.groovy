@@ -4,7 +4,7 @@ ruleset {
     }
 
     ruleset('rulesets/braces.xml'){
-        exclude 'IfStatementBraces' //FIXME add a new rule that does if statment braces unless its a single line
+        exclude 'IfStatementBraces' //FIXME add a new rule that does if statment braces unless its on a single line
     }
 
     ruleset('rulesets/concurrency.xml')
@@ -12,10 +12,14 @@ ruleset {
     ruleset('rulesets/convention.xml'){
         ['CouldBeElvis', 'NoDef', 'ParameterReassignment', 'MethodParameterTypeRequired',
          'MethodReturnTypeRequired', 'CouldBeSwitchStatement', 'InvertedCondition', 'TrailingComma',
-         'VariableTypeRequired'
+         'VariableTypeRequired','FieldTypeRequired'
         ].each{
             exclude it
         }
+        //FIXME enable this
+        //FieldTypeRequired {
+        //    doNotApplyToFilesMatching = ".*/grails-app/domain/.*|.*GrailsPlugin.groovy|.*Application.groovy|.*UrlMappings.groovy|*.BootStrap.groovy"
+        //}
     }
     // convention
     // NoTabCharacter
@@ -23,10 +27,11 @@ ruleset {
     ruleset('rulesets/design.xml'){
         [
          'NestedForLoop', 'Instanceof',
-         'AbstractClassWithoutAbstractMethod'
+         'AbstractClassWithoutAbstractMethod', 'PrivateFieldCouldBeFinal'
         ].each{
             exclude it
         }
+        //FIXME enable PrivateFieldCouldBeFinal
         BuilderMethodWithSideEffects{
             methodNameRegex = '(make.*|build.*)'
         }
@@ -41,7 +46,6 @@ ruleset {
     // ruleset('rulesets/formatting.xml')
     ruleset('rulesets/formatting.xml'){
         LineLength(doNotApplyToFilesMatching: '.*Spec.groovy', length:160)
-        //'BlockEndsWithBlankLine' doNotApplyToFilesMatching: '*Spec.groovy'
 
         ['ClassJavadoc', //FIXME this should be enabled
          'BlockEndsWithBlankLine', 'BlockStartsWithBlankLine',
@@ -64,6 +68,7 @@ ruleset {
 
     ruleset('rulesets/imports.xml'){
         MisorderedStaticImports(comesBefore:false)
+        NoWildcardImports(ignoreStaticImports:true)
     }
 
     ruleset('rulesets/jdbc.xml')
@@ -109,6 +114,8 @@ ruleset {
         'MethodSize' doNotApplyToFilesMatching: '.*Spec.groovy'
         //'ParameterCount' maxParameters: 6
         exclude 'CrapMetric'
+
+        ParameterCount(maxParameters:7)
         //exclude 'CyclomaticComplexity'
     }
 
@@ -122,7 +129,7 @@ ruleset {
         exclude 'UnnecessaryPublicModifier'
         exclude 'UnnecessaryReturnKeyword'
         //exclude 'UnnecessaryDotClass' //FIXME this should be enabled
-        exclude 'UnnecessarySetter' //FIXME this should be enabled
+        exclude 'UnnecessarySetter'
         exclude 'UnnecessarySubstring'
         exclude 'UnnecessaryElseStatement'
     }

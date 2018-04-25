@@ -3,10 +3,19 @@ package yakworks.gradle
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.internal.ClosureBackedAction
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.shipkit.internal.gradle.bintray.BintrayReleasePlugin
+import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.git.GitPlugin
+import org.shipkit.internal.gradle.java.ComparePublicationsPlugin
+import org.shipkit.internal.gradle.java.JavaBintrayPlugin
+import org.shipkit.internal.gradle.java.JavaLibraryPlugin
+import org.shipkit.internal.gradle.java.JavaPublishPlugin
 import org.shipkit.internal.gradle.java.PomContributorsPlugin
 import org.shipkit.internal.gradle.release.ReleasePlugin
 import org.shipkit.internal.gradle.util.ProjectUtil
@@ -24,16 +33,58 @@ class ShipkitPlugin implements Plugin<Project> {
         ProjectUtil.requireRootProject(project, this.getClass())
         //apply CircleReleasePlugin plugin, has be done early, before ShipkitConfiguration, so it can add the snapshot task to the startParams
         project.plugins.apply(CircleReleasePlugin)
-        //modified ShipkitBasePlugin
-        project.plugins.apply(BintrayReleasePlugin)
-        project.plugins.apply(PomContributorsPlugin)
         project.plugins.apply(DefaultsPlugin)
 
-        wireUpDocPublishing(project)
+        boolean isBintray = project.findProperty('isBintrayPublish') //set in the DefaultsPlugin
 
-        project.allprojects { Project subproject ->
-            subproject.getPlugins().withId("yakworks.grails-plugin") {
-                subproject.getPlugins().apply(GrailsPluginPublishPlugin)
+        if(isBintray){
+            project.plugins.apply(BintrayReleasePlugin)
+        } else{
+            project.plugins.apply(MavenRepoReleasePlugin)
+        }
+
+        project.plugins.apply(PomContributorsPlugin)
+
+        project.allprojects { Project prj ->
+
+            prj.getPlugins().withType(JavaLibraryPlugin) {
+                if(isBintray){
+                    prj.getPlugins().apply(JavaBintrayPlugin)
+                    configBintray(prj)
+
+                    prj.getPlugins().withId("yakworks.grails-plugin") {
+                        configGrailsBintray(prj)
+                    }
+                } else{
+                    //these are the 2 plugins that JavaBintrayPlugin applies above.
+                    prj.getPlugins().apply(JavaPublishPlugin)
+                    prj.getPlugins().apply(ComparePublicationsPlugin)
+                }
+
+                cleanDepsInPom(prj)
+            }
+
+//            prj.getPlugins().withId("yakworks.grails-plugin") {
+//                cleanDepsInPom(prj, true) //add the special plugin.xml artifact for grails
+//            }
+
+            if (prj.isSnapshot || !isBintray) {
+                setupPublishRepo(prj)
+            }
+
+            wireUpDocPublishing(project)
+        }
+    }
+
+    void setupPublishRepo(Project project){
+        //setup repo so `gradle publish` works
+        project.publishing.repositories {
+            maven {
+                url project.mavenPublishUrl
+                credentials {
+                    username project.findProperty("mavenRepoUser")
+                    password project.findProperty("mavenRepoKey")
+                }
             }
         }
     }
@@ -44,10 +95,93 @@ class ShipkitPlugin implements Plugin<Project> {
         final File rmeFile = project.file('README.md')
         GitPlugin.registerChangesForCommitIfApplied([rmeFile], 'README.md versions', updateReadme)
 
-        final Task performRelease = project.getTasks().getByName(ReleasePlugin.PERFORM_RELEASE_TASK);
-        final Task gitPublishPush = project.getTasks().getByName('gitPublishPush')
-        gitPublishPush.mustRunAfter(GitPlugin.GIT_PUSH_TASK)
-        performRelease.dependsOn(gitPublishPush)
+        final Task performRelease = project.getTasks().getByName(ReleasePlugin.PERFORM_RELEASE_TASK)
+        if(Boolean.parseBoolean(project.findProperty('enableDocsPublish'))) {
+            String gitPublishDocsTaskName = 'gitPublishPush'
+            if (project.hasProperty(ShipkitConfigurationPlugin.DRY_RUN_PROPERTY)) {
+                gitPublishDocsTaskName = 'gitPublishCopy'
+            }
+            final Task gitPublishDocsTask = project.getTasks().getByName(gitPublishDocsTaskName)
+            gitPublishDocsTask.mustRunAfter(GitPlugin.GIT_PUSH_TASK)
+            performRelease.dependsOn(gitPublishDocsTask)
+        }
+    }
+
+    /**
+     * Taken from GrailsCentralPublishGradlePlugin in grails-core. its the 'org.grails.grails-plugin-publish'
+     * Cleans up dependencies without versions and removes the bom dependencyManagement stuff and adds the grails-plugin.xml artefact
+     */
+    private void cleanDepsInPom(Project project) {
+        project.plugins.withType(MavenPublishPlugin) {
+            project.extensions.configure PublishingExtension, new ClosureBackedAction( {
+                publications {
+                    javaLibrary(MavenPublication) {
+                        artifact getGrailsPluginArtifact(project)
+                        pom.withXml {
+                            Node pomNode = asNode()
+                            if (pomNode.dependencyManagement) {
+                                pomNode.dependencyManagement[0].replaceNode {}
+                            }
+                            pomNode.dependencies.dependency.findAll {
+                                it.version.text().isEmpty()
+                            }.each {
+                                it.replaceNode {}
+                            }
+                        }
+                    }
+                }
+            })
+        }
+    }
+
+    /**
+     * sets up the bintray task defualts
+     */
+    private void configBintray(Project project) {
+        project.afterEvaluate { prj ->
+            prj.bintray {
+                user = System.getenv("BINTRAY_USER") ?: prj.findProperty("bintrayUser") ?: ''
+                key = System.getenv("BINTRAY_KEY") ?: prj.findProperty("bintrayKey") ?: ''
+                pkg {
+                    repo = prj.bintrayRepo
+                    userOrg = prj.bintrayOrg
+                    name = prj.name
+                    websiteUrl = prj.websiteUrl
+                    issueTrackerUrl = prj.gitHubIssues
+                    vcsUrl = prj.gitHubUrl
+                    licenses = prj.hasProperty('license') ? [prj.license] : []
+                    publicDownloadNumbers = true
+                    version {
+                        name = prj.version
+                        gpg {
+                            sign = false
+                            //passphrase = signingPassphrase
+                        }
+                        mavenCentralSync {
+                            sync = false
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void configGrailsBintray(Project project) {
+        project.afterEvaluate { prj ->
+            prj.bintray.pkg.version.attributes = ["grails-plugin": "$prj.group:$prj.name"]
+        }
+    }
+
+    protected Map<String, String> getGrailsPluginArtifact(Project project) {
+        def directory
+        try {
+            directory = project.sourceSets.main.groovy.outputDir
+        } catch (Exception e) {
+            directory = project.sourceSets.main.output.classesDir
+        }
+        [source: "${directory}/META-INF/grails-plugin.xml".toString(),
+         classifier: "plugin",
+         extension: 'xml']
     }
 
 }

@@ -1,3 +1,4 @@
+
 shipkit {
     gitHub.repository = "yakworks/gradle-plugins"
     gitHub.readOnlyAuthToken = "e7fe8fcdd6ffed5c38498c4c79b2a68e6f6ed1bb"

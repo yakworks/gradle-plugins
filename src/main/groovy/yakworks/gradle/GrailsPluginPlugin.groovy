@@ -19,57 +19,16 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
 
+/**
+ * basic marker for a grails plugin, "yakworks.grails-plugin", will apply GrailsPluginPublishPlugin later after config
+ */
 //@CompileStatic
 class GrailsPluginPlugin implements Plugin<Project> {
 
     void apply(Project project) {
-        //setup defaults props
-        //setupProperties(project)
         project.plugins.apply('groovy')
-        project.plugins.apply(JavaLibraryPlugin) //this has to come before the grails-plugin
+        //this has to come before the grails-plugin as it sets up the sourcesJar and javadocJar
+        project.plugins.apply(JavaLibraryPlugin)
         project.plugins.apply("org.grails.grails-plugin")
-        //project.plugins.apply('org.grails.grails-plugin')
-        //addGrailsPublishConfig(project)
-    }
-
-    @Deprecated
-    private void addGrailsPublishConfig(Project project) {
-        project.plugins.withId('org.grails.grails-plugin') {
-            project.plugins.apply('org.grails.grails-plugin-publish')
-
-            project.grailsPublish {
-                title = project.title
-                desc = project.description
-                userOrg = project.bintrayOrg
-                repo = project.bintrayRepo
-                developers = project.pomDevelopers
-                githubSlug = project.githubSlug
-                issueTrackerUrl = project.githubIssues
-                websiteUrl = project.websiteUrl
-                vcsUrl = project.githubUrl
-            }
-
-            if (project.findProperty('isSnapshot') || !project.findProperty('bintrayRepo')) {
-                //for snapshots setup the normal repo way, this will enable the 'publish' task
-                project.publishing {
-                    //println "SNAPSHOT - " + project.name + ":" + project.version.toString()
-                    repositories {
-                        maven {
-                            url project.artifactoryUrl
-                            credentials {
-                                username project.artifactoryUser
-                                password project.artifactoryPassword
-                            }
-                        }
-                    }
-                }
-            }
-//            else {
-//                project.task("publish", dependsOn:'bintrayUpload' , overwrite:true){
-//                    description = 'convienince to call bintrayUpload'
-//                    group = 'publishing'
-//                }
-//            }
-        }
     }
 }

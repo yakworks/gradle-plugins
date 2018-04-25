@@ -9,20 +9,19 @@ import org.shipkit.gradle.configuration.ShipkitConfiguration
 import org.shipkit.gradle.exec.ShipkitExecTask
 import org.shipkit.gradle.release.ReleaseNeededTask
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
-import org.shipkit.internal.gradle.exec.ExecCommandFactory
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
+import org.shipkit.internal.gradle.java.JavaPublishPlugin
 import org.shipkit.internal.gradle.release.CiReleasePlugin
 import org.shipkit.internal.gradle.release.ReleaseNeededPlugin
 import org.shipkit.internal.gradle.release.tasks.ReleaseNeeded
 import org.shipkit.internal.gradle.util.ProjectUtil
 import org.shipkit.internal.gradle.version.VersioningPlugin
 import org.shipkit.internal.util.PropertiesUtil
-import static java.util.Arrays.asList
+
 import static org.shipkit.internal.gradle.exec.ExecCommandFactory.execCommand
 
 /**
  * Does special Snapshot wiring and config with CircleCI.
- * This should be applied first before the CirclePlugin.
  * For snapshot this will read the snapshot property in the version.propeties and if true
  * it sets up the ciPublish to use
  */
@@ -57,7 +56,7 @@ public class CircleReleasePlugin implements Plugin<Project> {
 
             if (project.snapshotVersion) {
                 project.allprojects { Project subproject ->
-                    subproject.getPlugins().withType(JavaLibraryPlugin) {
+                    subproject.getPlugins().withType(JavaPublishPlugin) {
                         setupCiPublishForSnapshots(subproject, ciPubTask)
                     }
                 }
@@ -67,7 +66,7 @@ public class CircleReleasePlugin implements Plugin<Project> {
                 ciPubTask.dependsOn(CiReleasePlugin.CI_PERFORM_RELEASE_TASK)
             }
 
-            //addGitBotUserInfo(conf)
+            addGitBotUserInfo(conf)
         }
 
     }

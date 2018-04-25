@@ -39,17 +39,6 @@ class DefaultsPlugin implements Plugin<Project> {
         //apply default plugins
         rootProject.plugins.apply('com.energizedwork.idea-project-components')
         //rootProject.plugins.apply('com.dorongold.task-tree')
-        addSpotless(rootProject)
-
-        //gets all projects that don't start with ':examples' as they are considered "publishable"
-//        getPubSubprojects(rootProject).each { prj ->
-//            //println "prj.path " + prj.path
-//            prj.plugins.apply('groovy')
-//            //addGrailsPublishConfig(prj)
-//            //addGroovydocDefaults(prj)
-//            addSpotless(prj)
-//            prj.plugins.apply(CodenarcPlugin)
-//        }
 
         rootProject.allprojects { prj ->
             prj.plugins.withId('java') {
@@ -64,11 +53,12 @@ class DefaultsPlugin implements Plugin<Project> {
                 rh.maven { url "https://dl.bintray.com/9ci/grails-plugins"}
 
                 silentJavadocWarnings(prj)
-                addSpotless(prj)
+
             }
             prj.plugins.withType(JavaLibraryPlugin){
                 prj.plugins.apply(CodenarcPlugin)
             }
+            addSpotless(prj)
         }
         rootProject.plugins.apply(DocmarkPlugin)
     }
@@ -78,25 +68,34 @@ class DefaultsPlugin implements Plugin<Project> {
         //!!!properties should go there, not here!!
         // its assumed that certain props exists already as base lines to use
         //** Github props used for both doc generation links, publishing docs to gh-pages and maven/bintray publish
-        String gslug = prj.findProperty("githubSlug")
+        String gslug = prj.findProperty("gitHubSlug")
         if (gslug){
             def repoAndOrg = gslug.split("/")
-            setPropIfEmpty prj, 'githubOrg', repoAndOrg[0]
-            setPropIfEmpty prj, 'githubRepo', repoAndOrg[1]
+            setPropIfEmpty prj, 'gitHubOrg', repoAndOrg[0]
+            setPropIfEmpty prj, 'gitHubRepo', repoAndOrg[1]
         }
-        setPropIfEmpty prj, 'githubRepo', prj.name //defualts to project name
-        setPropIfEmpty prj, 'githubSlug', "${prj['githubOrg']}/${prj['githubRepo']}".toString()
-        setPropIfEmpty prj, 'githubUrl', "https://github.com/${prj['githubSlug']}".toString()
-        setPropIfEmpty prj, 'githubIssues', "${prj['githubUrl']}/issues".toString()
+        setPropIfEmpty prj, 'gitHubRepo', prj.name //defualts to project name
+        setPropIfEmpty prj, 'gitHubSlug', "${prj['gitHubOrg']}/${prj['gitHubRepo']}".toString()
+        setPropIfEmpty prj, 'gitHubUrl', "https://github.com/${prj['gitHubSlug']}".toString()
+        setPropIfEmpty prj, 'gitHubIssues', "${prj['gitHubUrl']}/issues".toString()
 
         //** Publishing Bintray, Artifactory settings
-        setPropIfEmpty prj, 'websiteUrl', "https://${prj['githubOrg']}.github.io/${prj['githubRepo']}".toString()
-        setPropIfEmpty prj, 'isSnapshot', prj.version.toString().endsWith("-SNAPSHOT")
-        setPropIfEmpty prj, 'bintrayOrg', prj.githubOrg
+        setPropIfEmpty prj, 'websiteUrl', "https://${prj['gitHubOrg']}.github.io/${prj['gitHubRepo']}".toString()
+        setPropIfEmpty prj, 'bintrayOrg', prj.gitHubOrg
 
-        setPropIfEmpty prj, 'artifactoryUrl', 'http://repo.9ci.com/oss-snapshots'
-        setPropIfEmpty prj, 'artifactoryUser', searchProps(prj, "ARTIFACTORY_USER")
-        setPropIfEmpty prj, 'artifactoryPassword', searchProps(prj, "ARTIFACTORY_PASSWORD")
+        setPropIfEmpty prj, 'isSnapshot', prj.version.toString().endsWith("-SNAPSHOT")
+        setPropIfEmpty prj, 'isBintrayPublish', (prj.findProperty('bintrayRepo')?:false)
+
+        //***Maven publish
+        setPropIfEmpty prj, 'mavenRepoUrl', 'http://repo.9ci.com/grails-plugins' //'http://repo.9ci.com/oss-snapshots'
+        setPropIfEmpty prj, 'mavenPublishUrl', prj.mavenRepoUrl
+        setPropIfEmpty prj, 'mavenRepoUser', searchProps(prj, "MAVEN_REPO_USER")
+        setPropIfEmpty prj, 'mavenRepoKey', searchProps(prj, "MAVEN_REPO_KEY")
+
+        if(prj.isSnapshot && prj.findProperty('mavenSnapshotUrl')){
+            prj.ext['mavenPublishUrl'] = prj.mavenSnapshotUrl
+        }
+
 
         def devs = prj.findProperty('developers') ?: [nodev: "Lone Ranger"]
         devs = devs instanceof Map ? devs : new groovy.json.JsonSlurper().parseText(devs)
@@ -120,22 +119,28 @@ class DefaultsPlugin implements Plugin<Project> {
         }
     }
 
-    private Set<Project> getPubSubprojects(Project rootProject) {
-        rootProject.subprojects.findAll { prj ->
-            //println "${prj.path} hasPlugin yakworks.grails-plugin " + prj.plugins.hasPlugin('yakworks.grails-plugin')
-            !prj.path.startsWith(":examples")
-        }
-        //rootProject.allprojects.findAll { prj -> prj.plugins.hasPlugin(BintrayPlugin) }
-    }
-
     private void addSpotless(Project project) {
         project.plugins.apply('com.diffplug.gradle.spotless')
+
+        project.plugins.withId('codenarc') {
+//            Task spotlessCheck = project.tasks.getByName('spotlessCheck')
+//            Task spotlessApply = project.tasks.getByName('spotlessApply')
+            project.tasks.getByName('codenarcMain').dependsOn('spotlessCheck')
+        }
+
         project.spotless.groovyGradle {
             target '**/*.gradle', 'build.gradle', 'gradle/*.gradle'
             trimTrailingWhitespace()
             indentWithSpaces(2)
             endWithNewline()
         }
+        project.spotless.format 'grailsConf', {
+            target 'grails-app/conf/**/*.groovy'
+            trimTrailingWhitespace()
+            indentWithSpaces(4) // this only checks for tabs and can replace with 4 spaces it it finds them
+            endWithNewline()
+        }
+
         project.plugins.withId('groovy') {
             //java {
                 //googleJavaFormat()
@@ -147,12 +152,15 @@ class DefaultsPlugin implements Plugin<Project> {
             project.spotless.groovy {
                 target project.fileTree('.') {
                     include 'src/main/groovy/**/*.groovy', 'grails-app/**/*.groovy'
-                    exclude '**/*.java', '**/conf/*.groovy'
+                    exclude '**/*.java', '**/conf/**/*.groovy'
                 }
-                //licenseHeader "/* Copyright \$YEAR. ${project.author}. Licensed under the Apache License, Version 2.0 */"
                 trimTrailingWhitespace()
                 indentWithSpaces(4) // this only checks for tabs and can replace with 4 spaces it it finds them
                 endWithNewline()
+            }
+            project.plugins.withType(JavaLibraryPlugin){
+                if(project.findProperty('licenseHeader')) project.spotless.formats.groovy.licenseHeader(project.licenseHeader)
+                if(project.findProperty('licenseHeaderFile')) project.spotless.formats.groovy.licenseHeaderFile(project.licenseHeaderFile)
             }
         }
     }
