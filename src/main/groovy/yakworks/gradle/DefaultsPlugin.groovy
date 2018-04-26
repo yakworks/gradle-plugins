@@ -61,6 +61,7 @@ class DefaultsPlugin implements Plugin<Project> {
             addSpotless(prj)
         }
         rootProject.plugins.apply(DocmarkPlugin)
+
     }
 
     void setupProperties(Project prj) {

@@ -67,3 +67,9 @@ wrapper {
 
 // spotless.formats.groovy.target 'src/main/groovy/**/*.groovy'
 // gradleLint.excludedRules = ['transitive-duplicate-dependency-class']
+
+tasks.create('foo'){
+  doLast{
+    println "GOT IT"
+  }
+}

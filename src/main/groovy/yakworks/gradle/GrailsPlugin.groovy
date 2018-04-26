@@ -18,14 +18,18 @@ package yakworks.gradle
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
+import org.shipkit.internal.gradle.java.JavaPublishPlugin
 
 /**
  * basic marker for a grails plugin, "yakworks.grails-plugin", will apply GrailsPluginPublishPlugin later after config
  */
 //@CompileStatic
-class GrailsPluginPlugin implements Plugin<Project> {
+class GrailsPlugin implements Plugin<Project> {
 
     void apply(Project project) {
+        //make sure the ShipkitPlugin applied to the root. this will apply it to it self if this is a single
+        //project and only the yakworks.grails-plugin is applied
+        project.rootProject.plugins.apply(ShipkitPlugin)
         project.plugins.apply('groovy')
         //this has to come before the grails-plugin as it sets up the sourcesJar and javadocJar
         project.plugins.apply(JavaLibraryPlugin)

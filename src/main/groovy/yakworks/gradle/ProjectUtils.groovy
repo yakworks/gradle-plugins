@@ -46,4 +46,8 @@ class ProjectUtils {
         //println text
         return text
     }
+
+    static String shExecute(String command){
+        return ['sh', '-c', command].execute().text.trim()
+    }
 }

@@ -56,37 +56,36 @@ class ShipkitPlugin implements Plugin<Project> {
                         configGrailsBintray(prj)
                     }
                 } else{
-                    //these are the 2 plugins that JavaBintrayPlugin applies above.
-                    prj.getPlugins().apply(JavaPublishPlugin)
-                    prj.getPlugins().apply(ComparePublicationsPlugin)
+                    //JavaBintrayPlugin takes care of these above
+                    prj.plugins.apply(JavaPublishPlugin)
+                    //prj.plugins.apply(ComparePublicationsPlugin) //TODO fix this
+                }
+                if (prj.isSnapshot || !isBintray) {
+                    LOG.lifecycle("Setting up publish maven Repo to $prj.mavenPublishUrl because one of these is true\n" +
+                        " - isSnapshot: " + prj.isSnapshot + ", (!isBintray): " + !isBintray + "\n" )
+                    setupPublishRepo(prj)
                 }
 
                 cleanDepsInPom(prj)
+                wireUpDocPublishing(project)
             }
 
-//            prj.getPlugins().withId("yakworks.grails-plugin") {
-//                cleanDepsInPom(prj, true) //add the special plugin.xml artifact for grails
-//            }
 
-            if (prj.isSnapshot || !isBintray) {
-                setupPublishRepo(prj)
-            }
-
-            wireUpDocPublishing(project)
         }
     }
 
     void setupPublishRepo(Project project){
-        //setup repo so `gradle publish` works
-        project.publishing.repositories {
-            maven {
-                url project.mavenPublishUrl
-                credentials {
-                    username project.findProperty("mavenRepoUser")
-                    password project.findProperty("mavenRepoKey")
+        project.extensions.configure PublishingExtension, new ClosureBackedAction( {
+            repositories {
+                maven {
+                    url project.mavenPublishUrl
+                    credentials {
+                        username project.findProperty("mavenRepoUser")
+                        password project.findProperty("mavenRepoKey")
+                    }
                 }
             }
-        }
+        })
     }
 
     //Sets dependendsOn and wires up so gitPush will take into account the README updates and the Mkdocs will get run after a release
@@ -96,14 +95,18 @@ class ShipkitPlugin implements Plugin<Project> {
         GitPlugin.registerChangesForCommitIfApplied([rmeFile], 'README.md versions', updateReadme)
 
         final Task performRelease = project.getTasks().getByName(ReleasePlugin.PERFORM_RELEASE_TASK)
-        if(Boolean.parseBoolean(project.findProperty('enableDocsPublish'))) {
+        boolean enableDocsPublish = Boolean.parseBoolean(project.findProperty('enableDocsPublish')?:'true')
+        if(enableDocsPublish) {
             String gitPublishDocsTaskName = 'gitPublishPush'
             if (project.hasProperty(ShipkitConfigurationPlugin.DRY_RUN_PROPERTY)) {
                 gitPublishDocsTaskName = 'gitPublishCopy'
             }
+            //LOG.lifecycle("gitPublishDocsTaskName $gitPublishDocsTaskName" )
             final Task gitPublishDocsTask = project.getTasks().getByName(gitPublishDocsTaskName)
             gitPublishDocsTask.mustRunAfter(GitPlugin.GIT_PUSH_TASK)
             performRelease.dependsOn(gitPublishDocsTask)
+        } else {
+            LOG.lifecycle("Docmark DOCS NOT PUBLISHED as enableDocsPublish is false" )
         }
     }
 
