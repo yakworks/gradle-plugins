@@ -15,15 +15,15 @@
  */
 package yakworks.gradle
 
+import groovy.transform.CompileStatic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
-import org.shipkit.internal.gradle.java.JavaPublishPlugin
 
 /**
  * basic marker for a grails plugin, "yakworks.grails-plugin", will apply GrailsPluginPublishPlugin later after config
  */
-//@CompileStatic
+@CompileStatic
 class GrailsPlugin implements Plugin<Project> {
 
     void apply(Project project) {

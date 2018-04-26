@@ -15,11 +15,8 @@
  */
 package yakworks.gradle
 
-import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.*
 import org.gradle.api.artifacts.dsl.RepositoryHandler
-import org.gradle.api.tasks.Exec
-import org.gradle.api.tasks.javadoc.Groovydoc
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
 
@@ -56,7 +53,9 @@ class DefaultsPlugin implements Plugin<Project> {
 
             }
             prj.plugins.withType(JavaLibraryPlugin){
-                prj.plugins.apply(CodenarcPlugin)
+                prj.plugins.withId('groovy') {
+                    prj.plugins.apply(CodenarcPlugin)
+                }
             }
             addSpotless(prj)
         }

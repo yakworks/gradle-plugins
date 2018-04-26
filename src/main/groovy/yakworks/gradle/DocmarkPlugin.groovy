@@ -21,6 +21,8 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.javadoc.Groovydoc
 import org.gradle.api.tasks.javadoc.Javadoc
+import org.shipkit.gradle.configuration.ShipkitConfiguration
+import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
 
 import static ProjectUtils.searchProps
@@ -33,6 +35,7 @@ class DocmarkPlugin implements Plugin<Project> {
     public static final String TEST_RELEASE_TASK = "testRelease"
 
     void apply(Project rootProject) {
+        ShipkitConfiguration conf = rootProject.plugins.apply(ShipkitConfigurationPlugin).configuration
         //do after groovy is applied to pubProjects above
         addCombineGroovyDocsTask(rootProject)
         addMkdocsTasks(rootProject)
@@ -145,9 +148,12 @@ class DocmarkPlugin implements Plugin<Project> {
 
     String replaceVersionRegex(Project prj, String content) {
         String updatedContent = content.replaceFirst(/(?i)version:\s*[\d\.]+[^\s]+/, "Version: $prj.version")
-        //update any subproject dependencies examples, ie `gorm-tools:6.1.0-SNAPSHOT"`
+        //VersionInfo info = project.getExtensions().getByType(VersionInfo.class)
         getLibraryProjects(prj).each { p ->
+            //update any subproject dependencies examples, ie `gorm-tools:6.1.0"`
             updatedContent = updatedContent.replaceFirst(/${p.name}:[\d\.]+[^"]+/, "${p.name}:${prj.version.trim()}")
+            //update any dependencies for plugin style versions, ie `id "yakworks.gorm-tools" version "1.2.3"`
+            updatedContent = updatedContent.replaceFirst(/(?i)${p.name}"\sversion\s"[\d\.]+[^\s]+"/, "${p.name}\" version \"$prj.version\"")
         }
         return updatedContent
     }

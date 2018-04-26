@@ -4,22 +4,23 @@ ruleset {
     }
 
     ruleset('rulesets/braces.xml'){
-        exclude 'IfStatementBraces' //FIXME add a new rule that does if statment braces unless its on a single line
+        'IfStatementBraces' enabled:false //FIXME add a new rule that does if statment braces unless its on a single line
     }
 
     ruleset('rulesets/concurrency.xml')
 
     ruleset('rulesets/convention.xml'){
-        ['CouldBeElvis', 'NoDef', 'ParameterReassignment', 'MethodParameterTypeRequired',
+        ['CouldBeElvis', 'NoDef', 'ParameterReassignment',
          'MethodReturnTypeRequired', 'CouldBeSwitchStatement', 'InvertedCondition', 'TrailingComma',
-         'VariableTypeRequired','FieldTypeRequired'
+         'VariableTypeRequired', 'FieldTypeRequired'
         ].each{
-            exclude it
+            "$it"(enabled:false)
         }
+
         //FIXME enable this
-        //FieldTypeRequired {
-        //    doNotApplyToFilesMatching = ".*/grails-app/domain/.*|.*GrailsPlugin.groovy|.*Application.groovy|.*UrlMappings.groovy|*.BootStrap.groovy"
-        //}
+//        FieldTypeRequired {
+//            doNotApplyToFilesMatching = ".*/grails-app/domain/.*|.*GrailsPlugin.groovy|.*Application.groovy|.*UrlMappings.groovy|.*BootStrap.groovy"
+//        }
     }
     // convention
     // NoTabCharacter
@@ -29,7 +30,7 @@ ruleset {
          'NestedForLoop', 'Instanceof',
          'AbstractClassWithoutAbstractMethod', 'PrivateFieldCouldBeFinal'
         ].each{
-            exclude it
+            "$it"(enabled:false)
         }
         //FIXME enable PrivateFieldCouldBeFinal
         BuilderMethodWithSideEffects{
@@ -54,7 +55,7 @@ ruleset {
          'SpaceAfterOpeningBrace', 'SpaceAfterClosingBrace', 'SpaceBeforeOpeningBrace', 'SpaceBeforeClosingBrace',
          'TrailingWhitespace'
         ].each{
-            exclude it
+            "$it"(enabled:false)
         }
     }
 
@@ -63,7 +64,7 @@ ruleset {
     //ruleset('rulesets/grails.xml')
 
     ruleset('rulesets/groovyism.xml'){
-        exclude 'GetterMethodCouldBeProperty'
+        'GetterMethodCouldBeProperty' enabled:false
     }
 
     ruleset('rulesets/imports.xml'){
@@ -74,9 +75,9 @@ ruleset {
     ruleset('rulesets/jdbc.xml')
 
     ruleset('rulesets/junit.xml'){
-        exclude 'JUnitPublicNonTestMethod'
-        exclude 'JUnitPublicProperty'
-        exclude 'JUnitPublicNonTestMethod'
+         'JUnitPublicNonTestMethod' enabled:false
+         'JUnitPublicProperty' enabled:false
+         'JUnitPublicNonTestMethod' enabled:false
     }
 
     ruleset('rulesets/logging.xml'){
@@ -128,7 +129,6 @@ ruleset {
         exclude 'UnnecessaryGetter'
         exclude 'UnnecessaryPublicModifier'
         exclude 'UnnecessaryReturnKeyword'
-        //exclude 'UnnecessaryDotClass' //FIXME this should be enabled
         exclude 'UnnecessarySetter'
         exclude 'UnnecessarySubstring'
         exclude 'UnnecessaryElseStatement'
@@ -144,4 +144,11 @@ ruleset {
             doNotApplyToFilesMatching = ".*/src/test/.*|.*GrailsPlugin.groovy|.*Application.groovy"
         }
     }
+
+    def getRule = { name ->
+        //def ruleClass = org.codenarc.ruleregistry.RuleRegistryHolder.ruleRegistry?.getRuleClass(name)
+        getRuleSet().rules.find{it.name==name}
+    }
+
+    /*@extCodenarcRulesets@*/
 }

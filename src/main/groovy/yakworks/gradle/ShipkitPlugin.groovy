@@ -1,5 +1,7 @@
 package yakworks.gradle
 
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -25,7 +27,7 @@ import org.shipkit.internal.gradle.util.ProjectUtil
  * Intended for root project of your Gradle project because it applies some configuration to 'allprojects'.
  * Adds plugins and tasks to setup automated releasing for a typical Java/Groovy/Grails multi-project build.
  */
-//@CompileStatic
+@CompileStatic
 class ShipkitPlugin implements Plugin<Project> {
     private final static Logger LOG = Logging.getLogger(ShipkitPlugin)
 
@@ -60,9 +62,9 @@ class ShipkitPlugin implements Plugin<Project> {
                     prj.plugins.apply(JavaPublishPlugin)
                     //prj.plugins.apply(ComparePublicationsPlugin) //TODO fix this
                 }
-                if (prj.isSnapshot || !isBintray) {
-                    LOG.lifecycle("Setting up publish maven Repo to $prj.mavenPublishUrl because one of these is true\n" +
-                        " - isSnapshot: " + prj.isSnapshot + ", (!isBintray): " + !isBintray + "\n" )
+                if (prj['isSnapshot'] || !isBintray) {
+                    LOG.lifecycle("Setting up publish maven Repo to ${prj['mavenPublishUrl']} because one of these is true\n" +
+                        " - isSnapshot: " + prj['isSnapshot'] + ", (!isBintray): " + !isBintray + "\n" )
                     setupPublishRepo(prj)
                 }
 
@@ -74,6 +76,7 @@ class ShipkitPlugin implements Plugin<Project> {
         }
     }
 
+    @CompileDynamic
     void setupPublishRepo(Project project){
         project.extensions.configure PublishingExtension, new ClosureBackedAction( {
             repositories {
@@ -95,7 +98,7 @@ class ShipkitPlugin implements Plugin<Project> {
         GitPlugin.registerChangesForCommitIfApplied([rmeFile], 'README.md versions', updateReadme)
 
         final Task performRelease = project.getTasks().getByName(ReleasePlugin.PERFORM_RELEASE_TASK)
-        boolean enableDocsPublish = Boolean.parseBoolean(project.findProperty('enableDocsPublish')?:'true')
+        boolean enableDocsPublish = project.hasProperty('enableDocsPublish')? Boolean.valueOf(project['enableDocsPublish'].toString()) : true
         if(enableDocsPublish) {
             String gitPublishDocsTaskName = 'gitPublishPush'
             if (project.hasProperty(ShipkitConfigurationPlugin.DRY_RUN_PROPERTY)) {
@@ -114,6 +117,7 @@ class ShipkitPlugin implements Plugin<Project> {
      * Taken from GrailsCentralPublishGradlePlugin in grails-core. its the 'org.grails.grails-plugin-publish'
      * Cleans up dependencies without versions and removes the bom dependencyManagement stuff and adds the grails-plugin.xml artefact
      */
+    @CompileDynamic
     private void cleanDepsInPom(Project project) {
         project.plugins.withType(MavenPublishPlugin) {
             project.extensions.configure PublishingExtension, new ClosureBackedAction( {
@@ -140,6 +144,7 @@ class ShipkitPlugin implements Plugin<Project> {
     /**
      * sets up the bintray task defualts
      */
+    @CompileDynamic
     private void configBintray(Project project) {
         project.afterEvaluate { prj ->
             prj.bintray {
@@ -169,12 +174,14 @@ class ShipkitPlugin implements Plugin<Project> {
         }
     }
 
+    @CompileDynamic
     private void configGrailsBintray(Project project) {
         project.afterEvaluate { prj ->
             prj.bintray.pkg.version.attributes = ["grails-plugin": "$prj.group:$prj.name"]
         }
     }
 
+    @CompileDynamic
     protected Map<String, String> getGrailsPluginArtifact(Project project) {
         def directory
         try {

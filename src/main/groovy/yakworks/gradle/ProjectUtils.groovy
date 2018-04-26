@@ -15,10 +15,14 @@
  */
 package yakworks.gradle
 
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import org.gradle.api.Project
 
+@CompileStatic
 class ProjectUtils {
 
+    @CompileDynamic
     static void setPropIfEmpty(Project prj, String propertyName, defaultValue) {
         if (!prj.hasProperty(propertyName) && defaultValue != null) {
             prj.ext[propertyName] = defaultValue
@@ -31,8 +35,8 @@ class ProjectUtils {
      * @return the prop or null
      */
     static def searchProps(Project prj, String prop) {
-        if (System.env[prop] != null) {
-            return System.env[prop]
+        if (System.getenv(prop) != null) {
+            return System.getenv(prop)
         } else if (System.properties[prop]) {
             return System.properties[prop]
         } else {
@@ -42,7 +46,7 @@ class ProjectUtils {
 
     //converts SOME_PROP env prop name to someProp
     static String toCamelCase( String text ) {
-        text = text.toLowerCase().replaceAll( "(_)([A-Za-z0-9])", { Object[] it -> it[2].toUpperCase() } )
+        text = text.toLowerCase().replaceAll( "(_)([A-Za-z0-9])", { String[] it -> it[2].toUpperCase() } )
         //println text
         return text
     }

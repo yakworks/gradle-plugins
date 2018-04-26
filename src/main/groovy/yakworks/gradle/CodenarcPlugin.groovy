@@ -12,17 +12,21 @@ class CodenarcPlugin implements Plugin<Project> {
         prj.plugins.apply('codenarc')
         if(!prj.hasProperty('yakworks')) prj.ext.yakworks = [:]
         prj.yakworks.getCodenarcRuleSet = { ->
-            return prj.resources.text.fromString(this.getClass().getResource('/codenarcRulesets.groovy').text)
+            String ruleSets = this.getClass().getResource('/codenarcRulesets.groovy').text
+            ruleSets = ruleSets.replace("/*@extCodenarcRulesets@*/", prj.findProperty('codenarcRuleset'))
+            return prj.resources.text.fromString(ruleSets)
         }
 
-        prj.codenarc {
-            toolVersion = CODENARC_VERSION
-            config = prj.yakworks.getCodenarcRuleSet()
-            reportFormat = 'html'
-            //ignoreFailures = true
-            maxPriority1Violations = 0
-            maxPriority2Violations = 4
-            maxPriority3Violations = 4
+        prj.afterEvaluate {
+            prj.codenarc {
+                toolVersion = CODENARC_VERSION
+                config = prj.yakworks.getCodenarcRuleSet()
+                reportFormat = 'html'
+                //ignoreFailures = true
+                maxPriority1Violations = 0
+                maxPriority2Violations = 4
+                maxPriority3Violations = 4
+            }
         }
 
         prj.dependencies {
