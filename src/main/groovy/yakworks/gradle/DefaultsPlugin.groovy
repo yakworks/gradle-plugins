@@ -89,8 +89,11 @@ class DefaultsPlugin implements Plugin<Project> {
         //***Maven publish
         setPropIfEmpty prj, 'mavenRepoUrl', 'http://repo.9ci.com/grails-plugins' //'http://repo.9ci.com/oss-snapshots'
         setPropIfEmpty prj, 'mavenPublishUrl', prj.mavenRepoUrl
-        setPropIfEmpty prj, 'mavenRepoUser', searchProps(prj, "MAVEN_REPO_USER")
-        setPropIfEmpty prj, 'mavenRepoKey', searchProps(prj, "MAVEN_REPO_KEY")
+
+        def mu = searchProps(prj, "MAVEN_REPO_USER")?:""
+        def mk = searchProps(prj, "MAVEN_REPO_KEY")?:""
+        setPropIfEmpty(prj, 'mavenRepoUser', mu)
+        setPropIfEmpty(prj, 'mavenRepoKey', mk)
 
         if(prj.isSnapshot && prj.findProperty('mavenSnapshotUrl')){
             prj.ext['mavenPublishUrl'] = prj.mavenSnapshotUrl

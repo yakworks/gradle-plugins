@@ -66,7 +66,7 @@ public class CircleReleasePlugin implements Plugin<Project> {
                 ciPubTask.dependsOn(CiReleasePlugin.CI_PERFORM_RELEASE_TASK)
             }
 
-            addGitBotUserInfo(conf)
+            addGitConfigUser(conf)
         }
 
     }
@@ -96,9 +96,9 @@ public class CircleReleasePlugin implements Plugin<Project> {
      * Checks if snapshot release is needed for the current branch.
      * checks for changes to docs and only publishes them if they are the only thing that changes
      */
-    void setupCiPublishForSnapshots(Project project, Task rootPubTask) {
+    void setupCiPublishForSnapshots(Project project, Task ciPublishTask) {
 
-        def ciPublishTask = project.task(CI_PUBLISH_TASK)
+        //def ciPublishTask = project.task(CI_PUBLISH_TASK)
 
         ReleaseNeededTask rtask = project.rootProject.tasks.getByName(ReleaseNeededPlugin.ASSERT_RELEASE_NEEDED_TASK)
         String branch = System.getenv("CIRCLE_BRANCH")
@@ -134,7 +134,7 @@ public class CircleReleasePlugin implements Plugin<Project> {
     }
 
     //some of the grgit doesnt seem to add the config for user info.
-    void addGitBotUserInfo(ShipkitConfiguration conf){
+    void addGitConfigUser(ShipkitConfiguration conf){
         ['git', 'config', '--global', 'user.name', conf.git.user].execute()
         ['git', 'config', '--global', 'user.email', conf.git.email].execute()
         ['git', 'config', '--global', 'credential.helper', "store --file=~/.git-credentials"].execute()
