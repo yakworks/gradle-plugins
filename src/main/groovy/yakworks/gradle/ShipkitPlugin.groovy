@@ -14,7 +14,6 @@ import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.shipkit.internal.gradle.bintray.BintrayReleasePlugin
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.git.GitPlugin
-import org.shipkit.internal.gradle.java.ComparePublicationsPlugin
 import org.shipkit.internal.gradle.java.JavaBintrayPlugin
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
 import org.shipkit.internal.gradle.java.JavaPublishPlugin
@@ -44,17 +43,16 @@ class ShipkitPlugin implements Plugin<Project> {
         } else{
             project.plugins.apply(MavenRepoReleasePlugin)
         }
-
         project.plugins.apply(PomContributorsPlugin)
 
         project.allprojects { Project prj ->
 
-            prj.getPlugins().withType(JavaLibraryPlugin) {
+            prj.plugins.withType(JavaLibraryPlugin) {
                 if(isBintray){
-                    prj.getPlugins().apply(JavaBintrayPlugin)
+                    prj.plugins.apply(JavaBintrayPlugin)
                     configBintray(prj)
 
-                    prj.getPlugins().withId("yakworks.grails-plugin") {
+                    prj.plugins.withId("yakworks.grails-plugin") {
                         configGrailsBintray(prj)
                     }
                 } else{
@@ -62,6 +60,7 @@ class ShipkitPlugin implements Plugin<Project> {
                     prj.plugins.apply(JavaPublishPlugin)
                     //prj.plugins.apply(ComparePublicationsPlugin) //TODO fix this
                 }
+
                 if (prj['isSnapshot'] || !isBintray) {
                     LOG.lifecycle("Setting up publish maven Repo to ${prj['mavenPublishUrl']} because one of these is true\n" +
                         " - isSnapshot: " + prj['isSnapshot'] + ", (!isBintray): " + !isBintray + "\n" )
@@ -71,8 +70,6 @@ class ShipkitPlugin implements Plugin<Project> {
                 cleanDepsInPom(prj)
                 wireUpDocPublishing(project)
             }
-
-
         }
     }
 
@@ -97,7 +94,7 @@ class ShipkitPlugin implements Plugin<Project> {
         final File rmeFile = project.file('README.md')
         GitPlugin.registerChangesForCommitIfApplied([rmeFile], 'README.md versions', updateReadme)
 
-        final Task performRelease = project.getTasks().getByName(ReleasePlugin.PERFORM_RELEASE_TASK)
+        final Task performRelease = project.tasks.getByName(ReleasePlugin.PERFORM_RELEASE_TASK)
         boolean enableDocsPublish = project.hasProperty('enableDocsPublish')? Boolean.valueOf(project['enableDocsPublish'].toString()) : true
         if(enableDocsPublish) {
             String gitPublishDocsTaskName = 'gitPublishPush'
@@ -105,7 +102,7 @@ class ShipkitPlugin implements Plugin<Project> {
                 gitPublishDocsTaskName = 'gitPublishCopy'
             }
             //LOG.lifecycle("gitPublishDocsTaskName $gitPublishDocsTaskName" )
-            final Task gitPublishDocsTask = project.getTasks().getByName(gitPublishDocsTaskName)
+            final Task gitPublishDocsTask = project.tasks.getByName(gitPublishDocsTaskName)
             gitPublishDocsTask.mustRunAfter(GitPlugin.GIT_PUSH_TASK)
             performRelease.dependsOn(gitPublishDocsTask)
         } else {

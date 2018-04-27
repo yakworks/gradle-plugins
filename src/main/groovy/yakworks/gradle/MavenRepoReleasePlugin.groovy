@@ -4,6 +4,7 @@ import groovy.transform.CompileStatic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.shipkit.gradle.configuration.ShipkitConfiguration
 import org.shipkit.gradle.notes.UpdateReleaseNotesTask
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
@@ -37,21 +38,23 @@ class MavenRepoReleasePlugin implements Plugin<Project> {
 
         project.allprojects { Project subproject ->
 
-            subproject.getPlugins().withType(JavaPublishPlugin) {
+            subproject.getPlugins().withType(MavenPublishPlugin) {
                 String mavenLocalTask = "${subproject.getPath()}:$MAVEN_LOCAL_TASK"
 
                 if (subproject.hasProperty(DRY_RUN_PROPERTY)) {
                     //if its a dryrun test then we are just publish to local
                     performRelease.dependsOn(mavenLocalTask)
                 } else {
-                    //publish after git push so that when git push fails we don't publish jars to bintray
-                    //git push is easier to undo than deleting published jars (not possible with Central)
-                    project.gradle.projectsEvaluated { //has to be done after all evaluated to get the MAVEN_REPO_TASK
-                        Task publish = subproject.tasks.getByName(MAVEN_PUBLISH_REPO_TASK)
-                        performRelease.dependsOn(publish)
-                        publish.mustRunAfter(gitPush)
+                    //publish after git push so that when git push fails we don't publish jars to bintray git push is easier to undo than
+                    // deleting published jars (not possible with Central)
+                    //the MAVEN_PUBLISH_REPO_TASK gets added so late that we need to listen for its creation. the normal build life cycle wont work
+                    subproject.tasks.whenTaskAdded { Task task ->
+                        println task.name
+                        if(task.name == MAVEN_PUBLISH_REPO_TASK){
+                            task.mustRunAfter(gitPush)
+                        }
                     }
-
+                    performRelease.dependsOn(MAVEN_PUBLISH_REPO_TASK)
                 }
 
                 //TODO FIXME See the UpdateReleaseNotesTask.setPublicationRepository in BintrayRelease plugin.

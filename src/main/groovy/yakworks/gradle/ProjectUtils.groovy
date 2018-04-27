@@ -46,7 +46,7 @@ class ProjectUtils {
 
     //converts SOME_PROP env prop name to someProp
     static String toCamelCase( String text ) {
-        text = text.toLowerCase().replaceAll( "(_)([A-Za-z0-9])", { String[] it -> it[2].toUpperCase() } )
+        text = text.toLowerCase().replaceAll( "(_)([A-Za-z0-9])", { List<String> it -> it[2].toUpperCase() } )
         //println text
         return text
     }

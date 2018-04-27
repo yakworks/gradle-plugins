@@ -13,7 +13,7 @@ class CodenarcPlugin implements Plugin<Project> {
         if(!prj.hasProperty('yakworks')) prj.ext.yakworks = [:]
         prj.yakworks.getCodenarcRuleSet = { ->
             String ruleSets = this.getClass().getResource('/codenarcRulesets.groovy').text
-            ruleSets = ruleSets.replace("/*@extCodenarcRulesets@*/", prj.findProperty('codenarcRuleset'))
+            ruleSets = ruleSets.replace("/*@extCodenarcRulesets@*/", prj.findProperty('codenarcRuleset')?:'')
             return prj.resources.text.fromString(ruleSets)
         }
 
