@@ -49,7 +49,6 @@ class MavenRepoReleasePlugin implements Plugin<Project> {
                     // deleting published jars (not possible with Central)
                     //the MAVEN_PUBLISH_REPO_TASK gets added so late that we need to listen for its creation. the normal build life cycle wont work
                     subproject.tasks.whenTaskAdded { Task task ->
-                        println task.name
                         if(task.name == MAVEN_PUBLISH_REPO_TASK){
                             task.mustRunAfter(gitPush)
                         }
