@@ -49,8 +49,8 @@ class YamlConfigPlugin implements Plugin<Project> {
         }
         configFileNames = configFileNames as List<String>
 
-        ConfigMap config = new ConfigMap()
-        loadClassPathDefaults(config)
+        ConfigObject config = new ConfigObject()
+        loadClassPathDefaults(prj, config)
 
         configFileNames.each { String fname ->
             File configFile = prj.file(fname)
@@ -60,21 +60,27 @@ class YamlConfigPlugin implements Plugin<Project> {
                     config.merge(cfgObj)
                 } else if(fname.endsWith('.yml')){
                     Map ymlMap = new Yaml().load(new FileInputStream(configFile))
-                    config.merge(ymlMap)
+                    def co = new ConfigObject()
+                    co.putAll(ymlMap)
+                    config.merge(co)
                 }
             }
         }
+
         GradleHelpers.prop(prj, 'config', config)
     }
 
     /**
      * first look for any /configs/defaults.yml on the classpath
      */
-    void loadClassPathDefaults(ConfigMap config){
+    void loadClassPathDefaults(Project prj, ConfigObject config){
         List<URL> resources = CPScanner.scanResources(new PackageNameFilter("configs"), new ResourceNameFilter("defaults.yml"))
-        println "resources: $resources"
-        resources.each { URL ymlSource ->
-            config.merge(loadYaml(ymlSource.newReader()))
+        //println "resources: $resources"
+        resources.each { URL url ->
+            def co = new ConfigObject()
+            Reader ymlExpanded = url.newReader() //GradleHelpers.expand(prj, url.text)
+            co.putAll(loadYaml(ymlExpanded))
+            config.merge(co)
         }
         config
     }
@@ -84,7 +90,10 @@ class YamlConfigPlugin implements Plugin<Project> {
      */
     Map loadYaml(ymlSource){
         Yaml yaml = new Yaml()
-        return yaml.load((Reader)ymlSource)
+        Map loaded = yaml.load((Reader)ymlSource)
+        //loaded = yaml.load((Reader)ymlSource)
+        //println loaded
+        return loaded
     }
 
 }

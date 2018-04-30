@@ -1,4 +1,6 @@
 import static groovy.json.JsonOutput.*
+import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.DumperOptions
 
 buildscript {
   repositories {
@@ -14,5 +16,16 @@ buildscript {
 apply plugin:"java"
 apply plugin:"yakworks.yaml-config"
 
-//println config
-println prettyPrint(toJson(config))
+DumperOptions dops = new DumperOptions()
+dops.setIndent(2)
+dops.setWidth(120)
+dops.setSplitLines(false)
+dops.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)
+Yaml yaml = new Yaml(dops)
+println yaml.dump(config)
+println config.prettyPrint()
+//println prettyPrint(toJson(config))
+
+//String str = '${System.properties[\'user.home\']}'
+//String str = '$project(\'name\')'
+//println Eval.me(/"$str"/)

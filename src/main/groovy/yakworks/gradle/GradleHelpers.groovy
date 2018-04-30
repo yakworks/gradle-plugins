@@ -151,7 +151,7 @@ class GradleHelpers {
         //prj.ext
     }
 
-    static expand(Project prj, String string){
+    static Reader expand(Project prj, String string){
         Template template;
         try {
             SimpleTemplateEngine engine = new SimpleTemplateEngine()
