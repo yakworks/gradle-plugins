@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package yakworks.gradle
+package yakworks.gradle.config
 
 import groovy.transform.CompileStatic
 import net.sf.corn.cps.CPScanner
@@ -25,18 +25,19 @@ import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.yaml.snakeyaml.Yaml
+import yakworks.gradle.GradleHelpers
 
 //import static yakworks.gradle.GradleHelpers.prop
 
 @CompileStatic
-class YakworksConfigPlugin implements Plugin<Project> {
-    private final static Logger LOG = Logging.getLogger(YakworksConfigPlugin)
+class YamlConfigPlugin implements Plugin<Project> {
+    private final static Logger LOG = Logging.getLogger(YamlConfigPlugin)
 
     void apply(Project prj) {
         if (prj.rootProject != prj) {
             throw new GradleException('yakworks.defaults must only be applied to the root project')
         }
-        String environment = prj.property('env') ?: 'dev'
+        String environment = prj.findProperty('env') ?: 'dev'
         //def configFile = prj.file('config.groovy')
 
         List configFileNames =  []
@@ -47,7 +48,10 @@ class YakworksConfigPlugin implements Plugin<Project> {
             configFileNames.add("${prj.rootDir}/gradle/config.yml")
         }
         configFileNames = configFileNames as List<String>
-        ConfigObject config = new ConfigObject()
+
+        ConfigMap config = new ConfigMap()
+        loadClassPathDefaults(config)
+
         configFileNames.each { String fname ->
             File configFile = prj.file(fname)
             if(configFile.exists()){
@@ -55,11 +59,8 @@ class YakworksConfigPlugin implements Plugin<Project> {
                     ConfigObject cfgObj = new ConfigSlurper(environment).parse(configFile.toURI().toURL())
                     config.merge(cfgObj)
                 } else if(fname.endsWith('.yml')){
-                    Yaml yaml = new Yaml()
-                    Map ymlMap = yaml.load(new FileInputStream(configFile))
-                    ConfigObject cfgObj = new ConfigObject()
-                    cfgObj.putAll(ymlMap)
-                    config.merge(cfgObj)
+                    Map ymlMap = new Yaml().load(new FileInputStream(configFile))
+                    config.merge(ymlMap)
                 }
             }
         }
@@ -67,13 +68,13 @@ class YakworksConfigPlugin implements Plugin<Project> {
     }
 
     /**
-     * first look for any defaultConfig.yml on the classpath
+     * first look for any /configs/defaults.yml on the classpath
      */
-    ConfigObject loadDefaults(){
-        ConfigObject config = new ConfigObject()
-        List<URL> resources = CPScanner.scanResources(new PackageNameFilter("configs.*"), new ResourceNameFilter("*defaults.yml"))
+    void loadClassPathDefaults(ConfigMap config){
+        List<URL> resources = CPScanner.scanResources(new PackageNameFilter("configs"), new ResourceNameFilter("defaults.yml"))
+        println "resources: $resources"
         resources.each { URL ymlSource ->
-            config.merge(loadYaml(ymlSource))
+            config.merge(loadYaml(ymlSource.newReader()))
         }
         config
     }
@@ -81,12 +82,9 @@ class YakworksConfigPlugin implements Plugin<Project> {
     /**
      * first look for any defaultConfig.yml on the classpath
      */
-    ConfigObject loadYaml(ymlSource){
+    Map loadYaml(ymlSource){
         Yaml yaml = new Yaml()
-        Map ymlMap = yaml.load((Reader)ymlSource)
-        ConfigObject cfgObj = new ConfigObject()
-        cfgObj.putAll(ymlMap)
-        cfgObj
+        return yaml.load((Reader)ymlSource)
     }
 
 }

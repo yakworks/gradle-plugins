@@ -1,3 +1,5 @@
+import static groovy.json.JsonOutput.*
+
 buildscript {
   repositories {
     //maven { url "https://repo.grails.org/grails/core" }
@@ -10,3 +12,7 @@ buildscript {
 }
 
 apply plugin:"java"
+apply plugin:"yakworks.yaml-config"
+
+//println config
+println prettyPrint(toJson(config))

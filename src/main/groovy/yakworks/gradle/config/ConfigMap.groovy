@@ -9,30 +9,30 @@ import java.util.Map.Entry
 import java.util.regex.Pattern
 
 /**
- * Copied from org.grails.config.NavigableMap so we can use it as a gradle plugin here
+ * Copied from org.grails.config.ConfigMap so we can use it as a gradle plugin here
  */
 @EqualsAndHashCode
 @CompileStatic
-class NavigableMap implements Map<String, Object>, Cloneable {
+class ConfigMap implements Map<String, Object>, Cloneable {
 
     private static final Pattern SPLIT_PATTERN = ~/\./
     private static final String SPRING_PROFILES = 'spring.profiles.active'
     private static final String SPRING = 'spring'
     private static final String PROFILES = 'profiles'
 
-    final NavigableMap rootConfig
+    final ConfigMap rootConfig
     final List<String> path
     final Map<String, Object> delegateMap
     final String dottedPath
 
-    public NavigableMap() {
+    public ConfigMap() {
         rootConfig = this
         path = []
         dottedPath = ""
         delegateMap = new LinkedHashMap<>()
     }
 
-    public NavigableMap(NavigableMap rootConfig, List<String> path) {
+    public ConfigMap(ConfigMap rootConfig, List<String> path) {
         super()
         this.rootConfig = rootConfig
         this.path = path
@@ -40,7 +40,7 @@ class NavigableMap implements Map<String, Object>, Cloneable {
         delegateMap = new LinkedHashMap<>()
     }
 
-    private NavigableMap(NavigableMap rootConfig, List<String> path, Map<String, Object> delegateMap) {
+    private ConfigMap(ConfigMap rootConfig, List<String> path, Map<String, Object> delegateMap) {
         this.rootConfig = rootConfig
         this.path = path
         dottedPath = path.join('.')
@@ -53,8 +53,8 @@ class NavigableMap implements Map<String, Object>, Cloneable {
     }
 
     @CompileDynamic
-    public NavigableMap clone() {
-        return new NavigableMap(rootConfig, path, delegateMap.clone())
+    public ConfigMap clone() {
+        return new ConfigMap(rootConfig, path, delegateMap.clone())
     }
 
     @Override
@@ -117,11 +117,15 @@ class NavigableMap implements Map<String, Object>, Cloneable {
         delegateMap.entrySet()
     }
 
-    public void merge(Map sourceMap, boolean parseFlatKeys=false) {
+    public void merge(String key, Object value) {
+        merge([(key): value], true)
+    }
+
+    public void merge(Map sourceMap, boolean parseFlatKeys=true) {
         mergeMaps(this, "", this, sourceMap, parseFlatKeys)
     }
 
-    private void mergeMaps(NavigableMap rootMap, String path, NavigableMap targetMap, Map sourceMap, boolean parseFlatKeys) {
+    private void mergeMaps(ConfigMap rootMap, String path, ConfigMap targetMap, Map sourceMap, boolean parseFlatKeys) {
         if (!shouldSkipBlock(sourceMap, path)) {
             for (Entry entry in sourceMap) {
                 Object sourceKeyObject = entry.key
@@ -154,19 +158,19 @@ class NavigableMap implements Map<String, Object>, Cloneable {
         return !springProfileDefined && hasSpringProfiles
     }
 
-    protected void mergeMapEntry(NavigableMap rootMap, String path, NavigableMap targetMap, String sourceKey, Object sourceValue, boolean parseFlatKeys, boolean isNestedSet = false) {
+    protected void mergeMapEntry(ConfigMap rootMap, String path, ConfigMap targetMap, String sourceKey, Object sourceValue, boolean parseFlatKeys, boolean isNestedSet = false) {
         Object currentValue = targetMap.containsKey(sourceKey) ? targetMap.get(sourceKey) : null
         Object newValue
         if(sourceValue instanceof Map) {
             List<String> newPathList = []
             newPathList.addAll( targetMap.getPath() )
             newPathList.add(sourceKey)
-            NavigableMap subMap
-            if(currentValue instanceof NavigableMap) {
-                subMap = (NavigableMap)currentValue
+            ConfigMap subMap
+            if(currentValue instanceof ConfigMap) {
+                subMap = (ConfigMap)currentValue
             }
             else {
-                subMap = new NavigableMap( (NavigableMap)targetMap.rootConfig, newPathList.asImmutable())
+                subMap = new ConfigMap( (ConfigMap)targetMap.rootConfig, newPathList.asImmutable())
                 if(currentValue instanceof Map) {
                     subMap.putAll((Map)currentValue)
                 }
@@ -200,7 +204,7 @@ class NavigableMap implements Map<String, Object>, Cloneable {
         }
     }
 
-    protected Object mergeMapEntry(NavigableMap targetMap, String sourceKey, newValue) {
+    protected Object mergeMapEntry(ConfigMap targetMap, String sourceKey, newValue) {
         targetMap.put(sourceKey, newValue)
     }
 
@@ -242,9 +246,9 @@ class NavigableMap implements Map<String, Object>, Cloneable {
         }
     }
 
-    public NavigableMap navigateSubMap(List<String> path, boolean createMissing) {
-        NavigableMap rootMap = this
-        NavigableMap currentMap = this
+    public ConfigMap navigateSubMap(List<String> path, boolean createMissing) {
+        ConfigMap rootMap = this
+        ConfigMap currentMap = this
         StringBuilder accumulatedPath = new StringBuilder()
         boolean isFirst = true
         for(String pathElement : path) {
@@ -257,14 +261,14 @@ class NavigableMap implements Map<String, Object>, Cloneable {
             }
 
             Object currentItem = currentMap.get(pathElement)
-            if(currentItem instanceof NavigableMap) {
-                currentMap = (NavigableMap)currentItem
+            if(currentItem instanceof ConfigMap) {
+                currentMap = (ConfigMap)currentItem
             } else if (createMissing) {
                 List<String> newPathList = []
                 newPathList.addAll( currentMap.getPath() )
                 newPathList.add(pathElement)
 
-                Map<String, Object> newMap = new NavigableMap( (NavigableMap)currentMap.rootConfig, newPathList.asImmutable())
+                Map<String, Object> newMap = new ConfigMap( (ConfigMap)currentMap.rootConfig, newPathList.asImmutable())
                 currentMap.put(pathElement, newMap)
 
                 def fullPath = accumulatedPath.toString()
@@ -340,10 +344,10 @@ class NavigableMap implements Map<String, Object>, Cloneable {
 
     @CompileStatic
     static class NullSafeNavigator implements Map<String, Object>{
-        final NavigableMap parent
+        final ConfigMap parent
         final List<String> path
 
-        NullSafeNavigator(NavigableMap parent, List<String> path) {
+        NullSafeNavigator(ConfigMap parent, List<String> path) {
             this.parent = parent
             this.path = path
         }
@@ -358,7 +362,7 @@ class NavigableMap implements Map<String, Object>, Cloneable {
 
         @Override
         int size() {
-            NavigableMap parentMap = parent.navigateSubMap(path, false)
+            ConfigMap parentMap = parent.navigateSubMap(path, false)
             if(parentMap != null) {
                 return parentMap.size()
             }
@@ -367,7 +371,7 @@ class NavigableMap implements Map<String, Object>, Cloneable {
 
         @Override
         boolean isEmpty() {
-            NavigableMap parentMap = parent.navigateSubMap(path, false)
+            ConfigMap parentMap = parent.navigateSubMap(path, false)
             if(parentMap != null) {
                 return parentMap.isEmpty()
             }
@@ -375,7 +379,7 @@ class NavigableMap implements Map<String, Object>, Cloneable {
         }
 
         boolean containsKey(Object key) {
-            NavigableMap parentMap = parent.navigateSubMap(path, false)
+            ConfigMap parentMap = parent.navigateSubMap(path, false)
             if(parentMap == null) return false
             else {
                 return parentMap.containsKey(key)
@@ -384,7 +388,7 @@ class NavigableMap implements Map<String, Object>, Cloneable {
 
         @Override
         boolean containsValue(Object value) {
-            NavigableMap parentMap = parent.navigateSubMap(path, false)
+            ConfigMap parentMap = parent.navigateSubMap(path, false)
             if(parentMap != null) {
                 return parentMap.containsValue(value)
             }
@@ -418,7 +422,7 @@ class NavigableMap implements Map<String, Object>, Cloneable {
 
         @Override
         Set<String> keySet() {
-            NavigableMap parentMap = parent.navigateSubMap(path, false)
+            ConfigMap parentMap = parent.navigateSubMap(path, false)
             if(parentMap != null) {
                 return parentMap.keySet()
             }
@@ -427,7 +431,7 @@ class NavigableMap implements Map<String, Object>, Cloneable {
 
         @Override
         Collection<Object> values() {
-            NavigableMap parentMap = parent.navigateSubMap(path, false)
+            ConfigMap parentMap = parent.navigateSubMap(path, false)
             if(parentMap != null) {
                 return parentMap.values()
             }
@@ -436,7 +440,7 @@ class NavigableMap implements Map<String, Object>, Cloneable {
 
         @Override
         Set<Map.Entry<String, Object>> entrySet() {
-            NavigableMap parentMap = parent.navigateSubMap(path, false)
+            ConfigMap parentMap = parent.navigateSubMap(path, false)
             if(parentMap != null) {
                 return parentMap.entrySet()
             }
@@ -444,7 +448,7 @@ class NavigableMap implements Map<String, Object>, Cloneable {
         }
 
         Object getProperty(String name) {
-            NavigableMap parentMap = parent.navigateSubMap(path, false)
+            ConfigMap parentMap = parent.navigateSubMap(path, false)
             if(parentMap == null) {
                 return new NullSafeNavigator(parent, ((path + [name]) as List<String>).asImmutable())
             } else {
@@ -453,7 +457,7 @@ class NavigableMap implements Map<String, Object>, Cloneable {
         }
 
         public void setProperty(String name, Object value) {
-            NavigableMap parentMap = parent.navigateSubMap(path, true)
+            ConfigMap parentMap = parent.navigateSubMap(path, true)
             parentMap.setProperty(name, value)
         }
 
