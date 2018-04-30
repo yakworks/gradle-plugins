@@ -1,4 +1,4 @@
-package yakworks.gradle
+package yakworks.gradle.shipkit
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -9,7 +9,6 @@ import org.shipkit.gradle.configuration.ShipkitConfiguration
 import org.shipkit.gradle.exec.ShipkitExecTask
 import org.shipkit.gradle.release.ReleaseNeededTask
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
-import org.shipkit.internal.gradle.java.JavaLibraryPlugin
 import org.shipkit.internal.gradle.java.JavaPublishPlugin
 import org.shipkit.internal.gradle.release.CiReleasePlugin
 import org.shipkit.internal.gradle.release.ReleaseNeededPlugin

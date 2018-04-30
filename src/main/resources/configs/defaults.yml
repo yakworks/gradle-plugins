@@ -1,0 +1,70 @@
+# gradle project properties will get set on the project or the project.ext depending on whether they exist already or not
+# the initial properties here will end up being set directly as gradle propeties just as they are in
+title: # short desc used for docs
+description: # REQUIRED
+author: 9ci Inc # REQUIRED author for docs and copyright, used in licenseHeader too. Can be legal Org name or user name
+license: Apache-2.0 # REQUIRED will be used in the docs, pom and bintray upload
+# the pointer to the docs for this project
+websiteUrl: # default: "https://\${github.owner}.github.io/\${github.repo}"
+issuesUrl: # default: "https://github.com/\${github.repo}/issues"
+
+-------------
+# everything after the first separator will in the project.config
+
+git:
+  releasableBranchRegex: 'master|release/.+'   # matches 'master', 'release/2.x', 'release/3.x', etc.
+  tagPrefix: v # so that tags are "v1.0", "v2.3.4"
+  commitMessagePostfix: '[ci skip]'
+  # config so it shows the user in the commits
+  config:
+    user: 9cibot
+    email: <9cibot@9ci.com>
+
+github:
+  fullName: yakworks/gradle-plugins # <Required> if set then this will take precedence. will concatenate $owner/$repo if empty.
+  # owner and repo will be parsed from fullName or used to build fullname with repo depending on which on is set.
+  owner: # yakworks
+  repo: # gradle-plugins
+  writeAuthUser: dummy # not used by github anymore
+  writeToken: e7fe8fcdd6ffed5c38498c4c79b2a68e6f6ed1bb # System.getenv("GRGIT_USER") ?: System.getenv("GH_WRITE_TOKEN") ?: project.findProperty("gitHubToken")
+  readOnlyToken: e7fe8fcdd6ffed5c38498c4c79b2a68e6f6ed1bb # token used for dry run and test builds so devs dont need a write token to get started
+
+team:
+  # keys here should be github user and name should match github name.
+  developers: # REQUIRED ex: { basejump: Joshua Burnett,  }
+  contributors:
+  ignoredContributors:
+
+releaseNotes:
+  file: docs/release-notes.md
+  ignoreCommitsContaining: '[ci skip]'
+  labelMapping:
+
+# see docs here https://github.com/bintray/gradle-bintray-plugin. the yml support options are below
+bintray:
+  enable: true # set this to false to turn off
+  user: # defaults "${System.getenv('BINTRAY_USER') ?: project.findProperty('bintrayUser')}"
+  key: "${System.getenv('BINTRAY_KEY') ?: project.findProperty('bintrayKey')}"
+  pkg:
+    name: \$project.name # this will get set using each projects name during runtime
+    repo:
+    userOrg:
+    websiteUrl: $project.websiteUrl
+    issueTrackerUrl: $issuesUrl
+    vcsUrl: "$vcsUrl"
+    licenses: [ "${prj.license}" ]
+    publicDownloadNumbers: true
+    version:
+        name: "${project.version}"
+        mavenCentralSync:
+          sync: false
+
+maven:
+  repoUrl:
+  snapshotUrl: # set this when not publishing to an artifactory vs bintray and you have a different repo than the primary repoUrl
+
+versions:
+  hibernate: 5.2.16.Final
+  buildTestData: 3.3.+
+  views: 1.2.7
+

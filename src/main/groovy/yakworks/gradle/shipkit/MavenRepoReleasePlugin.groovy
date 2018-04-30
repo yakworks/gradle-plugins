@@ -1,4 +1,4 @@
-package yakworks.gradle
+package yakworks.gradle.shipkit
 
 import groovy.transform.CompileStatic
 import org.gradle.api.Plugin

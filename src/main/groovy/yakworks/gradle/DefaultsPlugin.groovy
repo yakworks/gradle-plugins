@@ -19,9 +19,10 @@ import org.gradle.api.*
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
+import static org.gradle.api.logging.LogLevel.*
 
-import static ProjectUtils.searchProps
-import static ProjectUtils.setPropIfEmpty
+import static GradleHelpers.searchProps
+import static GradleHelpers.setPropIfEmpty
 
 //@CompileStatic
 class DefaultsPlugin implements Plugin<Project> {
@@ -59,56 +60,10 @@ class DefaultsPlugin implements Plugin<Project> {
             }
             addSpotless(prj)
         }
+
         rootProject.plugins.apply(DocmarkPlugin)
 
-    }
 
-    void setupProperties(Project prj) {
-        // sets up default composed props on ext from base props in gradle.properties
-        //!!!properties should go there, not here!!
-        // its assumed that certain props exists already as base lines to use
-        //** Github props used for both doc generation links, publishing docs to gh-pages and maven/bintray publish
-        String gslug = prj.findProperty("gitHubSlug")
-        if (gslug){
-            def repoAndOrg = gslug.split("/")
-            setPropIfEmpty prj, 'gitHubOrg', repoAndOrg[0]
-            setPropIfEmpty prj, 'gitHubRepo', repoAndOrg[1]
-        }
-        setPropIfEmpty prj, 'gitHubRepo', prj.name //defualts to project name
-        setPropIfEmpty prj, 'gitHubSlug', "${prj['gitHubOrg']}/${prj['gitHubRepo']}".toString()
-        setPropIfEmpty prj, 'gitHubUrl', "https://github.com/${prj['gitHubSlug']}".toString()
-        setPropIfEmpty prj, 'gitHubIssues', "${prj['gitHubUrl']}/issues".toString()
-
-        //** Publishing Bintray, Artifactory settings
-        setPropIfEmpty prj, 'websiteUrl', "https://${prj['gitHubOrg']}.github.io/${prj['gitHubRepo']}".toString()
-        setPropIfEmpty prj, 'bintrayOrg', prj.gitHubOrg
-
-        setPropIfEmpty prj, 'isSnapshot', prj.version.toString().endsWith("-SNAPSHOT")
-        setPropIfEmpty prj, 'isBintrayPublish', (prj.findProperty('bintrayRepo')?:false)
-
-        //***Maven publish
-        setPropIfEmpty prj, 'mavenRepoUrl', 'http://repo.9ci.com/grails-plugins' //'http://repo.9ci.com/oss-snapshots'
-        setPropIfEmpty prj, 'mavenPublishUrl', prj.mavenRepoUrl
-
-        def mu = searchProps(prj, "MAVEN_REPO_USER")?:""
-        def mk = searchProps(prj, "MAVEN_REPO_KEY")?:""
-        setPropIfEmpty(prj, 'mavenRepoUser', mu)
-        setPropIfEmpty(prj, 'mavenRepoKey', mk)
-
-        if(prj.isSnapshot && prj.findProperty('mavenSnapshotUrl')){
-            prj.ext['mavenPublishUrl'] = prj.mavenSnapshotUrl
-        }
-
-
-        def devs = prj.findProperty('developers') ?: [nodev: "Lone Ranger"]
-        devs = devs instanceof Map ? devs : new groovy.json.JsonSlurper().parseText(devs)
-        setPropIfEmpty prj, 'pomDevelopers', devs
-
-        //** Helpful dir params
-        setPropIfEmpty prj, 'gradleDir', "${prj.rootDir}/gradle"
-
-        //println "isSnapshot " + prj.isSnapshot
-        //println "prj.version " + prj.version
     }
 
     /**

@@ -17,16 +17,11 @@ package yakworks.gradle
 
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.*
-import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.javadoc.Groovydoc
-import org.gradle.api.tasks.javadoc.Javadoc
 import org.shipkit.gradle.configuration.ShipkitConfiguration
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
-
-import static ProjectUtils.searchProps
-import static ProjectUtils.setPropIfEmpty
 
 //@CompileStatic
 class DocmarkPlugin implements Plugin<Project> {
@@ -93,8 +88,7 @@ class DocmarkPlugin implements Plugin<Project> {
             }
         }
 
-        Task mkdocsBuildTask = prj.task('mkdocsBuild', type: Exec)
-        mkdocsBuildTask.with {
+        Task mkdocsBuildTask = prj.task('mkdocsBuild', type: Exec) {
             dependsOn copyTask
             workingDir 'build/mkdocs'
             commandLine 'mkdocs', 'build'

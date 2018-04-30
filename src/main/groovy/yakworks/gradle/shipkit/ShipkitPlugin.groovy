@@ -1,4 +1,4 @@
-package yakworks.gradle
+package yakworks.gradle.shipkit
 
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
@@ -20,6 +20,8 @@ import org.shipkit.internal.gradle.java.JavaPublishPlugin
 import org.shipkit.internal.gradle.java.PomContributorsPlugin
 import org.shipkit.internal.gradle.release.ReleasePlugin
 import org.shipkit.internal.gradle.util.ProjectUtil
+import yakworks.gradle.DefaultsPlugin
+import yakworks.gradle.DocmarkPlugin
 
 /**
  * Continuous delivery for Java/Groovy/Grails with CirclePlugin and Bintray.
@@ -106,7 +108,7 @@ class ShipkitPlugin implements Plugin<Project> {
             gitPublishDocsTask.mustRunAfter(GitPlugin.GIT_PUSH_TASK)
             performRelease.dependsOn(gitPublishDocsTask)
         } else {
-            LOG.lifecycle("Docmark DOCS NOT PUBLISHED as enableDocsPublish is false" )
+            //LOG.lifecycle("Doc will not be published as enableDocsPublish is false" )
         }
     }
 

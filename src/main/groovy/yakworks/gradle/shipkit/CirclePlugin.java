@@ -1,4 +1,4 @@
-package yakworks.gradle;
+package yakworks.gradle.shipkit;
 
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
@@ -12,14 +12,8 @@ import org.shipkit.internal.gradle.configuration.LazyConfiguration;
 import org.shipkit.internal.gradle.git.GitBranchPlugin;
 import org.shipkit.internal.gradle.git.GitSetupPlugin;
 import org.shipkit.internal.gradle.git.tasks.GitCheckOutTask;
-import org.shipkit.internal.gradle.release.CiReleasePlugin;
-import org.shipkit.internal.gradle.release.ReleaseNeededPlugin;
 import org.shipkit.internal.gradle.util.StringUtil;
-import org.shipkit.internal.exec.Exec;
-
-import java.util.List;
-
-import static java.util.Arrays.asList;
+import yakworks.gradle.GradleHelpers;
 
 /**
  * Configures the release automation to be used with Circle CI.
@@ -69,7 +63,7 @@ public class CirclePlugin implements Plugin<Project> {
 
         //List<String> commandLine = asList("sh", "-c", "git log --format=\"%s\" -n 1 $CIRCLE_SHA1");
         //String commitMessage = Exec.getProcessRunner(project.getProjectDir()).run(commandLine).trim();
-        String commitMessage = ProjectUtils.shExecute("git log --format=\"%s\" -n 1 $CIRCLE_SHA1");
+        String commitMessage = GradleHelpers.shExecute("git log --format=\"%s\" -n 1 $CIRCLE_SHA1");
         project.getTasks().withType(ReleaseNeededTask.class, new Action<ReleaseNeededTask>() {
             public void execute(ReleaseNeededTask t) {
                 t.setCommitMessage(commitMessage);
