@@ -8,11 +8,7 @@ import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.shipkit.gradle.configuration.ShipkitConfiguration
 import org.shipkit.gradle.notes.UpdateReleaseNotesTask
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
-import org.shipkit.internal.gradle.git.GitPlugin
-import org.shipkit.internal.gradle.java.JavaPublishPlugin
-import org.shipkit.internal.gradle.notes.ReleaseNotesPlugin
 import org.shipkit.internal.gradle.release.ReleasePlugin
-import org.shipkit.internal.gradle.util.StringUtil
 
 import static org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin.DRY_RUN_PROPERTY
 import static org.shipkit.internal.gradle.git.GitPlugin.GIT_PUSH_TASK
