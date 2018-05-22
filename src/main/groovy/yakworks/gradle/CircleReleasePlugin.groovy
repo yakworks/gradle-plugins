@@ -124,7 +124,8 @@ public class CircleReleasePlugin implements Plugin<Project> {
                 " - Docs have changed will run `:gitPublishPush` : " + hasDocChanges)
             if(hasAppChanges){
                 //rootPubTask.dependsOn(CI_CHECK_TASK)
-                ciPublishTask.dependsOn('publish')
+                ciPublishTask.dependsOn(MavenRepoReleasePlugin.MAVEN_PUBLISH_REPO_TASK)
+                //ciPublishTask.dependsOn('publish')
             }
             if(hasDocChanges) ciPublishTask.dependsOn(':gitPublishPush')
         } else {
