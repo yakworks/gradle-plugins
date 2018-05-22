@@ -14,6 +14,7 @@ import org.shipkit.internal.gradle.git.GitSetupPlugin;
 import org.shipkit.internal.gradle.git.tasks.GitCheckOutTask;
 import org.shipkit.internal.gradle.util.StringUtil;
 import yakworks.gradle.GradleHelpers;
+import yakworks.groovy.Shell;
 
 /**
  * Configures the release automation to be used with Circle CI.
@@ -63,7 +64,7 @@ public class CirclePlugin implements Plugin<Project> {
 
         //List<String> commandLine = asList("sh", "-c", "git log --format=\"%s\" -n 1 $CIRCLE_SHA1");
         //String commitMessage = Exec.getProcessRunner(project.getProjectDir()).run(commandLine).trim();
-        String commitMessage = GradleHelpers.shExecute("git log --format=\"%s\" -n 1 $CIRCLE_SHA1");
+        String commitMessage = Shell.exec("git log --format=\"%s\" -n 1 $CIRCLE_SHA1");
         project.getTasks().withType(ReleaseNeededTask.class, new Action<ReleaseNeededTask>() {
             public void execute(ReleaseNeededTask t) {
                 t.setCommitMessage(commitMessage);

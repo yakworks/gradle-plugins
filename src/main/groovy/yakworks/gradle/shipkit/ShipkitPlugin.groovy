@@ -34,11 +34,13 @@ class ShipkitPlugin implements Plugin<Project> {
 
     public void apply(final Project project) {
         ProjectUtil.requireRootProject(project, this.getClass())
-        //apply CircleReleasePlugin plugin, has be done early, before ShipkitConfiguration, so it can add the snapshot task to the startParams
-        project.plugins.apply(CircleReleasePlugin)
-        project.plugins.apply(DefaultsPlugin)
+        project.plugins.with {
+            apply(ConfigYakPlugin)
+            apply(CircleReleasePlugin)
+            apply(DefaultsPlugin)
+        }
 
-        boolean isBintray = project.findProperty('isBintrayPublish') //set in the DefaultsPlugin
+        boolean isBintray = project['config']['bintray.enabled']
 
         if(isBintray){
             project.plugins.apply(BintrayReleasePlugin)

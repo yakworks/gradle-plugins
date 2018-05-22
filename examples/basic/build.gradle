@@ -15,6 +15,21 @@ buildscript {
 
 apply plugin:"java"
 apply plugin:"yakworks.yaml-config"
+//println config
+println config['github.writeAuthToken']
+println config['github.owner']
+println config.github
+
+println config.github.writeAuthToken
+//println config.github
+println config.github.owner
+println config.github.repo
+println config.github.issuesUrl
+println config.websiteUrl
+//println config.bintray
+assert config['bintray.pkg.websiteUrl']
+//println config.bintray
+println config.bintray.pkg.licenses
 
 DumperOptions dops = new DumperOptions()
 dops.setIndent(2)
@@ -22,8 +37,8 @@ dops.setWidth(120)
 dops.setSplitLines(false)
 dops.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)
 Yaml yaml = new Yaml(dops)
-println yaml.dump(config)
-println config.prettyPrint()
+//println yaml.dump(config.toJsonMap())
+//println config.toJsonMap()
 //println prettyPrint(toJson(config))
 
 //String str = '${System.properties[\'user.home\']}'

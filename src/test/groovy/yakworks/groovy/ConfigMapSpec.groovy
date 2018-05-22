@@ -1,4 +1,4 @@
-package yakworks.gradle.config
+package yakworks.groovy
 
 import spock.lang.Issue;
 import spock.lang.Specification

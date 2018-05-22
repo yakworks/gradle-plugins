@@ -26,12 +26,15 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.yaml.snakeyaml.Yaml
 import yakworks.gradle.GradleHelpers
+import yakworks.groovy.ConfigMap
 
 //import static yakworks.gradle.GradleHelpers.prop
 
 @CompileStatic
 class YamlConfigPlugin implements Plugin<Project> {
     private final static Logger LOG = Logging.getLogger(YamlConfigPlugin)
+
+    ConfigMap config
 
     void apply(Project prj) {
         if (prj.rootProject != prj) {
@@ -49,7 +52,11 @@ class YamlConfigPlugin implements Plugin<Project> {
         }
         configFileNames = configFileNames as List<String>
 
-        ConfigObject config = new ConfigObject()
+        config = new ConfigMap()
+        config.extraBinding['project']      = prj
+        config.extraBinding['property']     = { String prop -> prj.property(prop) }
+        config.extraBinding['findProperty'] = { String prop -> prj.findProperty(prop) }
+
         loadClassPathDefaults(prj, config)
 
         configFileNames.each { String fname ->
@@ -60,9 +67,9 @@ class YamlConfigPlugin implements Plugin<Project> {
                     config.merge(cfgObj)
                 } else if(fname.endsWith('.yml')){
                     Map ymlMap = new Yaml().load(new FileInputStream(configFile))
-                    def co = new ConfigObject()
-                    co.putAll(ymlMap)
-                    config.merge(co)
+                    //def co = new ConfigObject()
+                    //co.putAll(ymlMap)
+                    config.merge(ymlMap)
                 }
             }
         }
@@ -73,14 +80,14 @@ class YamlConfigPlugin implements Plugin<Project> {
     /**
      * first look for any /configs/defaults.yml on the classpath
      */
-    void loadClassPathDefaults(Project prj, ConfigObject config){
+    void loadClassPathDefaults(Project prj, ConfigMap config){
         List<URL> resources = CPScanner.scanResources(new PackageNameFilter("configs"), new ResourceNameFilter("defaults.yml"))
         //println "resources: $resources"
         resources.each { URL url ->
-            def co = new ConfigObject()
+            //def co = new ConfigMap()
             Reader ymlExpanded = url.newReader() //GradleHelpers.expand(prj, url.text)
-            co.putAll(loadYaml(ymlExpanded))
-            config.merge(co)
+            //co.putAll(loadYaml(ymlExpanded))
+            config.merge(loadYaml(ymlExpanded))
         }
         config
     }

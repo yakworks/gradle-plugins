@@ -3,9 +3,9 @@
 title: # short desc used for docs
 description: # REQUIRED
 author: 9ci Inc # REQUIRED author for docs and copyright, used in licenseHeader too. Can be legal Org name or user name
-license: Apache-2.0 # REQUIRED will be used in the docs, pom and bintray upload
+license: &License Apache-2.0 # REQUIRED will be used in the docs, pom and bintray upload
 # the pointer to the docs for this project
-websiteUrl: ${"https://" + config.github.owner + ".github.io/" + config.github.repo} # default: "https://\${github.owner}.github.io/\${github.repo}"
+websiteUrl: &SiteUrl ${"https://" + config.github.owner + ".github.io/" + config.github.repo}
 
 # ---
 # everything after the first separator will in the project.config
@@ -20,20 +20,20 @@ git:
     email: <9cibot@9ci.com>
 
 github:
-  fullName: joedevs/my-lib # <Required> if set then this will take precedence. will concatenate owner/repo if empty.
-  # owner and repo will be parsed from fullName or used to build fullname with repo depending on which on is set.
+  fullName: joedevs/my-lib # <Required>
   owner: ${config.github.fullName.split('/')[0]} # joedevs
   repo: ${config.github.fullName.split('/')[1]} # my-lib
-  issuesUrl: ${'https://github.com/' + config.github.repo + '/issues'} # defaults to : "https://github.com/\${github.repo}/issues"
+  repoUrl: &GithubUrl ${'https://github.com/' + config.github.fullName}
+  issuesUrl: &IssuesUrl ${config.github.repoUrl + '/issues'}
   # token used for dry run and test builds so devs dont need a write token to get started
-  writeAuthToken: '${System.getenv("GRGIT_USER") ?: System.getenv("GH_WRITE_TOKEN") ?: project.findProperty("gitHubToken") ?: "e7fe8fcdd6ffed5c38498c4c79b2a68e6f6ed1bb"}'
-  readOnlyAuthToken: '${System.getenv("GRGIT_USER") ?: System.getenv("GH_WRITE_TOKEN") ?: project.findProperty("gitHubToken")}'
+  writeAuthToken: '${System.getenv("GRGIT_USER") ?: System.getenv("GH_WRITE_TOKEN") ?: findProperty("gitHubToken")}'
+  readOnlyAuthToken: '${System.getenv("GRGIT_USER") ?: System.getenv("GH_WRITE_TOKEN") ?: findProperty("gitHubToken") ?: "e7fe8fcdd6ffed5c38498c4c79b2a68e6f6ed1bb"}'
 
 team:
   # keys here should be github user and name should match github name.
-  developers: # REQUIRED ex: { basejump: Joshua Burnett,  }
-  contributors:
-  ignoredContributors: { 9cibot: 9ci Build Bot}
+  developers: # REQUIRED ex: List in form ['basejump: Joshua Burnett']
+  contributors: # List same format as developers
+  ignoredContributors: ['9cibot'] # list of names or logins to ignore. good for build bot commits
 
 releaseNotes:
   file: docs/release-notes.md
@@ -42,16 +42,16 @@ releaseNotes:
 # this gets setup for each publishable project
 bintray:
   enable: true # set this to false to turn off
-  user: '${System.getenv("BINTRAY_USER") ?: project.findProperty("bintrayUser")}' # REQUIRED
-  key: '${System.getenv("BINTRAY_KEY") ?: project.findProperty("bintrayKey")}' # REQUIRED
+  user: '${System.getenv("BINTRAY_USER") ?: findProperty("bintrayUser")}' # REQUIRED
+  key: '${System.getenv("BINTRAY_KEY") ?: findProperty("bintrayKey")}' # REQUIRED
   pkg:
     repo: # REQUIRED
-    userOrg: # REQUIRED
+    userOrg: ${config.github.owner} # REQUIRED
     name: # this will get set from each subprojects name during runtime
-    websiteUrl: \${config.websiteUrl}
-    issueTrackerUrl: \${config.github.issuesUrl}
-    vcsUrl: \${config.github.vcsUrl}
-    licenses: [ '${config.license}' ]
+    websiteUrl: *SiteUrl
+    issueTrackerUrl: *IssuesUrl
+    vcsUrl: *GithubUrl
+    licenses: [ *License ]
     publicDownloadNumbers: true
     version:
         name: ${project.version}

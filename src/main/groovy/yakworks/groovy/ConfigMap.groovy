@@ -1,4 +1,4 @@
-package yakworks.gradle.config
+package yakworks.groovy
 
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
@@ -10,6 +10,7 @@ import java.util.regex.Pattern
 
 /**
  * Copied from org.grails.config.ConfigMap so we can use it as a gradle plugin here
+ * This is like groovy's ConfigObject but better.
  */
 @EqualsAndHashCode
 @CompileStatic
@@ -24,6 +25,8 @@ class ConfigMap implements Map<String, Object>, Cloneable {
     final List<String> path
     final Map<String, Object> delegateMap
     final String dottedPath
+    //extra binding for gstring templates
+    Map extraBinding = [:]
 
     public ConfigMap() {
         rootConfig = this
@@ -121,7 +124,7 @@ class ConfigMap implements Map<String, Object>, Cloneable {
         merge([(key): value], true)
     }
 
-    public void merge(Map sourceMap, boolean parseFlatKeys=true) {
+    public void merge(Map sourceMap, boolean parseFlatKeys=false) {
         mergeMaps(this, "", this, sourceMap, parseFlatKeys)
     }
 
@@ -220,7 +223,22 @@ class ConfigMap implements Map<String, Object>, Cloneable {
         if (!containsKey(name)) {
             return new NullSafeNavigator(this, [name].asImmutable())
         }
-        return get(name)
+        def val = get(name)
+        if(val && val instanceof String && (val.startsWith('$') || val.startsWith('\$'))){
+            val = expand(val)
+            boolean hasDotKeys = name.matches(/.+[\.].+/)
+            hasDotKeys ? merge(name, val) : setProperty(name, val)
+            //mergeMapEntry(rootConfig, dottedPath, this, name, val, hasDotKeys, true)
+            //setProperty(name, val)
+        }
+        return val
+    }
+
+    String expand(String text){
+        def binding = [config : rootConfig] + extraBinding
+        def engine = new groovy.text.GStringTemplateEngine()
+        def template = engine.createTemplate(text).make(binding)
+        return template.toString()
     }
 
     public void setProperty(String name, Object value) {
@@ -281,6 +299,40 @@ class ConfigMap implements Map<String, Object>, Cloneable {
             }
         }
         currentMap
+    }
+
+    /**
+     * returns an un optimized map with out duplicate keys
+     * @return
+     */
+    public Map<String, Object> toJsonMap() {
+        //return toFlatConfig()
+        Closure nester
+
+        nester = { Map rslt, String key, val ->
+            String[] keys = key.split( /\./, 2 )
+            String key0 = keys[0]
+
+            if(!rslt.containsKey(key0)) rslt[key0] = [:]
+
+            if( keys.length == 2){
+                nester rslt[key0] as Map, keys[1], val
+            }
+            else{
+                rslt[key] = val
+            }
+            rslt
+        }
+
+        Map<String, Object> flat = toFlatConfig()
+        //skip the array keys "foo[0]"
+        flat.entrySet().removeIf { Entry<String, Object> entry->
+            entry.key.matches(/.*\[\d\]/)
+        }
+
+        Map treeMap = flat.inject [:], nester.trampoline()
+
+        return treeMap
     }
 
     public Map<String, Object> toFlatConfig() {

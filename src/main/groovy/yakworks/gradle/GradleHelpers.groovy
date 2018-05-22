@@ -20,6 +20,8 @@ import groovy.text.Template
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.Project
+import yakworks.groovy.Props
+import yakworks.groovy.Shell
 
 @CompileStatic
 class GradleHelpers {
@@ -64,38 +66,8 @@ class GradleHelpers {
         } else if (System.properties[prop]) {
             return System.properties[prop]
         } else {
-            return prj.findProperty(toCamelCase(prop)) //returns null if not found
+            return prj.findProperty(Props.toCamelCase(prop)) //returns null if not found
         }
-    }
-
-    //converts SOME_PROP env prop name to someProp
-    static String toCamelCase( String text ) {
-        text = text.toLowerCase().replaceAll( "(_)([A-Za-z0-9])", { List<String> it -> it[2].toUpperCase() } )
-        //println text
-        return text
-    }
-
-    static String shExecute(String command){
-        return ['sh', '-c', command].execute().text.trim()
-    }
-
-    static void setGitDefaultsProps(Project prj) {
-        // sets up default composed props on ext from base props in gradle.properties
-        //!!!properties should go there, not here!!
-        // its assumed that certain props exists already as base lines to use
-        //** Github props used for both doc generation links, publishing docs to gh-pages and maven/bintray publish
-        String gslug = prj.findProperty("gitHubSlug")
-        if (!gslug) gslug = GradleHelpers.shExecute("git config --local remote.origin.url|sed -n 's#.*/\\(.*/[^.]*\\)\\.git#\\1#p'")
-        if (gslug) {
-            def repoAndOrg = gslug.split("/")
-            setPropIfEmpty prj, 'gitHubOrg', repoAndOrg[0]
-            setPropIfEmpty prj, 'gitHubRepo', repoAndOrg[1]
-        }
-        setPropIfEmpty prj, 'gitHubRepo',   prj.name //defualts to project name
-        setPropIfEmpty prj, 'gitHubSlug',   "${prj['gitHubOrg']}/${prj['gitHubRepo']}".toString()
-        setPropIfEmpty prj, 'gitHubUrl',    "https://github.com/${prj['gitHubSlug']}".toString()
-        setPropIfEmpty prj, 'gitHubIssues', "${prj['gitHubUrl']}/issues".toString()
-        setPropIfEmpty prj, 'websiteUrl',   "https://${prj['gitHubOrg']}.github.io/${prj['gitHubRepo']}".toString()
     }
 
     static void setupPublishProps(Project prj) {
@@ -104,7 +76,7 @@ class GradleHelpers {
         // its assumed that certain props exists already as base lines to use
         //** Github props used for both doc generation links, publishing docs to gh-pages and maven/bintray publish
         String gslug = prj.findProperty("gitHubSlug")
-        if(!gslug) gslug = GradleHelpers.shExecute("git config --local remote.origin.url|sed -n 's#.*/\\(.*/[^.]*\\)\\.git#\\1#p'")
+        if(!gslug) gslug = Shell.exec("git config --local remote.origin.url|sed -n 's#.*/\\(.*/[^.]*\\)\\.git#\\1#p'")
         if (gslug){
             def repoAndOrg = gslug.split("/")
             setPropIfEmpty prj, 'gitHubOrg', repoAndOrg[0]
@@ -164,30 +136,4 @@ class GradleHelpers {
         return new StringReader(writer.toString())
     }
 
-    /**
-     * Deeply merges the contents of each Map in sources, merging from
-     * "right to left" and returning the merged Map.
-     *
-     * Mimics 'extend()' functions often seen in JavaScript libraries.
-     * Any specific Map implementations (e.g. TreeMap, LinkedHashMap)
-     * are not guaranteed to be retained. The ordering of the keys in
-     * the result Map is not guaranteed. Only nested maps will be
-     * merged; primitives, objects, and other collection types will be
-     * overwritten.
-     *
-     * The source maps will not be modified.
-     */
-
-    @CompileDynamic
-    Map merge(Map[] sources) {
-        if (sources.length == 0) return [:]
-        if (sources.length == 1) return sources[0]
-
-        sources.inject([:]) { result, source ->
-            source.each { k, v ->
-                result[k] = result[k] instanceof Map ? merge(result[k], v) : v
-            }
-            result
-        } as Map
-    }
 }
