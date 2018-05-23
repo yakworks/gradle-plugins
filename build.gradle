@@ -26,7 +26,7 @@ repositories {
   maven { url "https://plugins.gradle.org/m2/" }
 }
 
-//run `gradle updateLocks` to update the locks below to highest versionusing the + notation
+//run `gradle updateLocks` to update the locks below to highest versioning the + notation
 dependencies {
   // gradle
   compile gradleApi()
