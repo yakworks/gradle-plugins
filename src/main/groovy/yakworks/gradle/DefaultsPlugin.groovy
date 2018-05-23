@@ -109,7 +109,8 @@ class DefaultsPlugin implements Plugin<Project> {
             // }
             project.spotless.groovy {
                 target project.fileTree('.') {
-                    include 'src/main/groovy/**/*.groovy', 'grails-app/**/*.groovy'
+                    include 'src/main/groovy/**/*.groovy', 'grails-app/**/*.groovy',
+                        'src/test/groovy/**/*.groovy', 'src/integration-test/groovy/**/*.groovy'
                     exclude '**/*.java', '**/conf/**/*.groovy'
                 }
                 trimTrailingWhitespace()

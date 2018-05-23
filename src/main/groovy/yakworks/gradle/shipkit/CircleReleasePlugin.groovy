@@ -55,7 +55,7 @@ public class CircleReleasePlugin implements Plugin<Project> {
 
             if (project.snapshotVersion) {
                 project.allprojects { Project subproject ->
-                    subproject.getPlugins().withType(JavaPublishPlugin) {
+                    subproject.plugins.withType(JavaPublishPlugin) {
                         setupCiPublishForSnapshots(subproject, ciPubTask)
                     }
                 }
@@ -122,8 +122,8 @@ public class CircleReleasePlugin implements Plugin<Project> {
             LOG.lifecycle(" - Has application changes and will run publish: " + hasAppChanges + "\n" +
                 " - Docs have changed will run `:gitPublishPush` : " + hasDocChanges)
             if(hasAppChanges){
-                //rootPubTask.dependsOn(CI_CHECK_TASK)
-                ciPublishTask.dependsOn('publish')
+                String publishMavSnap = "${project.getPath()}:$MavenRepoReleasePlugin.MAVEN_PUBLISH_REPO_TASK"
+                ciPublishTask.dependsOn(publishMavSnap)
             }
             if(hasDocChanges) ciPublishTask.dependsOn(':gitPublishPush')
         } else {
