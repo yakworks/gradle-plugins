@@ -1,0 +1,9 @@
+/**
+ * Shipkit file is here as a place holder.
+ * When using yakworks.shipkit the configuration should done in the the gradle.yml or gradle/config.yml.
+ * Shipkit config is ok here but it will get overriden by the yaml files
+ * any normal gradle is allowed here and this can be used for utility code to keep the build.gradle clean
+ */
+shipkit {
+  // configured in yaml
+}

@@ -23,6 +23,9 @@ import org.shipkit.gradle.configuration.ShipkitConfiguration
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
 
+/**
+ * Generates the docs using mkdocs
+ */
 //@CompileStatic
 class DocmarkPlugin implements Plugin<Project> {
 

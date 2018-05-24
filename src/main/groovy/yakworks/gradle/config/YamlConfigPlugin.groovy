@@ -26,7 +26,7 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.yaml.snakeyaml.Yaml
 import yakworks.gradle.GradleHelpers
-import yakworks.groovy.ConfigMap
+import yakworks.commons.ConfigMap
 
 //import static yakworks.gradle.GradleHelpers.prop
 
@@ -48,6 +48,7 @@ class YamlConfigPlugin implements Plugin<Project> {
             configFileNames = prj.property('configFiles').toString().split(',') as List
         } else {
             //do defaults for config.groovy and config.yml
+            configFileNames.add("${prj.rootDir}/gradle.yml")
             configFileNames.add("${prj.rootDir}/gradle/config.yml")
         }
         configFileNames = configFileNames as List<String>

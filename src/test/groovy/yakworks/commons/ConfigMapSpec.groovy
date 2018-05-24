@@ -1,4 +1,4 @@
-package yakworks.groovy
+package yakworks.commons
 
 import spock.lang.Issue;
 import spock.lang.Specification

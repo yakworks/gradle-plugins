@@ -1,7 +1,10 @@
-package yakworks.groovy
+package yakworks.commons
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
+import org.codehaus.groovy.runtime.MetaClassHelper
+
+import java.beans.Introspector
 
 @Slf4j
 @CompileStatic
@@ -15,4 +18,7 @@ class Props {
         //println text
         return text
     }
+
+
+
 }

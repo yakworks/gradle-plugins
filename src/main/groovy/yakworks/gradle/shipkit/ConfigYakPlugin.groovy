@@ -1,6 +1,7 @@
 package yakworks.gradle.shipkit
 
 import groovy.transform.CompileStatic
+import org.codehaus.groovy.runtime.InvokerHelper
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
@@ -10,14 +11,17 @@ import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.util.ProjectUtil
 import org.shipkit.internal.gradle.version.VersioningPlugin
 import org.shipkit.internal.util.PropertiesUtil
-import yakworks.groovy.ConfigMap
+import yakworks.commons.ConfigMap
+import yakworks.commons.Pogo
 import yakworks.gradle.config.YamlConfigPlugin
-import yakworks.groovy.Shell
+import yakworks.commons.Shell
 
 import static yakworks.gradle.GradleHelpers.prop
 
 /**
+ * Uses the yaml config plugin to setup shipkit and others
  * This should be the first one applied so it can setup the snapshot configuration and the yaml-config defaults
+ *
  */
 @CompileStatic
 public class ConfigYakPlugin implements Plugin<Project> {
@@ -42,35 +46,32 @@ public class ConfigYakPlugin implements Plugin<Project> {
         //sets the fullname repo from git if its null
         String gslug = config['github.fullName']
         if (!gslug) {
-            gslug = Shell.exec("git config --local remote.origin.url|sed -n 's#.*/\\(.*/[^.]*\\)\\.git#\\1#p'")
+            String sedPart = $/sed -n 's#.*/\(.*/[^.]*\)\.git#\1#p'/$
+            gslug = Shell.exec("git config --get remote.origin.url | $sedPart")
+            //the sed above should have gotten back owner/repo
             config.merge('github.fullName', gslug)
         }
-        //github
-        shipConfig.gitHub.with {
-            repository = config['github.fullName']
-            writeAuthToken = config['github.writeAuthToken']
-            readOnlyAuthToken = config['github.readOnlyAuthToken']
-        }
-        //git
-        shipConfig.git.with {
-            releasableBranchRegex = config['git.releasableBranchRegex']
-            commitMessagePostfix = config['git.commitMessagePostfix']
-            user = config['git.config.user'] //the use on the commits
-            email = config['git.config.email']
-        }
-        //team
-        shipConfig.team.with {
-            developers = config['team.developers'] as Collection
-            contributors = (Collection)config['team.contributors'] ?: contributors
-            ignoredContributors = (Collection)config['team.ignoredContributors'] ?: ignoredContributors
-        }
-        //releaseNotes
-        shipConfig.releaseNotes.with {
-            file = config['releaseNotes.file'] ?: file
-            ignoreCommitsContaining = (Collection)config['releaseNotes.ignoreCommitsContaining'] ?: ignoreCommitsContaining
-            labelMapping = (Map)config['releaseNotes.labelMapping'] ?: labelMapping
-        }
 
+        //github
+        setProps(shipConfig.gitHub, config['github'])
+        shipConfig.gitHub.repository = config['github.fullName']
+
+        //git
+        setProps(shipConfig.git, config['git'])
+        shipConfig.git.user = config['git.config.user']
+        shipConfig.git.email = config['git.config.email']
+
+        //team
+        setProps(shipConfig.team, config['team'])
+
+        //releaseNotes
+        setProps(shipConfig.releaseNotes, config['releaseNotes'])
+
+    }
+
+    void setProps(pogo, cfgMap){
+        ConfigMap curConfig = (ConfigMap)cfgMap
+        InvokerHelper.setProperties(pogo, curConfig.evalAll().prune())
     }
 
     void addSnaphotTaskFromVersionProp(Project project) {

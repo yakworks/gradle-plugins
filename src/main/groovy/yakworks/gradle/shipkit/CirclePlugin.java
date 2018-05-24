@@ -13,13 +13,12 @@ import org.shipkit.internal.gradle.git.GitBranchPlugin;
 import org.shipkit.internal.gradle.git.GitSetupPlugin;
 import org.shipkit.internal.gradle.git.tasks.GitCheckOutTask;
 import org.shipkit.internal.gradle.util.StringUtil;
-import yakworks.gradle.GradleHelpers;
-import yakworks.groovy.Shell;
+import yakworks.commons.Shell;
 
 /**
  * Configures the release automation to be used with Circle CI.
  * Intended for root project.
- * BASED most of the logic was copied from the TravisPlugin class.
+ * Copied most of the logic from the TravisPlugin class.
  */
 public class CirclePlugin implements Plugin<Project> {
 
@@ -57,13 +56,6 @@ public class CirclePlugin implements Plugin<Project> {
         final boolean isPullRequest = pr != null && !pr.trim().isEmpty() && !pr.equals("false");
         LOG.info("Pull request build: {}", isPullRequest);
 
-        //TODO see here for possibly how to get the commit message with circleCI
-        //https://discuss.circleci.com/t/git-commit-message-in-environment-variable/533/3
-        // git log --format="%s" -n 1 $CIRCLE_SHA1
-        // http://ajoberstar.org/grgit/grgit-log.html
-
-        //List<String> commandLine = asList("sh", "-c", "git log --format=\"%s\" -n 1 $CIRCLE_SHA1");
-        //String commitMessage = Exec.getProcessRunner(project.getProjectDir()).run(commandLine).trim();
         String commitMessage = Shell.exec("git log --format=\"%s\" -n 1 $CIRCLE_SHA1");
         project.getTasks().withType(ReleaseNeededTask.class, new Action<ReleaseNeededTask>() {
             public void execute(ReleaseNeededTask t) {

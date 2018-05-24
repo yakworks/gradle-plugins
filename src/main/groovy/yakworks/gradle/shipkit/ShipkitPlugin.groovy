@@ -1,5 +1,6 @@
 package yakworks.gradle.shipkit
 
+import com.jfrog.bintray.gradle.BintrayExtension
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.Plugin
@@ -20,8 +21,11 @@ import org.shipkit.internal.gradle.java.JavaPublishPlugin
 import org.shipkit.internal.gradle.java.PomContributorsPlugin
 import org.shipkit.internal.gradle.release.ReleasePlugin
 import org.shipkit.internal.gradle.util.ProjectUtil
+import yakworks.commons.ConfigMap
+import yakworks.commons.Pogo
 import yakworks.gradle.DefaultsPlugin
 import yakworks.gradle.DocmarkPlugin
+import yakworks.gradle.config.YamlConfigPlugin
 
 /**
  * Continuous delivery for Java/Groovy/Grails with CirclePlugin and Bintray.
@@ -39,8 +43,9 @@ class ShipkitPlugin implements Plugin<Project> {
             apply(CircleReleasePlugin)
             apply(DefaultsPlugin)
         }
+        ConfigMap config = project.plugins.apply(YamlConfigPlugin).config
 
-        boolean isBintray = project['config']['bintray.enabled']
+        boolean isBintray = config['bintray.enabled']
 
         if(isBintray){
             project.plugins.apply(BintrayReleasePlugin)
@@ -54,7 +59,7 @@ class ShipkitPlugin implements Plugin<Project> {
             prj.plugins.withType(JavaLibraryPlugin) {
                 if(isBintray){
                     prj.plugins.apply(JavaBintrayPlugin)
-                    configBintray(prj)
+                    configBintray(prj, config)
 
                     prj.plugins.withId("yakworks.grails-plugin") {
                         configGrailsBintray(prj)
@@ -118,6 +123,7 @@ class ShipkitPlugin implements Plugin<Project> {
      * Taken from GrailsCentralPublishGradlePlugin in grails-core. its the 'org.grails.grails-plugin-publish'
      * Cleans up dependencies without versions and removes the bom dependencyManagement stuff and adds the grails-plugin.xml artefact
      */
+    //FIXME I don't think this is how it should be done.
     @CompileDynamic
     private void cleanDepsInPom(Project project) {
         project.plugins.withType(MavenPublishPlugin) {
@@ -146,39 +152,27 @@ class ShipkitPlugin implements Plugin<Project> {
      * sets up the bintray task defualts
      */
     @CompileDynamic
-    private void configBintray(Project project) {
+    private void configBintray(Project project, ConfigMap config) {
         project.afterEvaluate { prj ->
-            prj.bintray {
-                user = System.getenv("BINTRAY_USER") ?: prj.findProperty("bintrayUser") ?: ''
-                key = System.getenv("BINTRAY_KEY") ?: prj.findProperty("bintrayKey") ?: ''
-                pkg {
-                    repo = prj.bintrayRepo
-                    userOrg = prj.bintrayOrg
-                    name = prj.name
-                    websiteUrl = prj.websiteUrl
-                    issueTrackerUrl = prj.gitHubIssues
-                    vcsUrl = prj.gitHubUrl
-                    licenses = prj.hasProperty('license') ? [prj.license] : []
-                    publicDownloadNumbers = true
-                    version {
-                        name = prj.version
-                        gpg {
-                            sign = false
-                            //passphrase = signingPassphrase
-                        }
-                        mavenCentralSync {
-                            sync = false
-                        }
-                    }
-                }
-            }
+            final BintrayExtension bintray = project.getExtensions().getByType(BintrayExtension.class)
+            binConfig.evalAll() //make sure StringTemplates are evaluated
+            bintray.user = onfig['bintray.user']
+            bintray.key = onfig['bintray.key']
+
+            final BintrayExtension.PackageConfig pkg = bintray.getPkg()
+            Pogo.merge(pkg,config['bintray.pkg'])
+            Pogo.merge(pkg.version.gpg,config['bintray.pkg.version.gpg'])
+            Pogo.merge(pkg.version.mavenCentralSync,config['bintray.pkg.version.mavenCentralSync'])
+
+            pkg.name = prj.name
+            pkg.version.name = prj.version
         }
     }
 
-    @CompileDynamic
     private void configGrailsBintray(Project project) {
         project.afterEvaluate { prj ->
-            prj.bintray.pkg.version.attributes = ["grails-plugin": "$prj.group:$prj.name"]
+            final BintrayExtension bintray = project.getExtensions().getByType(BintrayExtension.class)
+            bintray.pkg.version.attributes = ["grails-plugin": "${prj['group']}:${prj['name']}".toString()]
         }
     }
 

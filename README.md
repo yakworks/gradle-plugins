@@ -92,7 +92,7 @@ In all "publishable" projects:
 
 
 ### Overriding Defaults
-if you want to change how spotelss is setup
+if you want to change how spotless is setup
 `spotless.formats.remove 'groovyGradle'` and then setup as normal or
 just change a specific setting such as `spotless.formats.groovyGradle.target('gradle/*.gradle', 'build.gradle')`
 

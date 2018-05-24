@@ -1,11 +1,10 @@
-package yakworks.groovy
+package yakworks.commons
 
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
 import org.codehaus.groovy.runtime.DefaultGroovyMethods
 
-import java.util.Map.Entry
 import java.util.regex.Pattern
 
 /**
@@ -224,8 +223,12 @@ class ConfigMap implements Map<String, Object>, Cloneable {
             return new NullSafeNavigator(this, [name].asImmutable())
         }
         def val = get(name)
+        //if it starts with a $ then eval it with using merge.
         if(val && val instanceof String && (val.startsWith('$') || val.startsWith('\$'))){
-            val = expand(val)
+            println "evaluating $name"
+            val = templateEval(val)  //evaluate the GString it
+            //now that its been evaluated we will merge it in so we don't do it again the next time its accessed
+            //if it has dot keys in the key then we need to merge in the evaluated result
             boolean hasDotKeys = name.matches(/.+[\.].+/)
             hasDotKeys ? merge(name, val) : setProperty(name, val)
             //mergeMapEntry(rootConfig, dottedPath, this, name, val, hasDotKeys, true)
@@ -234,11 +237,35 @@ class ConfigMap implements Map<String, Object>, Cloneable {
         return val
     }
 
-    String expand(String text){
+    /**
+     * Evals the text using a GStringTemplateEngine
+     * @param text
+     * @return
+     */
+    String templateEval(String text){
         def binding = [config : rootConfig] + extraBinding
         def engine = new groovy.text.GStringTemplateEngine()
         def template = engine.createTemplate(text).make(binding)
         return template.toString()
+    }
+
+    /**
+     * Gets the key and if its a Map will make sure all strings that start with $ have been evaluated
+     * returns this instance
+     */
+    ConfigMap evalAll(){
+        this.keySet().each { key ->
+            def val = this[key]
+            if(val instanceof ConfigMap) val.evalAll()
+        }
+        return this
+    }
+
+    /**
+     * returns a new map after pruning all nulls and falsey values
+     */
+    Map prune(){
+        Maps.prune(this)
     }
 
     public void setProperty(String name, Object value) {

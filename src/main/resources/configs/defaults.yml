@@ -13,16 +13,16 @@ websiteUrl: &SiteUrl ${"https://" + config.github.owner + ".github.io/" + config
 git:
   releasableBranchRegex: 'master|release/.+'   # matches 'master', 'release/2.x', 'release/3.x', etc.
   tagPrefix: v # so that tags are "v1.0", "v2.3.4"
-  commitMessagePostfix: '[ci skip]'
-  # config so it shows the user in the commits
+  commitMessagePostfix: '[ci skip]' # when shipkit commits, this postfix can have ci skip it preferably
+  # git config so it shows the user in the commits
   config:
-    user: 9cibot
+    user: ${config.github.owner}
     email: <9cibot@9ci.com>
 
 github:
-  fullName: joedevs/my-lib # <Required>
-  owner: ${config.github.fullName.split('/')[0]} # joedevs
-  repo: ${config.github.fullName.split('/')[1]} # my-lib
+  fullName: # REQUIRED (example: yakworks/) if none specified then will try to find from git config --get remote.origin.url
+  owner: ${config.github.fullName.split('/')[0]} # example: yakworks
+  repo: ${config.github.fullName.split('/')[1]} # example: gradle-plugins
   repoUrl: &GithubUrl ${'https://github.com/' + config.github.fullName}
   issuesUrl: &IssuesUrl ${config.github.repoUrl + '/issues'}
   # token used for dry run and test builds so devs dont need a write token to get started
@@ -53,17 +53,16 @@ bintray:
     vcsUrl: *GithubUrl
     licenses: [ *License ]
     publicDownloadNumbers: true
+    githubRepo: ${config.github.fullName} #Optional Github repository
+    githubReleaseNotesFile: README.md #Github readme file
     version:
-        name: ${project.version}
-        mavenCentralSync:
-          sync: false
+      name: ${project.version}
+      gpg:
+        sign: false
+      mavenCentralSync:
+        sync: false
 
 maven:
   repoUrl:
   snapshotUrl: # set this when not publishing to an artifactory vs bintray and you have a different repo than the primary repoUrl
-
-versions:
-  hibernate: 5.2.16.Final
-  buildTestData: 3.3.+
-  views: 1.2.7
 

@@ -1,4 +1,4 @@
-package yakworks.groovy
+package yakworks.commons
 
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
@@ -34,17 +34,21 @@ class Maps {
     }
 
     /**
-     * removes all nulls and optionally empty maps lists and stings as well
+     * Deeply remove/prune all nulls and falsey` empty maps, lists and strings as well
      *
      * @param map the map to prune
-     * @param pruneEmpty removes empty maps, lists and strings as well
+     * @param pruneEmpty default:true set to false to keep empty maps, lists and strings
      * @return the pruned map
      */
-    static Map deepPrune(Map map, boolean pruneEmpty = false) {
-        map.collectEntries { k, v -> [k, v instanceof Map ? deepPrune(v as Map) : v]}
+    static Map prune(Map map, boolean pruneEmpty = true) {
+        map.collectEntries { k, v -> [k, v instanceof Map ? prune(v as Map, pruneEmpty) : v]}
         .findAll { k, v ->
-            if(pruneEmpty && (v instanceof List || v instanceof Map) && v){
-                //if()
+            if(pruneEmpty){
+                if (v instanceof List || v instanceof Map || v instanceof String) {
+                    return v
+                } else {
+                    return v != null
+                }
             } else {
                 return v != null
             }

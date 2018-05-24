@@ -3,6 +3,9 @@ package yakworks.gradle
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
+/**
+ * sets up codenarc with predefined defaults the way we want them.
+ */
 class CodenarcPlugin implements Plugin<Project> {
 
     final static String CODENARC_VERSION = "1.1"

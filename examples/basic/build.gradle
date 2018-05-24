@@ -9,27 +9,36 @@ buildscript {
     maven { url "https://plugins.gradle.org/m2/" }
   }
   dependencies {
-    classpath "org.yakworks:gradle-plugins:0.1.40-SNAPSHOT"
+    classpath "org.yakworks:gradle-plugins:0.1.44-SNAPSHOT"
   }
 }
 
 apply plugin:"java"
 apply plugin:"yakworks.yaml-config"
 //println config
-println config['github.writeAuthToken']
-println config['github.owner']
-println config.github
-
-println config.github.writeAuthToken
-//println config.github
-println config.github.owner
-println config.github.repo
-println config.github.issuesUrl
-println config.websiteUrl
-//println config.bintray
-assert config['bintray.pkg.websiteUrl']
-//println config.bintray
-println config.bintray.pkg.licenses
+def git = config['git']
+println "config.git.class " + git.getClass()
+println "config.git " + git
+git.evalAll()
+println "config.git after eval " + git
+println "config.git.config.user" + git['config.user']
+//
+//println "github.writeAuthToken " + config.github.get('writeAuthToken')
+//println "github.owner " + config.github.owner
+//println "github.git " + config.git
+//
+//println "github.writeAuthToken " + config['github.writeAuthToken']
+//println "github.owner " + config['github.owner']
+//println "github.github " + config.github
+//
+//assert config.github.writeAuthToken == config['github.writeAuthToken']
+//println config.github.repo
+//println config.github.issuesUrl
+//println config.websiteUrl
+////println config.bintray
+//assert config['bintray.pkg.websiteUrl']
+////println config.bintray
+//println config.bintray.pkg.licenses
 
 DumperOptions dops = new DumperOptions()
 dops.setIndent(2)

@@ -20,8 +20,8 @@ import groovy.text.Template
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.Project
-import yakworks.groovy.Props
-import yakworks.groovy.Shell
+import yakworks.commons.Props
+import yakworks.commons.Shell
 
 @CompileStatic
 class GradleHelpers {

@@ -1,6 +1,5 @@
-package yakworks.groovy
+package yakworks.commons
 
-import spock.lang.Issue
 import spock.lang.Specification
 
 class MapsSpec extends Specification {
@@ -219,7 +218,7 @@ class MapsSpec extends Specification {
 
     void deepPrune () {
         when:
-        def m1 = [
+        def mp = [
             foo: 'thud',
             fuzz: '',
             fazz: null,
@@ -234,7 +233,9 @@ class MapsSpec extends Specification {
                 ]
             ]
         ]
-        when:
+
+        def m1 = Maps.prune(mp, false)
+
         def expected = [
             foo: 'thud',
             fuzz: '',
@@ -247,10 +248,14 @@ class MapsSpec extends Specification {
                 fred: [:]
             ]
         ]
-        then:
-        assertMapsEqual(expected, instance.deepPrune(m1))
 
-        when: "with pruneEmpty true"
+        then:
+        expected == m1
+        assertMapsEqual(expected, m1)
+
+        when:
+        def m2 = Maps.prune(mp)
+
         expected = [
             foo: 'thud',
             isFoo: false,
@@ -259,8 +264,10 @@ class MapsSpec extends Specification {
                 quux: 'corge'
             ]
         ]
-        then:
-        assertMapsEqual(expected, instance.deepPrune(m1))
+        then: "with pruneEmpty true"
+
+        expected == m2
+        assertMapsEqual(expected, m2)
     }
 
     // A couple rather crude map equality testers.

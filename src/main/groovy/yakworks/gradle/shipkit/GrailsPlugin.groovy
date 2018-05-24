@@ -21,7 +21,7 @@ import org.gradle.api.Project
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
 
 /**
- * basic marker for a grails plugin, "yakworks.grails-plugin", will apply GrailsPluginPublishPlugin later after config
+ * A marker for a grails plugin, "yakworks.grails-plugin", will apply GrailsPluginPublishPlugin later after config
  */
 @CompileStatic
 class GrailsPlugin implements Plugin<Project> {
