@@ -329,10 +329,12 @@ class ConfigMap implements Map<String, Object>, Cloneable {
     }
 
     /**
-     * returns an un optimized map with out duplicate keys
+     * returns an "un-optimized" map combining the denormalized keys with dots and removes duplicate keys
+     * basically puts it back into a "normalized" map
+     *
      * @return
      */
-    public Map<String, Object> toJsonMap() {
+    public Map<String, Object> toNormalMap() {
         //return toFlatConfig()
         Closure nester
 
@@ -357,9 +359,14 @@ class ConfigMap implements Map<String, Object>, Cloneable {
             entry.key.matches(/.*\[\d\]/)
         }
 
-        Map treeMap = flat.inject [:], nester.trampoline()
+        Map treeMap = injectTrampoline(flat, nester)
 
         return treeMap
+    }
+
+    @CompileDynamic //FIXME this should not need CompileDynamic, compile works fine but it shows an annoying error on intellij
+    Map injectTrampoline(flat, nester){
+        flat.inject [:], nester.trampoline()
     }
 
     public Map<String, Object> toFlatConfig() {
@@ -419,6 +426,14 @@ class ConfigMap implements Map<String, Object>, Cloneable {
     @Override
     boolean equals(Object obj) {
         return delegateMap.equals(obj)
+    }
+
+    /**
+     * Uses JsonOutput.prettyPrint to give a pretty and more human readable string
+     * @return
+     */
+    String prettyPrint() {
+        groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(toNormalMap()))
     }
 
     @CompileStatic

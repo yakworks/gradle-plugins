@@ -28,6 +28,8 @@ public class ConfigYakPlugin implements Plugin<Project> {
 
     private final static Logger LOG = Logging.getLogger(ConfigYakPlugin);
 
+    ConfigMap config
+
     public void apply(final Project project) {
         ProjectUtil.requireRootProject(project, this.getClass())
         //addSnaphotTaskFromVersionProp has to be done before ShipkitConfiguration, so it can add the snapshot task to the startParams
@@ -41,7 +43,7 @@ public class ConfigYakPlugin implements Plugin<Project> {
         shipkitConfigLogger.setLevel(oldLogLevel);
          */
         ShipkitConfiguration shipConfig = project.plugins.apply(ShipkitConfigurationPlugin).configuration
-        ConfigMap config = project.plugins.apply(YamlConfigPlugin).config
+        config = project.plugins.apply(YamlConfigPlugin).config
 
         //sets the fullname repo from git if its null
         String gslug = config['github.fullName']
@@ -67,6 +69,8 @@ public class ConfigYakPlugin implements Plugin<Project> {
         //releaseNotes
         setProps(shipConfig.releaseNotes, config['releaseNotes'])
 
+        setupMavenPublishProps(project, config)
+
     }
 
     void setProps(pogo, cfgMap){
@@ -87,6 +91,14 @@ public class ConfigYakPlugin implements Plugin<Project> {
             project.gradle.startParameter.taskNames = startTasks
             LOG.lifecycle("  Snapshot set in versions file. Added snapshot task.")
             //println project.gradle.startParameter.taskNames
+        }
+    }
+
+    void setupMavenPublishProps(final Project prj, ConfigMap config){
+        if(!config['maven.publishUrl']) config.merge('maven.publishUrl', config['maven.repoUrl'])
+
+        if(prj['isSnapshot'] && config['maven.snapshotUrl']){
+            config.merge('maven.publishUrl', config['maven.snapshotUrl'])
         }
     }
 

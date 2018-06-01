@@ -36,14 +36,17 @@ import yakworks.gradle.config.YamlConfigPlugin
 class ShipkitPlugin implements Plugin<Project> {
     private final static Logger LOG = Logging.getLogger(ShipkitPlugin)
 
+    ConfigMap config
+
     public void apply(final Project project) {
         ProjectUtil.requireRootProject(project, this.getClass())
+
+        config = project.plugins.apply(ConfigYakPlugin).config
+
         project.plugins.with {
-            apply(ConfigYakPlugin)
-            apply(CircleReleasePlugin)
+            apply(CiPublishPlugin)
             apply(DefaultsPlugin)
         }
-        ConfigMap config = project.plugins.apply(YamlConfigPlugin).config
 
         boolean isBintray = config['bintray.enabled']
 
@@ -71,8 +74,8 @@ class ShipkitPlugin implements Plugin<Project> {
                 }
 
                 if (prj['isSnapshot'] || !isBintray) {
-                    LOG.lifecycle("Setting up publish maven Repo to ${prj['mavenPublishUrl']} because one of these is true\n" +
-                        " - isSnapshot: " + prj['isSnapshot'] + ", (!isBintray): " + !isBintray + "\n" )
+                    LOG.lifecycle("Setting up publish maven Repo to ${prj['mavenPublishUrl']} because either:\n" +
+                        "isSnapshot is true: " + prj['isSnapshot'] + ", or bintray.enabled is false?: " + isBintray + "\n" )
                     setupPublishRepo(prj)
                 }
 
@@ -89,8 +92,8 @@ class ShipkitPlugin implements Plugin<Project> {
                 maven {
                     url project.mavenPublishUrl
                     credentials {
-                        username project.findProperty("mavenRepoUser")
-                        password project.findProperty("mavenRepoKey")
+                        username config.maven.user
+                        password config.maven.key
                     }
                 }
             }
@@ -104,7 +107,7 @@ class ShipkitPlugin implements Plugin<Project> {
         GitPlugin.registerChangesForCommitIfApplied([rmeFile], 'README.md versions', updateReadme)
 
         final Task performRelease = project.tasks.getByName(ReleasePlugin.PERFORM_RELEASE_TASK)
-        boolean enableDocsPublish = project.hasProperty('enableDocsPublish')? Boolean.valueOf(project['enableDocsPublish'].toString()) : true
+        boolean enableDocsPublish = config['docs.enabled']
         if(enableDocsPublish) {
             String gitPublishDocsTaskName = 'gitPublishPush'
             if (project.hasProperty(ShipkitConfigurationPlugin.DRY_RUN_PROPERTY)) {
@@ -156,8 +159,8 @@ class ShipkitPlugin implements Plugin<Project> {
         project.afterEvaluate { prj ->
             final BintrayExtension bintray = project.getExtensions().getByType(BintrayExtension.class)
             binConfig.evalAll() //make sure StringTemplates are evaluated
-            bintray.user = onfig['bintray.user']
-            bintray.key = onfig['bintray.key']
+            bintray.user = config['bintray.user']
+            bintray.key = config['bintray.key']
 
             final BintrayExtension.PackageConfig pkg = bintray.getPkg()
             Pogo.merge(pkg,config['bintray.pkg'])

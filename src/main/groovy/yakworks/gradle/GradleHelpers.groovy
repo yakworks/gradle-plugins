@@ -56,11 +56,12 @@ class GradleHelpers {
     }
 
     /**
-     * Genrally you'll pass in an environment var like SOME_PROP.
-     * look in System.env then System.properties, convert to camelCase and findProperty
+     * Generally you'll pass in an environment var like SOME_PROP.
+     * look in System.env then System.properties, converts to camelCase and then calls findProperty
+     *
      * @return the prop or null
      */
-    static def searchProps(Project prj, String prop) {
+    static def findAnyProperty(Project prj, String prop) {
         if (System.getenv(prop) != null) {
             return System.getenv(prop)
         } else if (System.properties[prop]) {
@@ -98,8 +99,8 @@ class GradleHelpers {
         setPropIfEmpty prj, 'mavenRepoUrl', 'http://repo.9ci.com/grails-plugins' //'http://repo.9ci.com/oss-snapshots'
         setPropIfEmpty prj, 'mavenPublishUrl', prj['mavenRepoUrl']
 
-        def mu = searchProps(prj, "MAVEN_REPO_USER")?:""
-        def mk = searchProps(prj, "MAVEN_REPO_KEY")?:""
+        def mu = findAnyProperty(prj, "MAVEN_REPO_USER")?:""
+        def mk = findAnyProperty(prj, "MAVEN_REPO_KEY")?:""
         setPropIfEmpty(prj, 'mavenRepoUser', mu)
         setPropIfEmpty(prj, 'mavenRepoKey', mk)
 

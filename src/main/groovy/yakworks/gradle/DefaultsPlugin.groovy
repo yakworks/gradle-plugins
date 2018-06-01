@@ -15,25 +15,26 @@
  */
 package yakworks.gradle
 
+import com.diffplug.gradle.spotless.SpotlessExtension
+import com.diffplug.gradle.spotless.SpotlessPlugin
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import org.gradle.api.*
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
-import static org.gradle.api.logging.LogLevel.*
+import yakworks.commons.ConfigMap
 
-import static GradleHelpers.searchProps
-import static GradleHelpers.setPropIfEmpty
-
-//@CompileStatic
+@CompileStatic
 class DefaultsPlugin implements Plugin<Project> {
 
     void apply(Project rootProject) {
         if (rootProject.rootProject != rootProject) {
             throw new GradleException('yakworks.defaults must only be applied to the root project')
         }
-        //final ShipkitConfiguration conf = project.getPlugins().apply(ShipkitConfigurationPlugin.class).getConfiguration()
+
         //setup defaults props
-        setupProperties(rootProject)
+
         //apply default plugins
         rootProject.plugins.apply('com.energizedwork.idea-project-components')
         //rootProject.plugins.apply('com.dorongold.task-tree')
@@ -43,16 +44,12 @@ class DefaultsPlugin implements Plugin<Project> {
                 //this is for CI to cache dependencies see https://github.com/palantir/gradle-configuration-resolver-plugin
                 prj.plugins.apply('com.palantir.configuration-resolver')
 
-                //add our default repositories to search.
-                RepositoryHandler rh = prj.repositories
-                rh.jcenter()
-                rh.mavenCentral()
-                rh.maven { url "https://repo.grails.org/grails/core" }
-                rh.maven { url "https://dl.bintray.com/9ci/grails-plugins"}
+                addDefaultRepos(prj)
 
                 silentJavadocWarnings(prj)
 
             }
+            //if its a groovy library then add codeNarc in
             prj.plugins.withType(JavaLibraryPlugin){
                 prj.plugins.withId('groovy') {
                     prj.plugins.apply(CodenarcPlugin)
@@ -63,66 +60,79 @@ class DefaultsPlugin implements Plugin<Project> {
 
         rootProject.plugins.apply(DocmarkPlugin)
 
+    }
 
+    @CompileDynamic
+    void addDefaultRepos(Project prj) {
+        //add our default repositories to search.
+        RepositoryHandler rh = prj.repositories
+        rh.jcenter()
+        rh.mavenCentral()
+        rh.maven { url "https://repo.grails.org/grails/core" }
+        rh.maven { url "https://dl.bintray.com/9ci/grails-plugins"}
     }
 
     /**
      * remove doclint warnings that pollute javadoc logs when building with java8
      */
-    private void silentJavadocWarnings(Project project) {
+    @CompileDynamic
+    void silentJavadocWarnings(Project project) {
         if (JavaVersion.current().isJava8Compatible()) {
             project.tasks.withType(Javadoc) {
                 options.addStringOption('Xdoclint:none', '-quiet')
             }
         }
     }
-
+    @CompileDynamic
     private void addSpotless(Project project) {
-        project.plugins.apply('com.diffplug.gradle.spotless')
+        SpotlessExtension spotless = project.plugins.apply(SpotlessPlugin).extension
 
+        //make sure spotless runs first in the checks
         project.plugins.withId('codenarc') {
-//            Task spotlessCheck = project.tasks.getByName('spotlessCheck')
-//            Task spotlessApply = project.tasks.getByName('spotlessApply')
             project.tasks.getByName('codenarcMain').dependsOn('spotlessCheck')
         }
 
-        project.spotless.groovyGradle {
-            target '**/*.gradle', 'build.gradle', 'gradle/*.gradle'
-            trimTrailingWhitespace()
-            indentWithSpaces(2)
-            endWithNewline()
-        }
-        project.spotless.format 'grailsConf', {
-            target 'grails-app/conf/**/*.groovy'
-            trimTrailingWhitespace()
-            indentWithSpaces(4) // this only checks for tabs and can replace with 4 spaces it it finds them
-            endWithNewline()
-        }
+        spotlessFromConfig project, spotless, 'groovyGradle'
 
         project.plugins.withId('groovy') {
-            //java {
-                //googleJavaFormat()
-            //    licenseHeader "/* Copyright \$YEAR. ${project.author}. Licensed under the Apache License, Version 2.0 */"
-            //    target project.fileTree('.') {
-            //        include 'src/main/groovy/gorm/**/*.java'
-            //    }
-            // }
-            project.spotless.groovy {
-                target project.fileTree('.') {
-                    include 'src/main/groovy/**/*.groovy', 'grails-app/**/*.groovy',
-                        'src/test/groovy/**/*.groovy', 'src/integration-test/groovy/**/*.groovy'
-                    exclude '**/*.java', '**/conf/**/*.groovy'
-                }
+            spotlessFromConfig project, spotless, 'groovy'
+
+            //broken out from normal groovy format so it doesn't try and add the license header
+            spotless.format 'grailsConf', {
+                target 'grails-app/conf/**/*.groovy'
                 trimTrailingWhitespace()
                 indentWithSpaces(4) // this only checks for tabs and can replace with 4 spaces it it finds them
                 endWithNewline()
             }
-            project.plugins.withType(JavaLibraryPlugin){
-                if(project.findProperty('licenseHeader')) project.spotless.formats.groovy.licenseHeader(project.licenseHeader)
-                if(project.findProperty('licenseHeaderFile')) project.spotless.formats.groovy.licenseHeaderFile(project.licenseHeaderFile)
-            }
         }
     }
 
+    @CompileDynamic
+    void spotlessFromConfig(Project project, SpotlessExtension spotless, String formatName){
+        Map cfg = project.config.spotless[formatName]
+
+        spotless."$formatName" {
+            target project.fileTree('.') {
+                cfg.includes.each{
+                    include it
+                }
+                cfg.excludes.each{
+                    exclude it
+                }
+            }
+            if(cfg.endWithNewline) endWithNewline()
+            if(cfg.trimTrailingWhitespace) trimTrailingWhitespace()
+            if(cfg.indentWithSpaces) indentWithSpaces(cfg.indentWithSpaces)
+
+            //if it has both the library plugin applied and it has the header specified
+            project.plugins.withType(JavaLibraryPlugin){
+                if(cfg.licenseHeader){
+                    licenseHeader(cfg.licenseHeader)
+                } else if(cfg.licenseHeaderFile) {
+                    licenseHeader(cfg.licenseHeaderFile)
+                }
+            }
+        }
+    }
 
 }

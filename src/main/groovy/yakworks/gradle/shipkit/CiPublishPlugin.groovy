@@ -1,12 +1,12 @@
 package yakworks.gradle.shipkit
 
+import groovy.transform.CompileStatic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.shipkit.gradle.configuration.ShipkitConfiguration
-import org.shipkit.gradle.exec.ShipkitExecTask
 import org.shipkit.gradle.release.ReleaseNeededTask
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.java.JavaPublishPlugin
@@ -14,46 +14,40 @@ import org.shipkit.internal.gradle.release.CiReleasePlugin
 import org.shipkit.internal.gradle.release.ReleaseNeededPlugin
 import org.shipkit.internal.gradle.release.tasks.ReleaseNeeded
 import org.shipkit.internal.gradle.util.ProjectUtil
-import org.shipkit.internal.gradle.version.VersioningPlugin
-import org.shipkit.internal.util.PropertiesUtil
-
-import static org.shipkit.internal.gradle.exec.ExecCommandFactory.execCommand
+import yakworks.commons.Shell
 
 /**
- * Does special Snapshot wiring and config with CircleCI.
- * For snapshot this will read the snapshot property in the version.propeties and if true
- * it sets up the ciPublish to use
+ * Why?: Shipkit has CiReleasePlugin. This does special snapshot wiring and sets up detection
+ * for commits that only change things like docs and should not perform a release.
+ * All is configurable in config.yml so that it can work with both circle and travis.
  */
-//@CompileStatic
-public class CircleReleasePlugin implements Plugin<Project> {
-    private final static Logger LOG = Logging.getLogger(CircleReleasePlugin)
+@CompileStatic
+public class CiPublishPlugin implements Plugin<Project> {
+    private final static Logger LOG = Logging.getLogger(CiPublishPlugin)
     public static final String CI_PUBLISH_TASK = "ciPublish"
     public static final String CI_CHECK_TASK = "ciCheck"
 
     public void apply(final Project project) {
         ProjectUtil.requireRootProject(project, this.getClass())
-        //addSnaphotTaskFromVersionProp has to be done before ShipkitConfiguration, so it can add the snapshot task to the startParams
-        addSnaphotTaskFromVersionProp(project)
-
         ShipkitConfiguration conf = project.getPlugins().apply(ShipkitConfigurationPlugin.class).getConfiguration()
 
         project.plugins.apply(CiReleasePlugin)
         project.plugins.apply(CirclePlugin)
 
-        if(System.env['CI']) {
+        if(System.getenv('CI')) {
             def ciPubTask = project.task(CI_PUBLISH_TASK)
 
             //add a check shell command. simply depending on it does not seem to fire it so we hard wire it this way
             //down the line, during snapshot, we check for code changes that are not just docs changes
             //and have the root ciPublish depend on this if there are.
             //NOT USED, Works locally but not on circle
-            ShipkitExecTask ciCheckTask = project.task(CI_CHECK_TASK, type:ShipkitExecTask){
-                description = "Runs the `gradle check` in a sep command process"
-                execCommands.add(execCommand("check tests", ["./gradlew", 'check', '--no-daemon']))
-                //execCommands.add(execCommand("check tests", ["./gradlew", 'check', '--no-daemon'], ExecCommandFactory.stopExecution()))
-            }
+//            ShipkitExecTask ciCheckTask = project.task(CI_CHECK_TASK, type:ShipkitExecTask){
+//                description = "Runs the `gradle check` in a sep command process"
+//                execCommands.add(execCommand("check tests", ["./gradlew", 'check', '--no-daemon']))
+//                //execCommands.add(execCommand("check tests", ["./gradlew", 'check', '--no-daemon'], ExecCommandFactory.stopExecution()))
+//            }
 
-            if (project.snapshotVersion) {
+            if (project['isSnapshot']) {
                 project.allprojects { Project subproject ->
                     subproject.plugins.withType(JavaPublishPlugin) {
                         setupCiPublishForSnapshots(subproject, ciPubTask)
@@ -71,27 +65,6 @@ public class CircleReleasePlugin implements Plugin<Project> {
     }
 
     /**
-     * Look into version file for a snapshot property. Add the snapshot task to startParameter.taskNames
-     * if its true.
-     */
-    void addSnaphotTaskFromVersionProp(Project project) {
-        final File versionFile = project.file(VersioningPlugin.VERSION_FILE_NAME);
-        String snapshot = PropertiesUtil.readProperties(versionFile).getProperty("snapshot")
-        def bSnapshot = Boolean.parseBoolean(snapshot ?: 'false')
-        List startTasks = project.gradle.startParameter.taskNames
-        project.ext.snapshotVersion = startTasks.contains('snapshot') || bSnapshot
-
-        boolean excludedTasks = startTasks.any { ['resolveConfigurations', 'clean'].contains(it)}
-
-        if(project.snapshotVersion && !excludedTasks) {
-            startTasks.add(0, 'snapshot')
-            project.gradle.startParameter.taskNames = startTasks
-            LOG.lifecycle("  Snapshot set in versions file. Added snapshot task.")
-            //println project.gradle.startParameter.taskNames
-        }
-    }
-
-    /**
      * Checks if snapshot release is needed for the current branch.
      * checks for changes to docs and only publishes them if they are the only thing that changes
      */
@@ -99,11 +72,11 @@ public class CircleReleasePlugin implements Plugin<Project> {
 
         //def ciPublishTask = project.task(CI_PUBLISH_TASK)
 
-        ReleaseNeededTask rtask = project.rootProject.tasks.getByName(ReleaseNeededPlugin.ASSERT_RELEASE_NEEDED_TASK)
+        ReleaseNeededTask rtask = (ReleaseNeededTask)project.rootProject.tasks.getByName(ReleaseNeededPlugin.ASSERT_RELEASE_NEEDED_TASK)
         String branch = System.getenv("CIRCLE_BRANCH")
         boolean releasableBranch = branch?.matches(rtask.releasableBranchRegex)
-        boolean skipEnvVariable = Boolean.parseBoolean(System.env['SKIP_RELEASE'])
-        boolean skippedByCommitMessage = rtask.commitMessage?.contains(ReleaseNeeded.SKIP_RELEASE_KEYWORD)
+        boolean skipEnvVariable = System.getenv('SKIP_RELEASE').toBoolean()
+        boolean skippedByCommitMessage = rtask.commitMessage?.contains("[ci skip-release]")
 
         LOG.lifecycle("Should Release SNAPSHOT on branch [${rtask.branch}] :\n" +
             " - releasableBranch: " + releasableBranch + ", $branch matches (${rtask.releasableBranchRegex}) \n" +
@@ -113,9 +86,9 @@ public class CircleReleasePlugin implements Plugin<Project> {
         )
 
         if(releasableBranch && !rtask.isPullRequest() && !skipEnvVariable && !skippedByCommitMessage) {
-            def commitRange = ['sh', '-c', 'echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev'].execute().text.trim()
+            String commitRange = Shell.exec('echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev')
             def gitDiff = "git diff --name-only $commitRange"
-            def grepReg = '"(README\\.md|mkdocs\\.yml|docs/)"'
+            def grepReg = $/"(README\.md|mkdocs\.yml|docs/)"/$
 
             boolean hasAppChanges = ['sh', '-c', gitDiff + ' | grep --invert-match -E ' + grepReg].execute().text.trim().length() > 0
             boolean hasDocChanges = ['sh', '-c', gitDiff + ' | grep -E ' + grepReg].execute().text.trim().length() > 0
@@ -133,6 +106,9 @@ public class CircleReleasePlugin implements Plugin<Project> {
     }
 
     //some of the grgit doesnt seem to add the config for user info.
+    /**
+     * add the github user info so commits are more readable, GRGIT doesn't seem to pick up the way shipkit does it.
+     */
     void addGitConfigUser(ShipkitConfiguration conf){
         ['git', 'config', '--global', 'user.name', conf.git.user].execute()
         ['git', 'config', '--global', 'user.email', conf.git.email].execute()

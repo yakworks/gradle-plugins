@@ -1,13 +1,19 @@
-# gradle project properties will get set on the project or the project.ext depending on whether they exist already or not
-# the initial properties here will end up being set directly as gradle propeties just as they are in
-title: # short desc used for docs
+# Can contain standard yaml pointers using the & and * and
+# strings can also use GString syntax is it starts with $.
+# available bound properties are this `config` and `project`.
+# Helper methods are property(prop), findProperty(prop)
+# and findAnyProperty(prop) which looks in env and system.properties.
+
+title: # short title used for javadocs and documentation
 description: # REQUIRED
-author: 9ci Inc # REQUIRED author for docs and copyright, used in licenseHeader too. Can be legal Org name or user name
+author: 9ci Inc # REQUIRED author for docs, copyright, and spotless licenseHeader too. Can be legal Org name or user name
 license: &License Apache-2.0 # REQUIRED will be used in the docs, pom and bintray upload
 # the pointer to the docs for this project
 websiteUrl: &SiteUrl ${"https://" + config.github.owner + ".github.io/" + config.github.repo}
 
-# ---
+# everything before the first separator will get set on the project property
+# or project.ext and standards for gradle.properties should be followed.
+---
 # everything after the first separator will in the project.config
 
 git:
@@ -16,11 +22,18 @@ git:
   commitMessagePostfix: '[ci skip]' # when shipkit commits, this postfix can have ci skip it preferably
   # git config so it shows the user in the commits
   config:
-    user: ${config.github.owner}
+    user: BuildBot
     email: <9cibot@9ci.com>
+  releasable:
+    branchRegex: 'master|release/.+'
+    diff: # gets set to either travisDiff or circleDiff depending on autodetection, can manually set this for local builds and testing
+    circleDiff: 'git diff --name-only $(echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev)'
+    travisDiff: 'git diff --name-only $TRAVIS_COMMIT_RANGE' # for Travis no parsing env var is needed.
+    grepDocs: ${config.git.changes.diff +  ' | grep -E (README\.md|mkdocs\.yml|docs/)'}
+    grepRelease: ${config.git.changes.diff +  ' | (README\.md|mkdocs\.yml|docs/|src/examples/|src/test/)}
 
 github:
-  fullName: # REQUIRED (example: yakworks/) if none specified then will try to find from git config --get remote.origin.url
+  fullName: # REQUIRED (example: yakworks/gradle-plugins) if none specified then will try to find from git config --get remote.origin.url
   owner: ${config.github.fullName.split('/')[0]} # example: yakworks
   repo: ${config.github.fullName.split('/')[1]} # example: gradle-plugins
   repoUrl: &GithubUrl ${'https://github.com/' + config.github.fullName}
@@ -42,8 +55,8 @@ releaseNotes:
 # this gets setup for each publishable project
 bintray:
   enable: true # set this to false to turn off
-  user: '${System.getenv("BINTRAY_USER") ?: findProperty("bintrayUser")}' # REQUIRED
-  key: '${System.getenv("BINTRAY_KEY") ?: findProperty("bintrayKey")}' # REQUIRED
+  user: ${findAnyProperty("BINTRAY_USER")} # REQUIRED
+  key: ${findAnyProperty("BINTRAY_KEY")} # REQUIRED
   pkg:
     repo: # REQUIRED
     userOrg: ${config.github.owner} # REQUIRED
@@ -63,6 +76,39 @@ bintray:
         sync: false
 
 maven:
-  repoUrl:
-  snapshotUrl: # set this when not publishing to an artifactory vs bintray and you have a different repo than the primary repoUrl
+  user: '${findAnyProperty("MAVEN_REPO_USER")}' # searches for env var and then a mavenRepoUser prop
+  key: '${findAnyProperty("MAVEN_REPO_KEY")}'
+  publishUrl: # will get set to from either repoUrl or snapshotUrl depending on whether snapshot is true in version.properties
+  repoUrl: 'http://repo.9ci.com/grails-plugins'
+  snapshotUrl: # set this when not publishing to an artifactory or bintray and you have a different repo than the primary repoUrl
 
+
+spotless:
+  enabled: true
+  # default license header file to use
+  licenseHeader: ${'/* Copyright \$YEAR. ' + config.author + ' Licensed under the Apache License, Version 2.0 */'}
+  # licenseHeaderFile: # or you specify the file name of header file to use
+  groovy:
+    licenseHeader: $config.spotless.licenseHeader
+    indentWithSpaces: 4
+    trimTrailingWhitespace: true
+    endWithNewline: true
+    includes:
+      - 'src/main/groovy/**/*.groovy'
+      - 'grails-app/**/*.groovy'
+      - 'src/test/groovy/**/*.groovy'
+      - 'src/integration-test/groovy/**/*.groovy'
+    excludes:
+      - '**/*.java'
+      - '**/conf/**/*.groovy'
+  groovyGradle:
+    indentWithSpaces: 2
+    trimTrailingWhitespace: true
+    endWithNewline: true
+    includes:
+      - '**/*.gradle'
+      - 'build.gradle'
+      - 'gradle/*.gradle'
+
+docs:
+  enabled: true

@@ -22,6 +22,7 @@ import org.gradle.api.tasks.javadoc.Groovydoc
 import org.shipkit.gradle.configuration.ShipkitConfiguration
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
+import yakworks.commons.ConfigMap
 
 /**
  * Generates the docs using mkdocs
@@ -51,6 +52,7 @@ class DocmarkPlugin implements Plugin<Project> {
     }
 
     private void addMkdocsTasks(Project prj) {
+        ConfigMap config = prj.config
         Task copyTask = prj.tasks.create('mkdocsCopy')
         copyTask.with {
             group = 'publishing'
@@ -78,15 +80,13 @@ class DocmarkPlugin implements Plugin<Project> {
                     into "$prj.buildDir/mkdocs"
                     include 'mkdocs.yml'
                     filter { line ->
-                        String siteUrl = prj.isSnapshot ? "$prj.websiteUrl/snapshot" : prj.websiteUrl //prj.property('websiteUrl')
-                        def newline = line.startsWith('repo_url:') ? "repo_url: ${prj.property('gitHubUrl')}" : line
+                        String siteUrl = prj.isSnapshot ? "$config.websiteUrl/snapshot" : config.websiteUrl //prj.property('websiteUrl')
+                        def newline = line.startsWith('repo_url:') ? "repo_url: ${config.github.repoUrl}" : line
                         newline.startsWith('site_url:') ? "site_url: $siteUrl" : newline
                     }
-                    filter(ReplaceTokens,
-                        tokens: ['version', 'title', 'description', 'gitHubSlug', 'author'].collectEntries {
-                            [it, prj."$it".toString()]
-                        }
-                    )
+                    def tokens = [version: prj.version, title: config.title, description: prj.description,
+                                  author: config.author, gitHubSlug: config.github.fullName, ]
+                    filter(ReplaceTokens, tokens)
                 }
             }
         }

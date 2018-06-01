@@ -46,8 +46,8 @@ dops.setWidth(120)
 dops.setSplitLines(false)
 dops.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)
 Yaml yaml = new Yaml(dops)
-//println yaml.dump(config.toJsonMap())
-//println config.toJsonMap()
+//println yaml.dump(config.toNormalMap())
+//println config.toNormalMap()
 //println prettyPrint(toJson(config))
 
 //String str = '${System.properties[\'user.home\']}'

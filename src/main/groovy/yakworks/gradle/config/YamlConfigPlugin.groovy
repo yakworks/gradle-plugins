@@ -57,6 +57,7 @@ class YamlConfigPlugin implements Plugin<Project> {
         config.extraBinding['project']      = prj
         config.extraBinding['property']     = { String prop -> prj.property(prop) }
         config.extraBinding['findProperty'] = { String prop -> prj.findProperty(prop) }
+        config.extraBinding['findAnyProperty'] = { String prop -> GradleHelpers.findAnyProperty(prj, prop) }
 
         loadClassPathDefaults(prj, config)
 
@@ -76,6 +77,10 @@ class YamlConfigPlugin implements Plugin<Project> {
         }
 
         GradleHelpers.prop(prj, 'config', config)
+        //setup core project items if they exit
+        GradleHelpers.setPropIfEmpty(prj, 'description', config['description'])
+        GradleHelpers.setPropIfEmpty(prj, 'group', config['group'])
+        GradleHelpers.setPropIfEmpty(prj, 'name', config['name'])
     }
 
     /**

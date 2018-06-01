@@ -12,7 +12,7 @@ buildscript {
 apply plugin:"groovy"
 apply plugin:"yakworks.shipkit"
 
-println config
+println config.prettyPrint()
 
 dependencies {
     // Use the latest Groovy version for building this library
