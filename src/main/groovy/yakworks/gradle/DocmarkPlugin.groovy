@@ -38,8 +38,13 @@ class DocmarkPlugin implements Plugin<Project> {
         ShipkitConfiguration conf = rootProject.plugins.apply(ShipkitConfigurationPlugin).configuration
         //do after groovy is applied to pubProjects above
         addCombineGroovyDocsTask(rootProject)
-        addMkdocsTasks(rootProject)
-        addGitPublish(rootProject)
+
+        boolean enableDocsPublish = rootProject.hasProperty('enableDocsPublish')? Boolean.valueOf(rootProject['enableDocsPublish'].toString()) : true
+        if(enableDocsPublish) {
+            addMkdocsTasks(rootProject)
+            addGitPublish(rootProject)
+        }
+
         addUpdateReadmeVersions(rootProject)
     }
 

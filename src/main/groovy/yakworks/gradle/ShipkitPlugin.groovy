@@ -47,7 +47,8 @@ class ShipkitPlugin implements Plugin<Project> {
 
         project.allprojects { Project prj ->
 
-            prj.plugins.withType(JavaLibraryPlugin) {
+            //do the with for JavaPublishPlugin so we know grails-plugin has been applied and we won't get empty dependencies
+            prj.plugins.withType(JavaPublishPlugin) {
                 if(isBintray){
                     prj.plugins.apply(JavaBintrayPlugin)
                     configBintray(prj)
@@ -57,13 +58,13 @@ class ShipkitPlugin implements Plugin<Project> {
                     }
                 } else{
                     //JavaBintrayPlugin takes care of these above
-                    prj.plugins.apply(JavaPublishPlugin)
+                    //prj.plugins.apply(JavaPublishPlugin) //TODO redundant know that we are doing withType on it
                     //prj.plugins.apply(ComparePublicationsPlugin) //TODO fix this
                 }
 
                 if (prj['isSnapshot'] || !isBintray) {
-                    LOG.lifecycle("Setting up publish maven Repo to ${prj['mavenPublishUrl']} because one of these is true\n" +
-                        " - isSnapshot: " + prj['isSnapshot'] + ", (!isBintray): " + !isBintray + "\n" )
+                    LOG.lifecycle("Setting up publish maven Repo to ${prj['mavenPublishUrl']} because either \n" +
+                        " - isSnapshot is true: " + prj['isSnapshot'] + ", or isBintray is false: " + isBintray + "\n" )
                     setupPublishRepo(prj)
                 }
 
