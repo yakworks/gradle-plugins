@@ -19,6 +19,7 @@ import groovy.transform.CompileStatic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.shipkit.internal.gradle.java.JavaLibraryPlugin
+import org.shipkit.internal.gradle.java.JavaPublishPlugin
 
 /**
  * A marker for a grails plugin, "yakworks.grails-plugin", will apply GrailsPluginPublishPlugin later after config
@@ -31,8 +32,11 @@ class GrailsPlugin implements Plugin<Project> {
         //project and only the yakworks.grails-plugin is applied
         project.rootProject.plugins.apply(ShipkitPlugin)
         project.plugins.apply('groovy')
-        //this has to come before the grails-plugin as it sets up the sourcesJar and javadocJar
+        //order is important here
+        //JavaLibraryPlugin has to come before the grails-plugin as it sets up the sourcesJar and javadocJar
         project.plugins.apply(JavaLibraryPlugin)
         project.plugins.apply("org.grails.grails-plugin")
+        //JavaPublishPlugin has to get applied after the grails-plugin has been applied or it doesn't add the dependencies to the pom properly
+        project.plugins.apply(JavaPublishPlugin)
     }
 }

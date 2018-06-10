@@ -59,7 +59,8 @@ class ShipkitPlugin implements Plugin<Project> {
 
         project.allprojects { Project prj ->
 
-            prj.plugins.withType(JavaLibraryPlugin) {
+            //do the with for JavaPublishPlugin so we know grails-plugin has been applied and we won't get empty dependencies
+            prj.plugins.withType(JavaPublishPlugin) {
                 if(isBintray){
                     prj.plugins.apply(JavaBintrayPlugin)
                     configBintray(prj, config)
@@ -69,7 +70,7 @@ class ShipkitPlugin implements Plugin<Project> {
                     }
                 } else{
                     //JavaBintrayPlugin takes care of these above
-                    prj.plugins.apply(JavaPublishPlugin)
+                    //prj.plugins.apply(JavaPublishPlugin) //TODO redundant know that we are doing withType on it
                     //prj.plugins.apply(ComparePublicationsPlugin) //TODO fix this
                 }
 
