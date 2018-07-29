@@ -13,7 +13,6 @@ websiteUrl: &SiteUrl ${"https://" + config.github.owner + ".github.io/" + config
 
 # everything before the first separator will get set on the project property
 # or project.ext and standards for gradle.properties should be followed.
----
 # everything after the first separator will in the project.config
 
 git:
@@ -29,8 +28,9 @@ git:
     diff: # gets set to either travisDiff or circleDiff depending on autodetection, can manually set this for local builds and testing
     circleDiff: 'git diff --name-only $(echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev)'
     travisDiff: 'git diff --name-only $TRAVIS_COMMIT_RANGE' # for Travis no parsing env var is needed.
-    grepDocs: ${config.git.changes.diff +  ' | grep -E (README\.md|mkdocs\.yml|docs/)'}
-    grepRelease: ${config.git.changes.diff +  ' | (README\.md|mkdocs\.yml|docs/|src/examples/|src/test/)}
+    #grepDocs: ${config.git.releasable.diff +  ' | grep -E xxx'}
+    grepDocs: ${config.git.releasable.circleDiff +  ' | grep -E (README\\.md|mkdocs\\.yml|docs/)' }
+    grepRelease: ${config.git.releasable.diff +  ' | (README\.md|mkdocs\.yml|docs/|src/examples/|src/test/)}
 
 github:
   fullName: # REQUIRED (example: yakworks/gradle-plugins) if none specified then will try to find from git config --get remote.origin.url

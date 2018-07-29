@@ -39,7 +39,7 @@ class DefaultsPlugin implements Plugin<Project> {
         rootProject.plugins.apply('com.energizedwork.idea-project-components')
         //rootProject.plugins.apply('com.dorongold.task-tree')
 
-        rootProject.allprojects { prj ->
+        rootProject.allprojects { Project prj ->
             prj.plugins.withId('java') {
                 //this is for CI to cache dependencies see https://github.com/palantir/gradle-configuration-resolver-plugin
                 prj.plugins.apply('com.palantir.configuration-resolver')

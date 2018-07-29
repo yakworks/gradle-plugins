@@ -5,14 +5,12 @@ buildscript {
     maven { url "https://plugins.gradle.org/m2/" }
   }
   dependencies {
-    classpath "org.yakworks:gradle-plugins:0.1.44-SNAPSHOT"
+    classpath "org.yakworks:gradle-plugins:0.1.46-SNAPSHOT"
   }
 }
 
 apply plugin:"groovy"
 apply plugin:"yakworks.shipkit"
-
-println config.prettyPrint()
 
 dependencies {
     // Use the latest Groovy version for building this library
@@ -28,3 +26,6 @@ repositories {
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
 }
+
+println config.prettyPrint()
+println config.git.releasable.grepDocs
