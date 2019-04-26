@@ -18,10 +18,10 @@ package yakworks.commons;
 import java.util.*;
 
 /**
- * Copied in from grails.util.GrailsNameUtils
+ * Copied in from grails.util.GrailsNameUtils and converted to groovy
  * Utility methods for converting between different name types,
  * for example from class names -> property names and vice-versa. The
- * key aspect of this class is that it has no dependencies outside the JDK!
+ * key aspect of this class is that it has no dependencies outside stock groovy!
  */
 public class NameUtils {
 

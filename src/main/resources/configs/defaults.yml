@@ -25,12 +25,12 @@ git:
     email: <9cibot@9ci.com>
   releasable:
     branchRegex: 'master|release/.+'
-    diff: # gets set to either travisDiff or circleDiff depending on autodetection, can manually set this for local builds and testing
+    diff: # gets set to either travisDiff or circleDiff depending on autodetection of CI, can manually set this for local builds and testing
     circleDiff: 'git diff --name-only $(echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev)'
     travisDiff: 'git diff --name-only $TRAVIS_COMMIT_RANGE' # for Travis no parsing env var is needed.
     #grepDocs: ${config.git.releasable.diff +  ' | grep -E xxx'}
     grepDocs: ${config.git.releasable.circleDiff +  ' | grep -E (README\\.md|mkdocs\\.yml|docs/)' }
-    grepRelease: ${config.git.releasable.diff +  ' | (README\.md|mkdocs\.yml|docs/|src/examples/|src/test/)}
+    grepRelease: ${config.git.releasable.diff +  ' | grep --invert-match -E (README\\.md|mkdocs\\.yml|docs/|src/examples/|src/test/)' }
 
 github:
   fullName: # REQUIRED (example: yakworks/gradle-plugins) if none specified then will try to find from git config --get remote.origin.url
@@ -38,28 +38,31 @@ github:
   repo: ${config.github.fullName.split('/')[1]} # example: gradle-plugins
   repoUrl: &GithubUrl ${'https://github.com/' + config.github.fullName}
   issuesUrl: &IssuesUrl ${config.github.repoUrl + '/issues'}
-  # token used for dry run and test builds so devs dont need a write token to get started
-  writeAuthToken: '${System.getenv("GRGIT_USER") ?: System.getenv("GH_WRITE_TOKEN") ?: findProperty("gitHubToken")}'
-  readOnlyAuthToken: '${System.getenv("GRGIT_USER") ?: System.getenv("GH_WRITE_TOKEN") ?: findProperty("gitHubToken") ?: "e7fe8fcdd6ffed5c38498c4c79b2a68e6f6ed1bb"}'
+  #DO NOT set and checkin your token in yml here. Use a env var or gradle.properties
+  writeAuthToken: '${System.getenv("GRGIT_USER") ?: System.getenv("GH_WRITE_TOKEN") ?: project.findProperty("gitHubToken")}'
+  readOnlyAuthToken: '${System.getenv("GRGIT_USER") ?: System.getenv("GH_WRITE_TOKEN") ?: project.findProperty("gitHubToken") ?: "e7fe8fcdd6ffed5c38498c4c79b2a68e6f6ed1bb"}'
 
 team:
   # keys here should be github user and name should match github name.
-  developers: # REQUIRED ex: List in form ['basejump: Joshua Burnett']
-  contributors: # List same format as developers
-  ignoredContributors: ['9cibot'] # list of names or logins to ignore. good for build bot commits
+  developers: # REQUIRED List in form githubUser: Full Name ex: ['basejump: Joshua Burnett', 'jimbob: Jim Bob']
+  contributors: # Other contribs , List same format as developers
+  ignoredContributors: ['9cibot'] # list of names or logins to ignore, mostly for changlog. good for robot/CI user's commits when build/deploying
 
 releaseNotes:
   file: docs/release-notes.md
 
-# see docs here https://github.com/bintray/gradle-bintray-plugin. the yml support options are below
-# this gets setup for each publishable project
+# see docs here https://github.com/bintray/gradle-bintray-plugin. the yml supported options are below
+# this gets setup for each publishable project. If this is enabled then its assumed this is the primary place to publish
 bintray:
-  enable: true # set this to false to turn off
-  user: ${findAnyProperty("BINTRAY_USER")} # REQUIRED
-  key: ${findAnyProperty("BINTRAY_KEY")} # REQUIRED
+  enabled: true # set this to false to turn off
+  #Note: properties such as BINTRAY_USER should be setup as system env variables, normally the case for CI
+  # or the camelCase variant can be put in ~/.gradle/gradle.properties or even assigned in ext props.
+  #DO NOT set or checkin your token in yml here and push to github, in case that wasn't obvious
+  user: ${findAnyProperty("BINTRAY_USER")} # REQUIRED findAny searches for BINTRAY_USER env and then looks for bintrayUser
+  key: ${props.findAny("BINTRAY_KEY")} # REQUIRED findAny searches for BINTRAY_KEY env and then looks for bintrayKey
   pkg:
-    repo: # REQUIRED
-    userOrg: ${config.github.owner} # REQUIRED
+    repo: # REQUIRED ex: grails-plugins
+    userOrg: ${config.github.owner} # -> the github owner by default
     name: # this will get set from each subprojects name during runtime
     websiteUrl: *SiteUrl
     issueTrackerUrl: *IssuesUrl
@@ -74,19 +77,22 @@ bintray:
         sign: false
       mavenCentralSync:
         sync: false
-
+# normal maven setting can be configured if not publishing to bintray and using an maven repo such as artifactory
+# If using bintray for primary and a maven repo for snapshots then just setup user/key and the repoUrl here.
+# if not using bintray then set enabled= false on it and setup repoUrl and a snapshotUrl if they differ.
+# Currently not suported to have 2 different credentials
 maven:
-  user: '${findAnyProperty("MAVEN_REPO_USER")}' # searches for env var and then a mavenRepoUser prop
-  key: '${findAnyProperty("MAVEN_REPO_KEY")}'
-  publishUrl: # will get set to from either repoUrl or snapshotUrl depending on whether snapshot is true in version.properties
+  user: '${props.findAny("MAVEN_REPO_USER")}' # see notes above about env variables like this
+  key: '${props.findAny("MAVEN_REPO_KEY")}'
+  publishUrl: # NOT normally set in config.yml. this plugin will assign it either repoUrl or snapshotUrl depending on whether snapshot is true in version.properties
   repoUrl: 'http://repo.9ci.com/grails-plugins'
-  snapshotUrl: # set this when not publishing to an artifactory or bintray and you have a different repo than the primary repoUrl
+  snapshotUrl: # set this when not using bintray and you have a different url for snapshots
 
-
+#spotless helps keep your code clean and spotless.
 spotless:
   enabled: true
   # default license header file to use
-  licenseHeader: ${'/* Copyright \$YEAR. ' + config.author + ' Licensed under the Apache License, Version 2.0 */'}
+  licenseHeader: ${'/* Copyright \$YEAR. ' + config.author + '. Licensed under the Apache License, Version 2.0 */'}
   # licenseHeaderFile: # or you specify the file name of header file to use
   groovy:
     licenseHeader: $config.spotless.licenseHeader
@@ -110,5 +116,6 @@ spotless:
       - 'build.gradle'
       - 'gradle/*.gradle'
 
+# the mkdocs engine
 docs:
   enabled: true

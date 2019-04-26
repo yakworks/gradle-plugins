@@ -18,7 +18,7 @@ import yakworks.commons.Shell;
 /**
  * Configures the release automation to be used with Circle CI.
  * Intended for root project.
- * Copied most of the logic from the TravisPlugin class.
+ * Copied the core logic from the TravisPlugin class.
  */
 public class CirclePlugin implements Plugin<Project> {
 

@@ -3,6 +3,10 @@ package yakworks.commons
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 
+/**
+ * Helpful methods for dealing with maps
+ */
+
 @Slf4j
 @CompileStatic
 class Maps {

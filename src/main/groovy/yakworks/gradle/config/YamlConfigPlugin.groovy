@@ -30,6 +30,10 @@ import yakworks.commons.ConfigMap
 
 //import static yakworks.gradle.GradleHelpers.prop
 
+/**
+ * Loads the default.yml from files from gradle plugins and merges in yml configFiles either from the configFiles
+ * or from the gradle.yml or gradle/config.yml
+ */
 @CompileStatic
 class YamlConfigPlugin implements Plugin<Project> {
     private final static Logger LOG = Logging.getLogger(YamlConfigPlugin)
@@ -54,12 +58,19 @@ class YamlConfigPlugin implements Plugin<Project> {
         configFileNames = configFileNames as List<String>
 
         config = new ConfigMap()
-        config.extraBinding['project']      = prj
-        config.extraBinding['property']     = { String prop -> prj.property(prop) }
-        config.extraBinding['findProperty'] = { String prop -> prj.findProperty(prop) }
-        config.extraBinding['findAnyProperty'] = { String prop -> GradleHelpers.findAnyProperty(prj, prop) }
+        config.addToBinding([
+            project: prj,
+            findAnyProperty: { String prop -> GradleHelpers.findAnyProperty(prj, prop) },
+            props: [
+                findAny: { String prop -> GradleHelpers.findAnyProperty(prj, prop) }
+            ]
+        ])
+//        config.extraBinding['project']         = prj
+//        config.extraBinding['property']        = { String prop -> prj.property(prop) }
+//        config.extraBinding['findProperty']    = { String prop -> prj.findProperty(prop) }
+//        config.extraBinding['findAnyProperty'] = { String prop -> GradleHelpers.findAnyProperty(prj, prop) }
 
-        loadClassPathDefaults(prj, config)
+        loadClassPathDefaults(prj, config) //looks for /configs/defaults.yml
 
         configFileNames.each { String fname ->
             File configFile = prj.file(fname)
@@ -69,18 +80,22 @@ class YamlConfigPlugin implements Plugin<Project> {
                     config.merge(cfgObj)
                 } else if(fname.endsWith('.yml')){
                     Map ymlMap = new Yaml().load(new FileInputStream(configFile))
-                    //def co = new ConfigObject()
-                    //co.putAll(ymlMap)
                     config.merge(ymlMap)
                 }
             }
         }
 
+        //assign the config object
         GradleHelpers.prop(prj, 'config', config)
         //setup core project items if they exit
         GradleHelpers.setPropIfEmpty(prj, 'description', config['description'])
-        GradleHelpers.setPropIfEmpty(prj, 'group', config['group'])
-        GradleHelpers.setPropIfEmpty(prj, 'name', config['name'])
+        //assign group if in config
+        if(config['group']){
+            prj.allprojects { Project prjsub ->
+                //println "prj.group for ${prjsub.name}: ${prjsub.group}"
+                prjsub.setGroup(config['group'])
+            }
+        }
     }
 
     /**
@@ -99,7 +114,7 @@ class YamlConfigPlugin implements Plugin<Project> {
     }
 
     /**
-     * first look for any defaultConfig.yml on the classpath
+     * load the ymlSource file, ymlSource should be some type of reader
      */
     Map loadYaml(ymlSource){
         Yaml yaml = new Yaml()

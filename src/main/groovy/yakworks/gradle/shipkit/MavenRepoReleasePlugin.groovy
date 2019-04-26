@@ -9,6 +9,7 @@ import org.shipkit.gradle.configuration.ShipkitConfiguration
 import org.shipkit.gradle.notes.UpdateReleaseNotesTask
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.release.ReleasePlugin
+import yakworks.commons.ConfigMap
 
 import static org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin.DRY_RUN_PROPERTY
 import static org.shipkit.internal.gradle.git.GitPlugin.GIT_PUSH_TASK
@@ -27,10 +28,12 @@ class MavenRepoReleasePlugin implements Plugin<Project> {
 
     void apply(final Project project) {
         ReleasePlugin releasePlugin = project.plugins.apply(ReleasePlugin) //should have already been done by now
-        ShipkitConfiguration conf = project.plugins.apply(ShipkitConfigurationPlugin).configuration
+        ShipkitConfiguration shipkitConf = project.plugins.apply(ShipkitConfigurationPlugin).configuration
 
         Task gitPush = (Task)project.property(GIT_PUSH_TASK)
         Task performRelease = project.tasks.getByName(PERFORM_RELEASE_TASK)
+
+        ConfigMap config = (ConfigMap)project.property('config')
 
         project.allprojects { Project subproject ->
 
@@ -49,13 +52,21 @@ class MavenRepoReleasePlugin implements Plugin<Project> {
                             task.mustRunAfter(gitPush)
                         }
                     }
-                    performRelease.dependsOn(MAVEN_PUBLISH_REPO_TASK)
+                    performRelease.dependsOn("${subproject.getPath()}:$MAVEN_PUBLISH_REPO_TASK")
                 }
 
-                //TODO FIXME See the UpdateReleaseNotesTask.setPublicationRepository in BintrayRelease plugin.
-                //UpdateReleaseNotesTask needs to be modified as its hard coded to use bintray when writing out the release-notes
-                def updateNotes = (UpdateReleaseNotesTask) project[UPDATE_NOTES_TASK]
-                updateNotes.publicationRepository = conf.releaseNotes.publicationRepository
+                subproject.afterEvaluate {
+                    //UpdateReleaseNotesTask needs to be modified as its hard coded to use bintray when writing out the release-notes
+                    UpdateReleaseNotesTask updateNotes = (UpdateReleaseNotesTask) project[UPDATE_NOTES_TASK]
+                    String userSpecifiedRepo = shipkitConf.lenient.releaseNotes.publicationRepository
+                    if (userSpecifiedRepo != null) {
+                        updateNotes.publicationRepository = userSpecifiedRepo
+                    } else {
+                        String groupPath = subproject.group.toString().replace('.','/')
+                        //Otherwise build it by hand
+                        updateNotes.publicationRepository = "${config['maven.publishUrl']}/${groupPath}/${subproject.name}/"
+                    }
+                }
 
                 //Making git push run as late as possible because it is an operation that is hard to reverse.
                 gitPush.mustRunAfter(mavenLocalTask)

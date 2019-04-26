@@ -19,9 +19,8 @@ import yakworks.commons.Shell
 import static yakworks.gradle.GradleHelpers.prop
 
 /**
- * Uses the yaml config plugin to setup shipkit and others
+ * Uses the yaml config plugin to setup shipkit and others gradle plugins
  * This should be the first one applied so it can setup the snapshot configuration and the yaml-config defaults
- *
  */
 @CompileStatic
 public class ConfigYakPlugin implements Plugin<Project> {
@@ -29,6 +28,7 @@ public class ConfigYakPlugin implements Plugin<Project> {
     private final static Logger LOG = Logging.getLogger(ConfigYakPlugin);
 
     ConfigMap config
+
 
     public void apply(final Project project) {
         ProjectUtil.requireRootProject(project, this.getClass())
@@ -46,8 +46,10 @@ public class ConfigYakPlugin implements Plugin<Project> {
         config = project.plugins.apply(YamlConfigPlugin).config
 
         //sets the fullname repo from git if its null
-        String gslug = config['github.fullName']
+        ConfigMap ghConfig = (ConfigMap)config.github
+        String gslug = ghConfig.fullName
         if (!gslug) {
+            //println "gslug was null so using sed to get config from git"
             String sedPart = $/sed -n 's#.*/\(.*/[^.]*\)\.git#\1#p'/$
             gslug = Shell.exec("git config --get remote.origin.url | $sedPart")
             //the sed above should have gotten back owner/repo
@@ -55,8 +57,11 @@ public class ConfigYakPlugin implements Plugin<Project> {
         }
 
         //github
-        setProps(shipConfig.gitHub, config['github'])
-        shipConfig.gitHub.repository = config['github.fullName']
+        setProps(shipConfig.gitHub, ghConfig)
+        //println "ghConfig $ghConfig"
+        shipConfig.gitHub.repository = ghConfig.fullName
+        //println "gitHubConfig['readOnlyAuthToken'] ${ghConfig.readOnlyAuthToken}"
+        //println "gitHubConfig['writeAuthToken'] ${ghConfig.writeAuthToken}"
 
         //git
         setProps(shipConfig.git, config['git'])
@@ -84,7 +89,7 @@ public class ConfigYakPlugin implements Plugin<Project> {
         List startTasks = project.gradle.startParameter.taskNames
         prop(project, 'isSnapshot', startTasks.contains('snapshot') || bSnapshot)
 
-        boolean excludedTasks = startTasks.any { ['resolveConfigurations', 'clean'].contains(it)}
+        boolean excludedTasks = startTasks.any { ['resolveConfigurations', 'clean'].contains(it) }
 
         if(prop(project, 'isSnapshot') && !excludedTasks) {
             startTasks.add(0, 'snapshot')

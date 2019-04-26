@@ -3,6 +3,9 @@ package yakworks.commons
 import spock.lang.Issue;
 import spock.lang.Specification
 
+/**
+ * copied from grails core
+ */
 class ConfigMapSpec extends Specification {
 
     def "should support merging ConfigObject maps"() {
@@ -91,7 +94,6 @@ test.another = true
         configMap.toFlatConfig() == ['a.b.c': 1, 'a.b.d': 2]
     }
 
-    @Issue('#9146')
     def "should support hashCode()"() {
         given:
         ConfigMap configMap = new ConfigMap()
@@ -109,8 +111,8 @@ test.another = true
         configMap.a.b.c = [1, 2, 3]
         configMap.a.b.d = 2
         then:
-        configMap.toFlatConfig() ==
-            ['a.b.c': [1, 2, 3],
+        configMap.toFlatConfig() == [
+            'a.b.c': [1, 2, 3],
              'a.b.c[0]': 1,
              'a.b.c[1]': 2,
              'a.b.c[2]': 3,
@@ -124,8 +126,8 @@ test.another = true
         configMap.a.b.c = [1, 2, 3]
         configMap.a.b.d = 2
         then:
-        configMap.toProperties() ==
-            ['a.b.c': '1,2,3',
+        configMap.toProperties() == [
+            'a.b.c': '1,2,3',
              'a.b.c[0]': '1',
              'a.b.c[1]': '2',
              'a.b.c[2]': '3',
@@ -140,13 +142,36 @@ test.another = true
         when:
         ConfigMap cloned = configMap.clone()
         then:
-        cloned.toFlatConfig() ==
-            ['a.b.c': [1, 2, 3],
+        cloned.toFlatConfig() == [
+            'a.b.c': [1, 2, 3],
              'a.b.c[0]': 1,
              'a.b.c[1]': 2,
              'a.b.c[2]': 3,
              'a.b.d': 2]
         !cloned.is(configMap)
         cloned == configMap
+    }
+
+    def "should support binding"() {
+        when:
+        ConfigMap configMap = new ConfigMap()
+
+        configMap.addToBinding("someVar", 'xxx' )
+        configMap.addToBinding("wtf", { String prop -> "got $prop" } )
+//        configMap.addToBinding([
+//            props: [find: { String prop -> "got $prop" } ]
+//        ])
+        println "bindingMap ${configMap.getBindingMap()}"
+        configMap.sv = '$someVar'
+        configMap.foo = 'bar'
+        configMap.cfg = '${config.foo}'
+        configMap.methCall = '${wtf("that")}'
+
+
+        then:
+        configMap.methCall == 'got that'
+        configMap.sv == 'xxx'
+        configMap.cfg == 'bar'
+
     }
 }

@@ -12,20 +12,22 @@ import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.java.JavaPublishPlugin
 import org.shipkit.internal.gradle.release.CiReleasePlugin
 import org.shipkit.internal.gradle.release.ReleaseNeededPlugin
+import org.shipkit.internal.gradle.release.ReleasePlugin
 import org.shipkit.internal.gradle.release.tasks.ReleaseNeeded
 import org.shipkit.internal.gradle.util.ProjectUtil
 import yakworks.commons.Shell
 
 /**
  * Why?: Shipkit has CiReleasePlugin. This does special snapshot wiring and sets up detection
- * for commits that only change things like docs and should not perform a release.
+ * for commits that only changed things like docs and should not perform a full release.
  * All is configurable in config.yml so that it can work with both circle and travis.
  */
 @CompileStatic
 public class CiPublishPlugin implements Plugin<Project> {
     private final static Logger LOG = Logging.getLogger(CiPublishPlugin)
     public static final String CI_PUBLISH_TASK = "ciPublish"
-    public static final String CI_CHECK_TASK = "ciCheck"
+    public static final String PUBLISH_RELEASE_TASK = "publishRelease"
+    //public static final String CI_CHECK_TASK = "ciCheck"
 
     public void apply(final Project project) {
         ProjectUtil.requireRootProject(project, this.getClass())
@@ -34,18 +36,18 @@ public class CiPublishPlugin implements Plugin<Project> {
         project.plugins.apply(CiReleasePlugin)
         project.plugins.apply(CirclePlugin)
 
+        //add a check shell command. simply depending on it does not seem to fire it so we hard wire it this way
+        //down the line, during snapshot, we check for code changes that are not just docs changes
+        //and have the root ciPublish depend on this if there are.
+        //NOT USED, Works locally but not on circle
+        //            ShipkitExecTask ciCheckTask = project.task(CI_CHECK_TASK, type:ShipkitExecTask){
+        //                description = "Runs the `gradle check` in a sep command process"
+        //                execCommands.add(execCommand("check tests", ["./gradlew", 'check', '--no-daemon']))
+        //                //execCommands.add(execCommand("check tests", ["./gradlew", 'check', '--no-daemon'], ExecCommandFactory.stopExecution()))
+        //            }
+
         if(System.getenv('CI')) {
             def ciPubTask = project.task(CI_PUBLISH_TASK)
-
-            //add a check shell command. simply depending on it does not seem to fire it so we hard wire it this way
-            //down the line, during snapshot, we check for code changes that are not just docs changes
-            //and have the root ciPublish depend on this if there are.
-            //NOT USED, Works locally but not on circle
-//            ShipkitExecTask ciCheckTask = project.task(CI_CHECK_TASK, type:ShipkitExecTask){
-//                description = "Runs the `gradle check` in a sep command process"
-//                execCommands.add(execCommand("check tests", ["./gradlew", 'check', '--no-daemon']))
-//                //execCommands.add(execCommand("check tests", ["./gradlew", 'check', '--no-daemon'], ExecCommandFactory.stopExecution()))
-//            }
 
             if (project['isSnapshot']) {
                 project.allprojects { Project subproject ->
@@ -54,12 +56,23 @@ public class CiPublishPlugin implements Plugin<Project> {
                     }
                 }
             } else {
-                //runs the normal ciPerformRelease after it runs a check
-                //ciPubTask.dependsOn(ciCheckTask)
                 ciPubTask.dependsOn(CiReleasePlugin.CI_PERFORM_RELEASE_TASK)
             }
 
             addGitConfigUser(conf)
+        }
+        else { //
+            def pubTask = project.task(PUBLISH_RELEASE_TASK)
+
+            if (project['isSnapshot']) {
+                project.allprojects { Project subproject ->
+                    subproject.plugins.withType(JavaPublishPlugin) {
+                        pubTask.dependsOn("${subproject.getPath()}:$MavenRepoReleasePlugin.MAVEN_PUBLISH_REPO_TASK")
+                    }
+                }
+            } else {
+                pubTask.dependsOn(ReleasePlugin.PERFORM_RELEASE_TASK)
+            }
         }
 
     }

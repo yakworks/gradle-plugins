@@ -49,16 +49,16 @@ class ShipkitPlugin implements Plugin<Project> {
         }
 
         boolean isBintray = config['bintray.enabled']
-
         if(isBintray){
+            println "applying BintrayReleasePlugin isBintray=true"
             project.plugins.apply(BintrayReleasePlugin)
         } else{
+            //we are publishing lib to artifactory
             project.plugins.apply(MavenRepoReleasePlugin)
         }
         project.plugins.apply(PomContributorsPlugin)
 
         project.allprojects { Project prj ->
-
             //do the with for JavaPublishPlugin so we know grails-plugin has been applied and we won't get empty dependencies
             prj.plugins.withType(JavaPublishPlugin) {
                 if(isBintray){
@@ -75,9 +75,8 @@ class ShipkitPlugin implements Plugin<Project> {
                 }
 
                 if (prj['isSnapshot'] || !isBintray) {
-                    LOG.lifecycle("Setting up publish maven Repo to ${prj['mavenPublishUrl']} because either:\n" +
-                        "isSnapshot is true: " + prj['isSnapshot'] + ", or bintray.enabled is false?: " + isBintray + "\n" )
-                    setupPublishRepo(prj)
+                    LOG.lifecycle("calling setupMavenPublishRepo because either isSnapshot is true: ${prj['isSnapshot']} , or bintray.enabled is false?: $isBintray " )
+                    setupMavenPublishRepo(prj)
                 }
 
                 cleanDepsInPom(prj)
@@ -87,11 +86,12 @@ class ShipkitPlugin implements Plugin<Project> {
     }
 
     @CompileDynamic
-    void setupPublishRepo(Project project){
+    void setupMavenPublishRepo(Project project){
+        LOG.lifecycle("Set PublishingExtension with URL: ${config['maven.publishUrl']}")
         project.extensions.configure PublishingExtension, new ClosureBackedAction( {
             repositories {
                 maven {
-                    url project.mavenPublishUrl
+                    url config.maven.publishUrl
                     credentials {
                         username config.maven.user
                         password config.maven.key
@@ -127,14 +127,16 @@ class ShipkitPlugin implements Plugin<Project> {
      * Taken from GrailsCentralPublishGradlePlugin in grails-core. its the 'org.grails.grails-plugin-publish'
      * Cleans up dependencies without versions and removes the bom dependencyManagement stuff and adds the grails-plugin.xml artefact
      */
-    //FIXME I don't think this is how it should be done.
+    //FIXME I don't think this is how it should be done as it doesnt include the BOM deps
     @CompileDynamic
     private void cleanDepsInPom(Project project) {
         project.plugins.withType(MavenPublishPlugin) {
             project.extensions.configure PublishingExtension, new ClosureBackedAction( {
                 publications {
                     javaLibrary(MavenPublication) {
-                        artifact getGrailsPluginArtifact(project)
+                        project.plugins.withId("yakworks.grails-plugin") {
+                            artifact getGrailsPluginArtifact(project)
+                        }
                         pom.withXml {
                             Node pomNode = asNode()
                             if (pomNode.dependencyManagement) {
@@ -153,13 +155,14 @@ class ShipkitPlugin implements Plugin<Project> {
     }
 
     /**
-     * sets up the bintray task defualts
+     * sets up the bintray task defaults
      */
     @CompileDynamic
     private void configBintray(Project project, ConfigMap config) {
         project.afterEvaluate { prj ->
+            println "configBintray for ${prj.name}"
             final BintrayExtension bintray = project.getExtensions().getByType(BintrayExtension.class)
-            binConfig.evalAll() //make sure StringTemplates are evaluated
+            config.evalAll() //make sure StringTemplates are evaluated
             bintray.user = config['bintray.user']
             bintray.key = config['bintray.key']
 

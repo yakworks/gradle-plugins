@@ -25,12 +25,13 @@ class ConfigMap implements Map<String, Object>, Cloneable {
     final Map<String, Object> delegateMap
     final String dottedPath
     //extra binding for gstring templates
-    Map extraBinding = [:]
+    final Map bindingMap
 
     public ConfigMap() {
         rootConfig = this
         path = []
         dottedPath = ""
+        bindingMap = [:]
         delegateMap = new LinkedHashMap<>()
     }
 
@@ -219,13 +220,15 @@ class ConfigMap implements Map<String, Object>, Cloneable {
     }
 
     public Object getProperty(String name) {
+        //println "getProperty $name"
         if (!containsKey(name)) {
             return new NullSafeNavigator(this, [name].asImmutable())
         }
         def val = get(name)
+        //println "getProperty $name : $val"
         //if it starts with a $ then eval it with using merge.
         if(val && val instanceof String && (val.startsWith('$') || val.startsWith('\$'))){
-            println "evaluating $name"
+            //println "evaluating $val"
             val = templateEval(val)  //evaluate the GString it
             //now that its been evaluated we will merge it in so we don't do it again the next time its accessed
             //if it has dot keys in the key then we need to merge in the evaluated result
@@ -237,15 +240,23 @@ class ConfigMap implements Map<String, Object>, Cloneable {
         return val
     }
 
+    void addToBinding(Map vars){
+        bindingMap.putAll(vars)
+    }
+    void addToBinding(String var, Object val){
+        bindingMap.put(var,val)
+    }
+
     /**
      * Evals the text using a GStringTemplateEngine
      * @param text
      * @return
      */
     String templateEval(String text){
-        def binding = [config : rootConfig] + extraBinding
-        def engine = new groovy.text.GStringTemplateEngine()
-        def template = engine.createTemplate(text).make(binding)
+        Map binding = [config:rootConfig] + rootConfig.getBindingMap()
+        def engine = new groovy.text.SimpleTemplateEngine()
+        def template = engine.createTemplate(text).make(binding.withDefault{null})
+        //println "templateEval with binding ${binding}"
         return template.toString()
     }
 
@@ -253,9 +264,9 @@ class ConfigMap implements Map<String, Object>, Cloneable {
      * Gets the key and if its a Map will make sure all strings that start with $ have been evaluated
      * returns this instance
      */
-    ConfigMap evalAll(){
+    ConfigMap  evalAll(){
         this.keySet().each { key ->
-            def val = this[key]
+            def val = getProperty(key) //accessing the property will force an eval if its a string and starts with $
             if(val instanceof ConfigMap) val.evalAll()
         }
         return this

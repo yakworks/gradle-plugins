@@ -83,6 +83,7 @@ class DefaultsPlugin implements Plugin<Project> {
             }
         }
     }
+
     @CompileDynamic
     private void addSpotless(Project project) {
         SpotlessExtension spotless = project.plugins.apply(SpotlessPlugin).extension
