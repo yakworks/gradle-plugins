@@ -3,6 +3,7 @@ description: |
   Enim necessitatibus animi omnis expedita. Quasi quidem enim soluta voluptatem cumque earum.
   Pariatur ducimus culpa ex vitae perspiciatis voluptatem impedit. Et veniam id dolores libero et sapiente eos quis.
 author: Yak Works Group # REQUIRED author for docs and copyright, used in licenseHeader too. Can be legal Org name or user name
+group: works.yakit
 
 git:
   config:
@@ -14,19 +15,6 @@ github:
 
 team:
   developers: ['basejump: Joshua Burnett', 'janedev: Jane Dev']
-  contributors: # List same format as developers
-  ignoredContributors: ['BillyBot'] # list of names or logins to ignore. good for build bot commits
-
-# see docs here https://github.com/bintray/gradle-bintray-plugin.
-bintray:
-  # enable: true # set this to false to turn off and use only maven publishing
-  pkg:
-    repo: maven
-    userOrg: yakworks
-    # name: # this will get set from each subprojects name during runtime
-    version:
-      gpg:
-        sign: true
 
 maven:
   # repoUrl: http://repo.9ci.com/oss-snapshots
