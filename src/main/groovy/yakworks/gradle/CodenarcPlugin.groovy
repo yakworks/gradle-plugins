@@ -8,7 +8,7 @@ import org.gradle.api.Project
  */
 class CodenarcPlugin implements Plugin<Project> {
 
-    final static String CODENARC_VERSION = "1.1"
+    final static String CODENARC_VERSION = "1.3"
     final static String CODENARC_EXTRA_VERSION = "1.0.2"
 
     void apply(Project prj) {
