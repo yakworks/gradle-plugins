@@ -16,7 +16,6 @@ import org.shipkit.internal.gradle.bintray.BintrayReleasePlugin
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.git.GitPlugin
 import org.shipkit.internal.gradle.java.JavaBintrayPlugin
-import org.shipkit.internal.gradle.java.JavaLibraryPlugin
 import org.shipkit.internal.gradle.java.JavaPublishPlugin
 import org.shipkit.internal.gradle.java.PomContributorsPlugin
 import org.shipkit.internal.gradle.release.ReleasePlugin

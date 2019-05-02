@@ -3,8 +3,8 @@ ruleset {
         'EmptyClass' doNotApplyToFilesMatching: '.*Spec.groovy'
     }
 
-    ruleset('rulesets/braces.xml'){
-        'IfStatementBraces' enabled:false //FIXME add a new rule that does if statment braces unless its on a single line
+    ruleset('rulesets/braces.xml') {
+        'IfStatementBraces' enabled: false
     }
 
     ruleset('rulesets/concurrency.xml')
@@ -12,7 +12,9 @@ ruleset {
     ruleset('rulesets/convention.xml'){
         ['CouldBeElvis', 'NoDef', 'ParameterReassignment',
          'MethodReturnTypeRequired', 'CouldBeSwitchStatement', 'InvertedCondition', 'TrailingComma',
-         'VariableTypeRequired', 'FieldTypeRequired'
+         'VariableTypeRequired', 'FieldTypeRequired', 'PublicMethodsBeforeNonPublicMethods','NoJavaUtilDate',
+         'StaticFieldsBeforeInstanceFields', //FIXME this should be enabled
+         'StaticMethodsBeforeInstanceMethods'
         ].each{
             "$it"(enabled:false)
         }
@@ -44,16 +46,14 @@ ruleset {
 
     ruleset('rulesets/exceptions.xml')
 
-    // ruleset('rulesets/formatting.xml')
     ruleset('rulesets/formatting.xml'){
         LineLength(doNotApplyToFilesMatching: '.*Spec.groovy', length:160)
 
-        ['ClassJavadoc', //FIXME this should be enabled
-         'BlockEndsWithBlankLine', 'BlockStartsWithBlankLine',
+        ['BlockEndsWithBlankLine', 'BlockStartsWithBlankLine',
          'SpaceAfterCatch', 'SpaceAfterFor', 'SpaceAfterIf', 'SpaceAfterSwitch', 'SpaceAfterWhile',
          'SpaceAroundClosureArrow', 'SpaceAroundMapEntryColon', 'SpaceAroundOperator',
          'SpaceAfterOpeningBrace', 'SpaceAfterClosingBrace', 'SpaceBeforeOpeningBrace', 'SpaceBeforeClosingBrace',
-         'TrailingWhitespace'
+         'TrailingWhitespace','ClassEndsWithBlankLine', 'ClassStartsWithBlankLine'
         ].each{
             "$it"(enabled:false)
         }
@@ -61,7 +61,7 @@ ruleset {
 
     ruleset('rulesets/generic.xml')
 
-    //ruleset('rulesets/grails.xml')
+    //ruleset('rulesets/grails.xml') //FIXME why not use this?
 
     ruleset('rulesets/groovyism.xml'){
         'GetterMethodCouldBeProperty' enabled:false
@@ -75,9 +75,11 @@ ruleset {
     ruleset('rulesets/jdbc.xml')
 
     ruleset('rulesets/junit.xml'){
-         'JUnitPublicNonTestMethod' enabled:false
-         'JUnitPublicProperty' enabled:false
-         'JUnitPublicNonTestMethod' enabled:false
+        ['JUnitPublicNonTestMethod', 'JUnitPublicProperty',
+         'JUnitPublicNonTestMethod', 'ChainedTest'
+        ].each{
+            "$it"(enabled:false)
+        }
     }
 
     ruleset('rulesets/logging.xml'){
@@ -115,7 +117,10 @@ ruleset {
         'MethodSize' doNotApplyToFilesMatching: '.*Spec.groovy'
         //'ParameterCount' maxParameters: 6
         exclude 'CrapMetric'
-
+        MethodCount {
+            doNotApplyToFilesMatching = '.*Spec.groovy'
+            maxMethods = 40
+        }
         ParameterCount(maxParameters:7)
         //exclude 'CyclomaticComplexity'
     }
@@ -132,6 +137,7 @@ ruleset {
         exclude 'UnnecessarySetter'
         exclude 'UnnecessarySubstring'
         exclude 'UnnecessaryElseStatement'
+        exclude 'UnnecessarySemicolon'
     }
 
     ruleset('rulesets/unused.xml'){

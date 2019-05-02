@@ -116,6 +116,20 @@ spotless:
       - 'build.gradle'
       - 'gradle/*.gradle'
 
+codenarc:
+  toolVersion: 1.3
+  config: prj.yakworks.getCodenarcRuleSet()
+  reportFormat: 'html'
+  maxPriority1Violations: 0
+  maxPriority2Violations: 2
+  maxPriority3Violations: 4
+  main:
+    ignoreFailures: false
+    excludes: # make this a list of excludes is wanted
+  test:
+    enabled: false # if false will exclude all files by adding a exclude: '**/*', runs much faster with lots of tests
+    ignoreFailures: true
+    excludes:
 # the mkdocs engine
 docs:
   enabled: true

@@ -22,8 +22,8 @@ import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.javadoc.Groovydoc
 import org.shipkit.gradle.configuration.ShipkitConfiguration
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
-import org.shipkit.internal.gradle.java.JavaLibraryPlugin
 import yakworks.commons.ConfigMap
+import yakworks.gradle.shipkit.ShippablePlugin
 
 /**
  * Tasks and configuration for generating mkdocs and groovydocs.
@@ -60,10 +60,10 @@ class DocmarkPlugin implements Plugin<Project> {
     }
 
     //this should be called from inside of an afterEvaluate so the JavaLibraryPlugin will have been applied properly to subs
-    private Set<Project> getLibraryProjects(Project rootProject) {
+    private Set<Project> getShippableProjects(Project rootProject) {
         rootProject.allprojects.findAll { prj ->
             //println "${prj.path} hasPlugin JavaLibraryPlugin " + prj.plugins.hasPlugin(JavaLibraryPlugin)
-            prj.plugins.hasPlugin(JavaLibraryPlugin)
+            prj.plugins.hasPlugin(ShippablePlugin)
         }
         //rootProject.allprojects.findAll { prj -> prj.plugins.hasPlugin(BintrayPlugin) }
     }
@@ -169,7 +169,7 @@ class DocmarkPlugin implements Plugin<Project> {
     String replaceVersionRegex(Project prj, String content) {
         String updatedContent = content.replaceFirst(/(?i)version:\s*[\d\.]+[^\s]+/, "Version: $prj.version")
         //VersionInfo info = project.getExtensions().getByType(VersionInfo.class)
-        getLibraryProjects(prj).each { p ->
+        getShippableProjects(prj).each { p ->
             //update any subproject dependencies examples, ie `gorm-tools:6.1.0"`
             updatedContent = updatedContent.replaceFirst(/${p.name}:[\d\.]+[^"]+/, "${p.name}:${prj.version.trim()}")
             //update any dependencies for plugin style versions, ie `id "yakworks.gorm-tools" version "1.2.3"`
@@ -191,9 +191,11 @@ class DocmarkPlugin implements Plugin<Project> {
         //modeled from here https://github.com/nebula-plugins/gradle-aggregate-javadocs-plugin/blob/master/src/main/groovy/nebula/plugin/javadoc/NebulaAggregateJavadocPlugin.groovy
         //println "addCombineGroovyDocsTask"
         Task tsk = project.task(GROOVYDOC_MERGE_TASK, type: Groovydoc, overwrite: true)
-        //do it after entire project evaluated so getLibraryProjects is complete
+        //do it after entire project evaluated so
         project.gradle.projectsEvaluated {
-            Set<Project> pubProjects = getLibraryProjects(project)
+            Set<Project> pubProjects = project.allprojects.findAll { prj ->
+                prj.plugins.hasPlugin(ShippablePlugin) && prj.plugins.hasPlugin('groovy')
+            }
             //println "groovydocMerge task for - " + pubProjects
             tsk.with {
                 description = 'Aggregates groovydoc API documentation .'

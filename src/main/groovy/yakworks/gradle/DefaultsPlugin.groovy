@@ -22,8 +22,7 @@ import groovy.transform.CompileStatic
 import org.gradle.api.*
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.tasks.javadoc.Javadoc
-import org.shipkit.internal.gradle.java.JavaLibraryPlugin
-import yakworks.commons.ConfigMap
+import yakworks.gradle.shipkit.ShippablePlugin
 
 @CompileStatic
 class DefaultsPlugin implements Plugin<Project> {
@@ -50,7 +49,7 @@ class DefaultsPlugin implements Plugin<Project> {
 
             }
             //if its a groovy library then add codeNarc in
-            prj.plugins.withType(JavaLibraryPlugin){
+            prj.plugins.withType(ShippablePlugin){
                 prj.plugins.withId('groovy') {
                     prj.plugins.apply(CodenarcPlugin)
                 }
@@ -125,8 +124,8 @@ class DefaultsPlugin implements Plugin<Project> {
             if(cfg.trimTrailingWhitespace) trimTrailingWhitespace()
             if(cfg.indentWithSpaces) indentWithSpaces(cfg.indentWithSpaces)
 
-            //if it has both the library plugin applied and it has the header specified
-            project.plugins.withType(JavaLibraryPlugin){
+            //if its a shippable item then makes sure a license header is applied (as opposed to an example or test project)
+            project.plugins.withType(ShippablePlugin){
                 if(cfg.licenseHeader){
                     licenseHeader(cfg.licenseHeader)
                 } else if(cfg.licenseHeaderFile) {
