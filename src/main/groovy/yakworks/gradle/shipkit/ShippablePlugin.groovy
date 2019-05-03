@@ -33,7 +33,7 @@ class ShippablePlugin implements Plugin<Project> {
     //ConfigMap config
 
     void apply(Project project) {
-        project.rootProject.plugins.apply(ShipkitPlugin)
+        project.rootProject.plugins.apply(ShipyakPlugin)
     }
 
 }
