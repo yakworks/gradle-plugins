@@ -16,21 +16,63 @@
 package yakworks.gradle.shipkit
 
 import groovy.transform.CompileStatic
+import groovy.transform.CompileDynamic
+import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.shipkit.internal.gradle.java.JavaLibraryPlugin
+import org.gradle.api.Task
+import org.gradle.api.internal.ClosureBackedAction
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
+import org.gradle.api.publish.PublicationContainer
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
+import org.gradle.api.tasks.bundling.Jar
+import org.shipkit.gradle.configuration.ShipkitConfiguration
+import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.java.JavaPublishPlugin
+import org.shipkit.internal.gradle.snapshot.LocalSnapshotPlugin
+import org.shipkit.internal.gradle.util.GradleDSLHelper
+import org.shipkit.internal.gradle.util.PomCustomizer
+import org.shipkit.internal.gradle.util.StringUtil
 
 /**
  * A marker for a grails plugin, "yakworks.grails-plugin", will apply GrailsPluginPublishPlugin later after config
  */
 @CompileStatic
 class GrailsWebPlugin implements Plugin<Project> {
+    private final static Logger LOG = Logging.getLogger(GrailsWebPlugin.class);
 
     void apply(Project project) {
         project.plugins.apply(ShippablePlugin)
+
         project.plugins.apply('war')
         project.plugins.apply('groovy')
         project.plugins.apply("org.grails.grails-web")
+
+        //setup deploy
+        setupMavenWarPublish(project)
+        project.rootProject.plugins.apply(MavenConfPlugin) //should come last after setupMavenWarPublish as it needs to have MavenPublishPlugin
+    }
+
+    @CompileDynamic
+    void setupMavenWarPublish(final Project project) {
+        project.getPlugins().apply(LocalSnapshotPlugin.class);
+        Task snapshotTask = project.getTasks().getByName(LocalSnapshotPlugin.SNAPSHOT_TASK);
+        snapshotTask.dependsOn(JavaPublishPlugin.MAVEN_LOCAL_TASK);
+        project.getPlugins().apply("maven-publish");
+
+        project.plugins.withType(MavenPublishPlugin) {
+            project.extensions.configure PublishingExtension, new ClosureBackedAction( {
+                publications {
+                    javaLibrary(MavenPublication) {
+                        from project.components.web
+                    }
+                }
+            })
+        }
+        //so that we flesh out problems with maven publication during the build process
+        project.getTasks().getByName("build").dependsOn(JavaPublishPlugin.MAVEN_LOCAL_TASK);
     }
 }

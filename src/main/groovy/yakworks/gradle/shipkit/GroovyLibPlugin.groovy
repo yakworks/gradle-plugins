@@ -30,5 +30,6 @@ class GroovyLibPlugin implements Plugin<Project> {
         project.plugins.apply(ShippablePlugin)
         project.plugins.apply('groovy')
         project.plugins.apply(JavaPublishPlugin)
+        project.rootProject.plugins.apply(MavenConfPlugin)//should come last after JavaPublishPlugin as it needs to have MavenPublishPlugin
     }
 }

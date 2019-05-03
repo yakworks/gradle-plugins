@@ -35,7 +35,7 @@ class DefaultsPlugin implements Plugin<Project> {
         //setup defaults props
 
         //apply default plugins
-        rootProject.plugins.apply('com.energizedwork.idea-project-components')
+        rootProject.plugins.apply("com.github.erdi.extended-idea")
         //rootProject.plugins.apply('com.dorongold.task-tree')
 
         rootProject.allprojects { Project prj ->

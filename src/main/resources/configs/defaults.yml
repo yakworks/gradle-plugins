@@ -107,6 +107,7 @@ spotless:
     excludes:
       - '**/*.java'
       - '**/conf/**/*.groovy'
+      # - 'grails-app/init/**/*.groovy'
   groovyGradle:
     indentWithSpaces: 2
     trimTrailingWhitespace: true

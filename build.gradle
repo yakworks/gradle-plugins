@@ -38,7 +38,7 @@ dependencies {
   runtime 'org.ajoberstar:gradle-git-publish:1.0.1'
   // 3rd party plugins
   compile 'com.diffplug.spotless:spotless-plugin-gradle:3.14.0'
-  runtime "gradle.plugin.com.energizedwork:idea-gradle-plugins:1.4"
+  runtime "gradle.plugin.com.github.erdi:idea-gradle-plugins:2.1"
   runtime "gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.2.0"
 
   compile 'org.shipkit:shipkit:2.0.25'
@@ -88,7 +88,7 @@ pluginBundle {
 }
 
 wrapper {
-  gradleVersion = '4.6'
+  gradleVersion = '4.10.3'
 }
 
 // spotless.formats.groovy.target 'src/main/groovy/**/*.groovy'

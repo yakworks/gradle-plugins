@@ -36,5 +36,6 @@ class GrailsPlugin implements Plugin<Project> {
         project.plugins.apply("org.grails.grails-plugin")
         //JavaPublishPlugin has to get applied after the grails-plugin has been applied or it doesn't add the dependencies to the pom properly
         project.plugins.apply(JavaPublishPlugin)
+        project.rootProject.plugins.apply(MavenConfPlugin) //this should come last after JavaPublishPlugin as it finalizes the maven/bintray setups
     }
 }

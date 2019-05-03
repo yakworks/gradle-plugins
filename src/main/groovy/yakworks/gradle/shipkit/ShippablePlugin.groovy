@@ -15,21 +15,25 @@
  */
 package yakworks.gradle.shipkit
 
-import groovy.transform.CompileStatic
+
+import groovy.transform.CompileDynamic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.shipkit.internal.gradle.java.JavaPublishPlugin
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 
 /**
  * A base marker for any type of library or war that will be shippable/publishable. In other areas of gradle here
- * It will look for this marker to do certain things.
+ * other areas look for this marker to do certain things.
  */
-@CompileStatic
+@CompileDynamic
 class ShippablePlugin implements Plugin<Project> {
+    private final static Logger LOG = Logging.getLogger(ShippablePlugin)
+
+    //ConfigMap config
 
     void apply(Project project) {
-        //make sure the ShipkitPlugin applied to the root. this will apply it to it self if this is a single
-        //project and only the yakworks.grails-plugin is applied
         project.rootProject.plugins.apply(ShipkitPlugin)
     }
+
 }
