@@ -1,11 +1,11 @@
 
 shipkit {
-    gitHub.repository = "yakworks/gradle-plugins"
-    gitHub.readOnlyAuthToken = "e7fe8fcdd6ffed5c38498c4c79b2a68e6f6ed1bb"
+  team.developers = ['basejump:Joshua Burnett']
+  gitHub.repository = "yakworks/gradle-plugins"
+  gitHub.writeAuthToken = System.getenv("GRGIT_USER") ?: System.getenv("GH_WRITE_TOKEN") ?: project.findProperty("gitHubToken")
+  gitHub.readOnlyAuthToken = System.getenv("GRGIT_USER") ?: System.getenv("GH_WRITE_TOKEN") ?: project.findProperty("gitHubToken")
 
-    //team.developers = ['basejump:Joshua Burnett']
-
-    releaseNotes.publicationRepository = "https://plugins.gradle.org/plugin/yakworks.defaults/"
+  releaseNotes.publicationRepository = "https://plugins.gradle.org/plugin/yakworks.shipyak"
 }
 
 //apply plugin: 'org.shipkit.upgrade-dependency'

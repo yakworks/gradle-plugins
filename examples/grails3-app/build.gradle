@@ -7,7 +7,7 @@ buildscript {
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsVersion"
-        classpath "org.yakworks:gradle-plugins:1.0.0-SNAPSHOT"
+        classpath "org.yakworks:gradle-plugins:1.0.1-SNAPSHOT"
         classpath "org.grails.plugins:hibernate5:${gormVersion-".RELEASE"}"
         classpath "com.bertramlabs.plugins:asset-pipeline-gradle:2.15.1"
     }

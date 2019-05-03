@@ -1,0 +1,69 @@
+# Java Gradle CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      # docker image with python and mkdocs on it already as well, based on gradle:4.6-alpine
+      - image: dock9/gradle:4.6
+
+      # Specify service dependencies here if necessary
+      # CircleCI maintains a library of pre-built images
+      # documented at https://circleci.com/docs/2.0/circleci-images/
+      # - image: circleci/postgres:9.4
+
+#    branches:
+#      only:
+#        - master
+
+    # working_directory: ~/repo
+
+    environment:
+      # Customize the JVM maximum heap limit
+      # JVM_OPTS: -Xmx3200m
+      MALLOC_ARENA_MAX: 2
+      GRADLE_OPTS: "-Xmx3200m -Dorg.gradle.daemon=false" #daemon false doesn't seem to get picked up by fork
+      TERM: dumb
+
+    parallelism: 1
+
+    steps:
+      - checkout
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v3-gradle-{{ checksum "build.gradle" }}
+
+      # see https://github.com/palantir/gradle-configuration-resolver-plugin
+      - run: ./gradlew resolveConfigurations
+      #- run: ./gradlew test-app:dependencies
+
+      - save_cache:
+          paths:
+            - /home/gradle # the https://hub.docker.com/_/gradle/ containter does wierd stuff for cache
+            - ~/.m2
+            - ~/.gradle
+          key: v3-gradle-{{ checksum "build.gradle" }}
+
+      - run:
+          name: gradle check tests.
+          command: ./gradlew check
+
+      - run:
+          name: does perform release, this will fire publishPlugins since its a gradle plugin
+          command: ./gradlew ciPerformRelease
+
+      - store_artifacts:
+          path: plugin/build/reports/tests/test/
+          destination: test-reports/unit/
+
+      - store_artifacts:
+          path: plugin/build/reports/codenarc/
+          destination: codenarc/
+
+      - store_test_results:
+          path: plugin/build/test-results
+
