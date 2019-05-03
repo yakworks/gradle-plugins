@@ -61,12 +61,13 @@ def defTags = ['grails', 'groovy', 'shipkit', 'spotless', 'circleCI', 'continuou
 pluginBundle {
   website = 'https://github.com/yakworks/gradle-plugins'
   vcsUrl = 'https://github.com/yakworks/gradle-plugins.git'
-  description = 'Plugin providing opinionated defaults and shipkit setup for Groovy, Grails and Gradle library/plugin projects. Enables hooks for automated releases and versioning and tags with CircleCI. '
+  description = 'Plugin providing opinionated defaults and shipkit setup for Groovy, Grails and Gradle library/plugin projects. ' +
+    'Enables hooks for automated releases and versioning and tags with CircleCI. Yaml config properties'
   tags = defTags
   plugins {
     publishPlugin {
       id = 'yakworks.defaults'
-      displayName = 'Yakworks defaults used for our Groovy, Grails and Gradle projects. Setup defauls for codenarc, spotless '
+      displayName = 'Yakworks opinionated defaults used for our Groovy, Grails and Gradle projects. Setup defauls for codenarc, spotless '
       tags = defTags
     }
     publishPlugin {
@@ -75,7 +76,22 @@ pluginBundle {
       tags = defTags
     }
     publishPlugin {
+      id = 'yakworks.grails-web'
+      displayName = 'For grails web apps. setups for shipping and also applies the war and org.grails.web-app. can publish wars to maven'
+      tags = defTags
+    }
+    publishPlugin {
+      id = 'yakworks.groovy-lib'
+      displayName = 'plugin to setup a project as a groovy library.'
+      tags = defTags
+    }
+    publishPlugin {
       id = 'yakworks.shipkit'
+      displayName = 'Wrapper around shipkit so it works without a non-bintray maven repo susch as artifactory, integrates with circleCI, adds Grails support and generates mkdocs'
+      tags = defTags
+    }
+    publishPlugin {
+      id = 'yakworks.yaml-config'
       displayName = 'Wrapper around shipkit so it works without a non-bintray maven repo susch as artifactory, integrates with circleCI, adds Grails support and generates mkdocs'
       tags = defTags
     }
