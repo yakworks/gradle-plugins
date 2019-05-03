@@ -37,9 +37,9 @@ jobs:
           keys:
           - v3-gradle-{{ checksum "build.gradle" }}
 
-      # see https://github.com/palantir/gradle-configuration-resolver-plugin
-      - run: ./gradlew resolveConfigurations
-      #- run: ./gradlew test-app:dependencies
+      - run:
+          name: gradle check tests.
+          command: ./gradlew check
 
       - save_cache:
           paths:
@@ -47,10 +47,6 @@ jobs:
             - ~/.m2
             - ~/.gradle
           key: v3-gradle-{{ checksum "build.gradle" }}
-
-      - run:
-          name: gradle check tests.
-          command: ./gradlew check
 
       - run:
           name: does perform release, this will fire publishPlugins since its a gradle plugin
