@@ -5,7 +5,8 @@ buildscript {
     maven { url "https://plugins.gradle.org/m2/" }
   }
   dependencies {
-    classpath 'org.shipkit:shipkit:2.2.5'
+    //classpath 'org.shipkit:shipkit:2.2.5'
+    classpath "org.yakworks:gradle-plugins:1.0.2-SNAPSHOT"
     //classpath 'ru.vyarus:gradle-animalsniffer-plugin:+'
     //classpath 'io.spring.gradle:dependency-lock:latest.release'
   }
@@ -17,13 +18,15 @@ plugins {
   id "java-gradle-plugin"
 }
 
-apply plugin: 'idea'
-apply plugin: 'groovy'
-apply plugin: 'org.shipkit.gradle-plugin'
+apply plugin: 'yakworks.gradle-plugin'
+
+//apply plugin: 'groovy'
+//apply plugin: 'org.shipkit.gradle-plugin'
+
 //apply plugin: 'com.gradle.plugin-publish'
 //apply plugin: 'spring.lock' //run gradle updateLocks
 
-group = 'org.yakworks'
+//group = 'org.yakworks'
 
 repositories {
   jcenter()
@@ -95,20 +98,27 @@ gradlePlugin {
       description = 'plugin to setup and release a project as a groovy library.'
       //tags = defTags
     }
-    shipkitPlugin {
-      id = 'yakworks.shipkit'
-      implementationClass = 'yakworks.gradle.shipkit.ShipkitPlugin'
-      displayName = 'DEPRECATED'
-      description = 'DEPRECATED use yakworks.shipyak'
+    gradlePluginPlugin {
+      id = 'yakworks.gradle-plugin'
+      implementationClass = 'yakworks.gradle.shipkit.ShipYakGradlePlugin'
+      displayName = 'ShipYak Gradle Plugin'
+      description = 'Wrapper around shipkit.gradle-plugin to use defaults and CircleCI'
       //tags = defTags
     }
     shipyakPlugin {
       id = 'yakworks.shipyak'
-      implementationClass = 'yakworks.gradle.shipkit.ShipkitPlugin'
-      displayName = 'Yakworks Shipkit'
-      description = 'Wrapper around shipkit so it works without a non-bintray maven repo susch as artifactory, integrates with circleCI, adds Grails support and generates mkdocs'
+      implementationClass = 'yakworks.gradle.shipkit.ShipyakPlugin'
+      displayName = 'ShipYak Root Project'
+      description = 'ShipYak Root Project, Does the defaults to get ShipYak and ShipKit setup. Usually you would apply one of the others but if multi-project then put this on the root'
       //tags = defTags
     }
+//    shipkitPlugin { //DEPRECATED
+//      id = 'yakworks.shipkit'
+//      implementationClass = 'yakworks.gradle.shipkit.ShipkitPlugin'
+//      displayName = 'DEPRECATED'
+//      description = 'DEPRECATED use yakworks.shipyak'
+//      //tags = defTags
+//    }
     yamlConfigPlugin {
       id = 'yakworks.yaml-config'
       implementationClass = 'yakworks.gradle.config.YamlConfigPlugin'

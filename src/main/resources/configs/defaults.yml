@@ -54,7 +54,7 @@ releaseNotes:
 # see docs here https://github.com/bintray/gradle-bintray-plugin. the yml supported options are below
 # this gets setup for each publishable project. If this is enabled then its assumed this is the primary place to publish
 bintray:
-  enabled: true # set this to false to turn off
+  enabled: false # set this to true to turn on
   #Note: properties such as BINTRAY_USER should be setup as system env variables, normally the case for CI
   # or the camelCase variant can be put in ~/.gradle/gradle.properties or even assigned in ext props.
   #DO NOT set or checkin your token in yml here and push to github, in case that wasn't obvious
