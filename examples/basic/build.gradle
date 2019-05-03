@@ -1,0 +1,55 @@
+import static groovy.json.JsonOutput.*
+import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.DumperOptions
+
+buildscript {
+  repositories {
+    //maven { url "https://repo.grails.org/grails/core" }
+    mavenLocal()
+    maven { url "https://plugins.gradle.org/m2/" }
+  }
+  dependencies {
+    classpath "org.yakworks:gradle-plugins:0.1.44-SNAPSHOT"
+  }
+}
+
+apply plugin:"java"
+apply plugin:"yakworks.yaml-config"
+//println config
+def git = config['git']
+println "config.git.class " + git.getClass()
+println "config.git " + git
+git.evalAll()
+println "config.git after eval " + git
+println "config.git.config.user" + git['config.user']
+//
+//println "github.writeAuthToken " + config.github.get('writeAuthToken')
+//println "github.owner " + config.github.owner
+//println "github.git " + config.git
+//
+//println "github.writeAuthToken " + config['github.writeAuthToken']
+//println "github.owner " + config['github.owner']
+//println "github.github " + config.github
+//
+//assert config.github.writeAuthToken == config['github.writeAuthToken']
+//println config.github.repo
+//println config.github.issuesUrl
+//println config.websiteUrl
+////println config.bintray
+//assert config['bintray.pkg.websiteUrl']
+////println config.bintray
+//println config.bintray.pkg.licenses
+
+DumperOptions dops = new DumperOptions()
+dops.setIndent(2)
+dops.setWidth(120)
+dops.setSplitLines(false)
+dops.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK)
+Yaml yaml = new Yaml(dops)
+//println yaml.dump(config.toNormalMap())
+//println config.toNormalMap()
+//println prettyPrint(toJson(config))
+
+//String str = '${System.properties[\'user.home\']}'
+//String str = '$project(\'name\')'
+//println Eval.me(/"$str"/)

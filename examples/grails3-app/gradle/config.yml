@@ -1,0 +1,16 @@
+title: Grails Testing War App
+description: This is for testing a grails app that build a war
+author: 9ci Inc
+group: deleteme.testing #org.grails.plugins
+
+github:
+  fullName: basejump/gorm-tools # owner(org) and repo get parsed from this
+
+team:
+  developers: ['basejump: Joshua Burnett']
+
+bintray:
+  enabled: false
+maven:
+  repoUrl: http://repo.9ci.com/wars
+  snapshotUrl: http://repo.9ci.com/snapshots

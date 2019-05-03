@@ -15,29 +15,33 @@
  */
 package yakworks.gradle
 
-import org.apache.tools.ant.filters.ReplaceTokens
+import org.apache.tools.ant.    filters.ReplaceTokens
 import org.gradle.api.*
-import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.javadoc.Groovydoc
-import org.gradle.api.tasks.javadoc.Javadoc
 import org.shipkit.gradle.configuration.ShipkitConfiguration
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
-import org.shipkit.internal.gradle.java.JavaLibraryPlugin
+import yakworks.commons.ConfigMap
+import yakworks.gradle.shipkit.ShippablePlugin
 
-import static ProjectUtils.searchProps
-import static ProjectUtils.setPropIfEmpty
-
+/**
+ * Tasks and configuration for generating mkdocs and groovydocs.
+ */
 //@CompileStatic
 class DocmarkPlugin implements Plugin<Project> {
 
     public static final String UPDATE_README_TASK = "updateReadmeVersions"
-    public static final String TEST_RELEASE_TASK = "testRelease"
+    public static final String MKDOCS_COPY_TASK = "mkdocsPrepare"
+    public static final String MKDOCS_BUILD_TASK = "mkdocsBuild"
+    public static final String PUBLISH_DOCS_TASK = "publishDocs"
+    public static final String GROOVYDOC_MERGE_TASK = "groovydocMerge"
+    //public static final String TEST_RELEASE_TASK = "testRelease"
 
     void apply(Project rootProject) {
         ShipkitConfiguration conf = rootProject.plugins.apply(ShipkitConfigurationPlugin).configuration
         //do after groovy is applied to pubProjects above
-        addCombineGroovyDocsTask(rootProject)
+        addGroovydocMergeTask(rootProject)
 
         boolean enableDocsPublish = rootProject.hasProperty('enableDocsPublish')? Boolean.valueOf(rootProject['enableDocsPublish'].toString()) : true
         if(enableDocsPublish) {
@@ -46,26 +50,34 @@ class DocmarkPlugin implements Plugin<Project> {
         }
 
         addUpdateReadmeVersions(rootProject)
+
+        Task pubDocsTask = rootProject.tasks.create(PUBLISH_DOCS_TASK)
+        pubDocsTask.with {
+            group = JavaBasePlugin.DOCUMENTATION_GROUP
+            description = 'Builds and publishes docs to github'
+            dependsOn 'gitPublishPush'
+        }
     }
 
     //this should be called from inside of an afterEvaluate so the JavaLibraryPlugin will have been applied properly to subs
-    private Set<Project> getLibraryProjects(Project rootProject) {
+    private Set<Project> getShippableProjects(Project rootProject) {
         rootProject.allprojects.findAll { prj ->
             //println "${prj.path} hasPlugin JavaLibraryPlugin " + prj.plugins.hasPlugin(JavaLibraryPlugin)
-            prj.plugins.hasPlugin(JavaLibraryPlugin)
+            prj.plugins.hasPlugin(ShippablePlugin)
         }
         //rootProject.allprojects.findAll { prj -> prj.plugins.hasPlugin(BintrayPlugin) }
     }
 
     private void addMkdocsTasks(Project prj) {
-        Task copyTask = prj.tasks.create('mkdocsCopy')
+        ConfigMap config = prj.config
+        Task copyTask = prj.tasks.create(MKDOCS_COPY_TASK)
         copyTask.with {
-            group = 'publishing'
-            description = 'Copy contents to be published to git.'
+            group = JavaBasePlugin.DOCUMENTATION_GROUP
+            description = 'Copy docs to build and run replace filters to update tokens. Called by mkdocsBuild'
             doLast {
                 prj.copy {
                     from 'docs'
-                    into 'build/mkdocs/docs'
+                    into "$prj.buildDir/mkdocs/docs"
                 }
                 //Copy the README in as index
                 prj.copy {
@@ -85,23 +97,22 @@ class DocmarkPlugin implements Plugin<Project> {
                     into "$prj.buildDir/mkdocs"
                     include 'mkdocs.yml'
                     filter { line ->
-                        String siteUrl = prj.isSnapshot ? "$prj.websiteUrl/snapshot" : prj.websiteUrl //prj.property('websiteUrl')
-                        def newline = line.startsWith('repo_url:') ? "repo_url: ${prj.property('gitHubUrl')}" : line
+                        String siteUrl = prj.isSnapshot ? "$config.websiteUrl/snapshot" : config.websiteUrl //prj.property('websiteUrl')
+                        def newline = line.startsWith('repo_url:') ? "repo_url: ${config.github.repoUrl}" : line
                         newline.startsWith('site_url:') ? "site_url: $siteUrl" : newline
                     }
-                    filter(ReplaceTokens,
-                        tokens: ['version', 'title', 'description', 'gitHubSlug', 'author'].collectEntries {
-                            [it, prj."$it".toString()]
-                        }
-                    )
+                    def tokens = [version: prj.version, title: config.title, description: prj.description,
+                                  author: config.author, gitHubSlug: config.github.fullName, ]
+                    filter(ReplaceTokens, tokens: tokens)
                 }
             }
         }
 
-        Task mkdocsBuildTask = prj.task('mkdocsBuild', type: Exec)
-        mkdocsBuildTask.with {
+        Task mkdocsBuildTask = prj.task(MKDOCS_BUILD_TASK, type: Exec) {
+            group = 'documentation'
+            description = 'prepares docs and runs the mkdocs'
             dependsOn copyTask
-            workingDir 'build/mkdocs'
+            workingDir "$prj.buildDir/mkdocs"
             commandLine 'mkdocs', 'build'
         }
     }
@@ -134,8 +145,8 @@ class DocmarkPlugin implements Plugin<Project> {
             commitMessage = "Docs published for ${project.version} release [skip ci]".toString()
         }
 
-        project.gitPublishCopy.dependsOn 'mkdocsBuild'
-        project.gitPublishCopy.mustRunAfter 'mkdocsBuild'
+        project.gitPublishCopy.dependsOn MKDOCS_BUILD_TASK
+        project.gitPublishCopy.mustRunAfter MKDOCS_BUILD_TASK
         project.gitPublishCopy.inputs.files project.groovydocMerge //forces the copy task to depend on up to date groovydoc
     }
 
@@ -143,18 +154,22 @@ class DocmarkPlugin implements Plugin<Project> {
     //https://stackoverflow.com/questions/17465353/how-to-replace-a-string-for-a-buildvariant-with-gradle-in-android-studio/17572644#17572644
     private void addUpdateReadmeVersions(Project rootProject) {
         Task copyTask = rootProject.tasks.create(UPDATE_README_TASK)
-        copyTask.doLast {
-            //updates the Version: 6.1.x-whatever in the first yakworks logo part
-            def updatedContent = rootProject.file('README.md').getText('UTF-8')
-            updatedContent = replaceVersionRegex(rootProject, updatedContent)
-            rootProject.file('README.md').write(updatedContent, 'UTF-8')
+        copyTask.with {
+            group = JavaBasePlugin.DOCUMENTATION_GROUP
+            description = 'Updates the README with version token'
+            doLast {
+                //updates the Version: 6.1.x-whatever in the first yakworks logo part
+                def updatedContent = rootProject.file('README.md').getText('UTF-8')
+                updatedContent = replaceVersionRegex(rootProject, updatedContent)
+                rootProject.file('README.md').write(updatedContent, 'UTF-8')
+            }
         }
     }
 
     String replaceVersionRegex(Project prj, String content) {
         String updatedContent = content.replaceFirst(/(?i)version:\s*[\d\.]+[^\s]+/, "Version: $prj.version")
         //VersionInfo info = project.getExtensions().getByType(VersionInfo.class)
-        getLibraryProjects(prj).each { p ->
+        getShippableProjects(prj).each { p ->
             //update any subproject dependencies examples, ie `gorm-tools:6.1.0"`
             updatedContent = updatedContent.replaceFirst(/${p.name}:[\d\.]+[^"]+/, "${p.name}:${prj.version.trim()}")
             //update any dependencies for plugin style versions, ie `id "yakworks.gorm-tools" version "1.2.3"`
@@ -169,16 +184,22 @@ class DocmarkPlugin implements Plugin<Project> {
 //        }
 //    }
 
-    private void addCombineGroovyDocsTask(Project project) {
+    /**
+     * Adds the groovydocMerge task to meld together all publishable source sets into single docs
+     */
+    private void addGroovydocMergeTask(Project project) {
         //modeled from here https://github.com/nebula-plugins/gradle-aggregate-javadocs-plugin/blob/master/src/main/groovy/nebula/plugin/javadoc/NebulaAggregateJavadocPlugin.groovy
         //println "addCombineGroovyDocsTask"
-        Task tsk = project.task("groovydocMerge", type: Groovydoc, overwrite: true)
+        Task tsk = project.task(GROOVYDOC_MERGE_TASK, type: Groovydoc, overwrite: true)
+        //do it after entire project evaluated so
         project.gradle.projectsEvaluated {
-            Set<Project> pubProjects = getLibraryProjects(project)
+            Set<Project> pubProjects = project.allprojects.findAll { prj ->
+                prj.plugins.hasPlugin(ShippablePlugin) && prj.plugins.hasPlugin('groovy')
+            }
             //println "groovydocMerge task for - " + pubProjects
             tsk.with {
                 description = 'Aggregates groovydoc API documentation .'
-                //group = JavaBasePlugin.DOCUMENTATION_GROUP
+                group = JavaBasePlugin.DOCUMENTATION_GROUP
                 docTitle project.version
                 dependsOn pubProjects.groovydoc
                 source pubProjects.groovydoc.source
@@ -190,6 +211,9 @@ class DocmarkPlugin implements Plugin<Project> {
         }
     }
 
+    /**
+     * updates the groovydoc links so they are clickable into external docs
+     */
     private void groovydocLinks(Task tsk) {
         tsk.with {
             noTimestamp = true

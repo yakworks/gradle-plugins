@@ -1,0 +1,33 @@
+buildscript {
+  repositories {
+    //maven { url "https://repo.grails.org/grails/core" }
+    mavenLocal()
+    maven { url "https://plugins.gradle.org/m2/" }
+  }
+  dependencies {
+    classpath "org.yakworks:gradle-plugins:0.1.46-SNAPSHOT"
+  }
+}
+apply plugin:"groovy"
+apply plugin:"yakworks.shipkit"
+apply plugin: "org.shipkit.java"
+
+dependencies {
+    // Use the latest Groovy version for building this library
+    compile 'org.codehaus.groovy:groovy-all:2.4.15'
+
+    // Use the awesome Spock testing and specification framework
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+}
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+    // Use jcenter for resolving your dependencies.
+    // You can declare any Maven/Ivy/file repository here.
+    jcenter()
+}
+
+//println config.prettyPrint()
+//println config.bintray.user
+//println config.bintray.key
+//println config.git.releasable.grepDocs

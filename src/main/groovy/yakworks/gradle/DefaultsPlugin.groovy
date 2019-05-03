@@ -15,106 +15,67 @@
  */
 package yakworks.gradle
 
+import com.diffplug.gradle.spotless.SpotlessExtension
+import com.diffplug.gradle.spotless.SpotlessPlugin
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 import org.gradle.api.*
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.tasks.javadoc.Javadoc
-import org.shipkit.internal.gradle.java.JavaLibraryPlugin
+import yakworks.gradle.shipkit.ShippablePlugin
 
-import static ProjectUtils.searchProps
-import static ProjectUtils.setPropIfEmpty
-
-//@CompileStatic
+@CompileStatic
 class DefaultsPlugin implements Plugin<Project> {
 
     void apply(Project rootProject) {
         if (rootProject.rootProject != rootProject) {
             throw new GradleException('yakworks.defaults must only be applied to the root project')
         }
-        //final ShipkitConfiguration conf = project.getPlugins().apply(ShipkitConfigurationPlugin.class).getConfiguration()
+
         //setup defaults props
-        setupProperties(rootProject)
+
         //apply default plugins
-        rootProject.plugins.apply('com.energizedwork.idea-project-components')
+        rootProject.plugins.apply("com.github.erdi.extended-idea")
         //rootProject.plugins.apply('com.dorongold.task-tree')
 
-        rootProject.allprojects { prj ->
+        rootProject.allprojects { Project prj ->
             prj.plugins.withId('java') {
                 //this is for CI to cache dependencies see https://github.com/palantir/gradle-configuration-resolver-plugin
                 prj.plugins.apply('com.palantir.configuration-resolver')
 
-                //add our default repositories to search.
-                RepositoryHandler rh = prj.repositories
-                rh.jcenter()
-                rh.mavenCentral()
-                rh.maven { url "https://repo.grails.org/grails/core" }
-                rh.maven { url "https://dl.bintray.com/9ci/grails-plugins"}
+                addDefaultRepos(prj)
 
                 silentJavadocWarnings(prj)
 
             }
-            prj.plugins.withType(JavaLibraryPlugin){
+            //if its a groovy library then add codeNarc in
+            prj.plugins.withType(ShippablePlugin){
                 prj.plugins.withId('groovy') {
                     prj.plugins.apply(CodenarcPlugin)
                 }
             }
             addSpotless(prj)
         }
+
         rootProject.plugins.apply(DocmarkPlugin)
 
     }
 
-    void setupProperties(Project prj) {
-        // sets up default composed props on ext from base props in gradle.properties
-        //!!!properties should go there, not here!!
-        // its assumed that certain props exists already as base lines to use
-        //** Github props used for both doc generation links, publishing docs to gh-pages and maven/bintray publish
-        String gslug = prj.findProperty("gitHubSlug")
-        if (gslug){
-            def repoAndOrg = gslug.split("/")
-            setPropIfEmpty prj, 'gitHubOrg', repoAndOrg[0]
-            setPropIfEmpty prj, 'gitHubRepo', repoAndOrg[1]
-        }
-        setPropIfEmpty prj, 'gitHubRepo', prj.name //defualts to project name
-        setPropIfEmpty prj, 'gitHubSlug', "${prj['gitHubOrg']}/${prj['gitHubRepo']}".toString()
-        setPropIfEmpty prj, 'gitHubUrl', "https://github.com/${prj['gitHubSlug']}".toString()
-        setPropIfEmpty prj, 'gitHubIssues', "${prj['gitHubUrl']}/issues".toString()
-
-        //** Publishing Bintray, Artifactory settings
-        setPropIfEmpty prj, 'websiteUrl', "https://${prj['gitHubOrg']}.github.io/${prj['gitHubRepo']}".toString()
-        setPropIfEmpty prj, 'bintrayOrg', prj.gitHubOrg
-
-        setPropIfEmpty prj, 'isSnapshot', prj.version.toString().endsWith("-SNAPSHOT")
-        setPropIfEmpty prj, 'isBintrayPublish', (prj.findProperty('bintrayRepo')?:false)
-
-        //***Maven publish
-        setPropIfEmpty prj, 'mavenRepoUrl', 'http://repo.9ci.com/grails-plugins' //'http://repo.9ci.com/oss-snapshots'
-        setPropIfEmpty prj, 'mavenPublishUrl', prj.mavenRepoUrl
-
-        def mu = searchProps(prj, "MAVEN_REPO_USER")?:""
-        def mk = searchProps(prj, "MAVEN_REPO_KEY")?:""
-        setPropIfEmpty(prj, 'mavenRepoUser', mu)
-        setPropIfEmpty(prj, 'mavenRepoKey', mk)
-
-        if(prj.isSnapshot && prj.findProperty('mavenSnapshotUrl')){
-            prj.ext['mavenPublishUrl'] = prj.mavenSnapshotUrl
-        }
-
-
-        def devs = prj.findProperty('developers') ?: [nodev: "Lone Ranger"]
-        devs = devs instanceof Map ? devs : new groovy.json.JsonSlurper().parseText(devs)
-        setPropIfEmpty prj, 'pomDevelopers', devs
-
-        //** Helpful dir params
-        setPropIfEmpty prj, 'gradleDir', "${prj.rootDir}/gradle"
-
-        //println "isSnapshot " + prj.isSnapshot
-        //println "prj.version " + prj.version
+    @CompileDynamic
+    void addDefaultRepos(Project prj) {
+        //add our default repositories to search.
+        RepositoryHandler rh = prj.repositories
+        rh.jcenter()
+        rh.mavenCentral()
+        rh.maven { url "https://repo.grails.org/grails/core" }
+        rh.maven { url "https://dl.bintray.com/9ci/grails-plugins"}
     }
 
     /**
      * remove doclint warnings that pollute javadoc logs when building with java8
      */
-    private void silentJavadocWarnings(Project project) {
+    @CompileDynamic
+    void silentJavadocWarnings(Project project) {
         if (JavaVersion.current().isJava8Compatible()) {
             project.tasks.withType(Javadoc) {
                 options.addStringOption('Xdoclint:none', '-quiet')
@@ -122,52 +83,56 @@ class DefaultsPlugin implements Plugin<Project> {
         }
     }
 
+    @CompileDynamic
     private void addSpotless(Project project) {
-        project.plugins.apply('com.diffplug.gradle.spotless')
+        SpotlessExtension spotless = project.plugins.apply(SpotlessPlugin).extension
 
+        //make sure spotless runs first in the checks
         project.plugins.withId('codenarc') {
-//            Task spotlessCheck = project.tasks.getByName('spotlessCheck')
-//            Task spotlessApply = project.tasks.getByName('spotlessApply')
             project.tasks.getByName('codenarcMain').dependsOn('spotlessCheck')
         }
 
-        project.spotless.groovyGradle {
-            target '**/*.gradle', 'build.gradle', 'gradle/*.gradle'
-            trimTrailingWhitespace()
-            indentWithSpaces(2)
-            endWithNewline()
-        }
-        project.spotless.format 'grailsConf', {
-            target 'grails-app/conf/**/*.groovy'
-            trimTrailingWhitespace()
-            indentWithSpaces(4) // this only checks for tabs and can replace with 4 spaces it it finds them
-            endWithNewline()
-        }
+        spotlessFromConfig project, spotless, 'groovyGradle'
 
         project.plugins.withId('groovy') {
-            //java {
-                //googleJavaFormat()
-            //    licenseHeader "/* Copyright \$YEAR. ${project.author}. Licensed under the Apache License, Version 2.0 */"
-            //    target project.fileTree('.') {
-            //        include 'src/main/groovy/gorm/**/*.java'
-            //    }
-            // }
-            project.spotless.groovy {
-                target project.fileTree('.') {
-                    include 'src/main/groovy/**/*.groovy', 'grails-app/**/*.groovy',
-                        'src/test/groovy/**/*.groovy', 'src/integration-test/groovy/**/*.groovy'
-                    exclude '**/*.java', '**/conf/**/*.groovy'
-                }
+            spotlessFromConfig project, spotless, 'groovy'
+
+            //broken out from normal groovy format so it doesn't try and add the license header
+            spotless.format 'grailsConf', {
+                target 'grails-app/conf/**/*.groovy'
                 trimTrailingWhitespace()
                 indentWithSpaces(4) // this only checks for tabs and can replace with 4 spaces it it finds them
                 endWithNewline()
             }
-            project.plugins.withType(JavaLibraryPlugin){
-                if(project.findProperty('licenseHeader')) project.spotless.formats.groovy.licenseHeader(project.licenseHeader)
-                if(project.findProperty('licenseHeaderFile')) project.spotless.formats.groovy.licenseHeaderFile(project.licenseHeaderFile)
-            }
         }
     }
 
+    @CompileDynamic
+    void spotlessFromConfig(Project project, SpotlessExtension spotless, String formatName){
+        Map cfg = project.config.spotless[formatName]
+
+        spotless."$formatName" {
+            target project.fileTree('.') {
+                cfg.includes.each{
+                    include it
+                }
+                cfg.excludes.each{
+                    exclude it
+                }
+            }
+            if(cfg.endWithNewline) endWithNewline()
+            if(cfg.trimTrailingWhitespace) trimTrailingWhitespace()
+            if(cfg.indentWithSpaces) indentWithSpaces(cfg.indentWithSpaces)
+
+            //if its a shippable item then makes sure a license header is applied (as opposed to an example or test project)
+            project.plugins.withType(ShippablePlugin){
+                if(cfg.licenseHeader){
+                    licenseHeader(cfg.licenseHeader)
+                } else if(cfg.licenseHeaderFile) {
+                    licenseHeader(cfg.licenseHeaderFile)
+                }
+            }
+        }
+    }
 
 }

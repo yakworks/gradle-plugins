@@ -1,0 +1,21 @@
+title: Testing groovy lib
+description: |
+  Enim necessitatibus animi omnis expedita. Quasi quidem enim soluta voluptatem cumque earum.
+  Pariatur ducimus culpa ex vitae perspiciatis voluptatem impedit. Et veniam id dolores libero et sapiente eos quis.
+author: Yak Works Group # REQUIRED author for docs and copyright, used in licenseHeader too. Can be legal Org name or user name
+group: works.yakit
+
+git:
+  config:
+    user: yakbot
+    email: <hal@yakworks.org>
+
+github:
+  fullName: yakworks/groovy-lib
+
+team:
+  developers: ['basejump: Joshua Burnett', 'janedev: Jane Dev']
+
+maven:
+  # repoUrl: http://repo.9ci.com/oss-snapshots
+  snapshotUrl: http://repo.9ci.com/oss-snapshots # where snapshots are published using maven
