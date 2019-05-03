@@ -13,12 +13,14 @@ buildscript {
 
 plugins {
   id "com.dorongold.task-tree" version "1.3"
+  id "com.gradle.plugin-publish" version "0.10.1"
+  id "java-gradle-plugin"
 }
 
 apply plugin: 'idea'
 apply plugin: 'groovy'
 apply plugin: 'org.shipkit.gradle-plugin'
-apply plugin: 'com.gradle.plugin-publish'
+//apply plugin: 'com.gradle.plugin-publish'
 //apply plugin: 'spring.lock' //run gradle updateLocks
 
 group = 'org.yakworks'
@@ -56,46 +58,62 @@ dependencies {
   testCompile gradleTestKit()
 }
 
-def defTags = ['grails', 'groovy', 'shipkit', 'spotless', 'circleCI', 'continuous delivery', 'release', 'defaults', 'codenarc', 'mkdocs', 'markdown', 'documentation']
+def defTags = ['grails', 'groovy', 'shipkit', 'spotless', 'circleCI', 'continuous delivery', 'release', 'defaults', 'codenarc',
+               'mkdocs', 'markdown', 'documentation']
+
+gradlePlugin {
+  plugins {
+    defaultsPlugin {
+      id = 'yakworks.defaults'
+      implementationClass = 'yakworks.gradle.DefaultsPlugin'
+      displayName = 'Yakworks Defaults'
+      description = 'Yakworks opinionated defaults used for our Groovy, Grails and Gradle projects. Setup defauls for codenarc, spotless '
+      //tags = defTags
+    }
+    grailsPlugin {
+      id = 'yakworks.grails-plugin'
+      implementationClass = 'yakworks.gradle.shipkit.GrailsPlugin'
+      displayName = 'Yakworks Grails Plugin'
+      description = 'Marks and sets up defaults and publishing (shipkit) for grails plugins. applies shipkit and circleCI settings '
+      //tags = defTags
+    }
+    grailsWebPlugin {
+      id = 'yakworks.grails-web'
+      implementationClass = 'yakworks.gradle.shipkit.GrailsWebPlugin'
+      displayName = 'Yakworks Grails Web'
+      description = 'For grails web apps. setups for shipping and also applies the war and org.grails.web-app. can publish wars to maven'
+      //tags = defTags
+    }
+    groovyLibPlugin {
+      id = 'yakworks.groovy-lib'
+      implementationClass = 'yakworks.gradle.shipkit.GroovyLibPlugin'
+      displayName = 'Yakworks Groovy Library'
+      description = 'plugin to setup and release a project as a groovy library.'
+      //tags = defTags
+    }
+    shipkitPlugin {
+      id = 'yakworks.shipkit'
+      implementationClass = 'yakworks.gradle.shipkit.ShipkitPlugin'
+      displayName = 'Yakworks Shipkit'
+      description = 'Wrapper around shipkit so it works without a non-bintray maven repo susch as artifactory, integrates with circleCI, adds Grails support and generates mkdocs'
+      //tags = defTags
+    }
+    yamlConfigPlugin {
+      id = 'yakworks.yaml-config'
+      implementationClass = 'yakworks.gradle.config.YamlConfigPlugin'
+      displayName = 'Yakworks Yaml Config'
+      description = 'Use a YAML file to setup config for gradle builds'
+      //tags = defTags
+    }
+  }
+}
 
 pluginBundle {
   website = 'https://github.com/yakworks/gradle-plugins'
   vcsUrl = 'https://github.com/yakworks/gradle-plugins.git'
-  description = 'Plugin providing opinionated defaults and shipkit setup for Groovy, Grails and Gradle library/plugin projects. ' +
-    'Enables hooks for automated releases and versioning and tags with CircleCI. Yaml config properties'
+  //description = 'Plugin providing opinionated defaults and shipkit setup for Groovy, Grails and Gradle library/plugin projects. ' +
+  //  'Enables hooks for automated releases and versioning and tags with CircleCI. Yaml config properties'
   tags = defTags
-  plugins {
-    publishPlugin {
-      id = 'yakworks.defaults'
-      displayName = 'Yakworks opinionated defaults used for our Groovy, Grails and Gradle projects. Setup defauls for codenarc, spotless '
-      tags = defTags
-    }
-    publishPlugin {
-      id = 'yakworks.grails-plugin'
-      displayName = 'Marks and sets up defaults and publishing (shipkit) for grails plugins. applies shipkit and circleCI settings '
-      tags = defTags
-    }
-    publishPlugin {
-      id = 'yakworks.grails-web'
-      displayName = 'For grails web apps. setups for shipping and also applies the war and org.grails.web-app. can publish wars to maven'
-      tags = defTags
-    }
-    publishPlugin {
-      id = 'yakworks.groovy-lib'
-      displayName = 'plugin to setup a project as a groovy library.'
-      tags = defTags
-    }
-    publishPlugin {
-      id = 'yakworks.shipkit'
-      displayName = 'Wrapper around shipkit so it works without a non-bintray maven repo susch as artifactory, integrates with circleCI, adds Grails support and generates mkdocs'
-      tags = defTags
-    }
-    publishPlugin {
-      id = 'yakworks.yaml-config'
-      displayName = 'Wrapper around shipkit so it works without a non-bintray maven repo susch as artifactory, integrates with circleCI, adds Grails support and generates mkdocs'
-      tags = defTags
-    }
-  }
   mavenCoordinates {
     groupId = project.group
     artifactId = project.name

@@ -42,7 +42,7 @@ class YamlConfigPlugin implements Plugin<Project> {
 
     void apply(Project prj) {
         if (prj.rootProject != prj) {
-            throw new GradleException('yakworks.defaults must only be applied to the root project')
+            throw new GradleException('YamlConfigPlugin must only be applied to the root project')
         }
         String environment = prj.findProperty('env') ?: 'dev'
         //def configFile = prj.file('config.groovy')
