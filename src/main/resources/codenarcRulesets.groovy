@@ -93,7 +93,8 @@ ruleset {
             ignorePropertyNames='_*'
         }
         FieldName {
-            staticFinalRegex='[A-Z][a-zA-Z0-9_]*'
+            staticFinalRegex='[a-zA-Z][a-zA-Z0-9_]*'
+            ignoreFieldNames='serialVersionUID,log,LOG'
         }
         VariableName {
             finalRegex='[a-zA-Z][a-zA-Z0-9_]*'
@@ -141,8 +142,11 @@ ruleset {
     }
 
     ruleset('rulesets/unused.xml'){
+        UnusedPrivateField{
+            ignoreFieldNames = 'serialVersionUID,log,LOG'
+        }
         exclude 'UnusedMethodParameter' //FIXME this should be enabled
-        exclude 'UnusedVariable' //FIXME this should be enabled
+        exclude 'UnusedVariable'
     }
 
     ruleset('rulesets/codenarc-extra.xml') {

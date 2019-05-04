@@ -1,18 +1,7 @@
 /*
- * Copyright 2014-2016 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright 2019. Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+*/
 package yakworks.gradle
 
 import groovy.text.SimpleTemplateEngine
@@ -39,7 +28,7 @@ class GradleHelpers {
 
     //sets the prop or creates it on ext if not found
     @CompileDynamic
-    static void prop(Project prj, String propertyName, val) {
+    static void prop(Project prj, String propertyName, Object val) {
         //if it has the property then set it.
         if(prj.hasProperty(propertyName)){
             prj.setProperty(propertyName, val)
@@ -49,7 +38,7 @@ class GradleHelpers {
     }
 
     @CompileDynamic
-    static void setPropIfEmpty(Project prj, String propertyName, defaultValue) {
+    static void setPropIfEmpty(Project prj, String propertyName, Object defaultValue) {
         if (!prj.findProperty(propertyName) && defaultValue != null) {
             prop(prj, propertyName, defaultValue)
         }
@@ -61,7 +50,7 @@ class GradleHelpers {
      *
      * @return the prop or null
      */
-    static def findAnyProperty(Project prj, String prop) {
+    static Object findAnyProperty(Project prj, String prop) {
         if (System.getenv(prop) != null) {
             return System.getenv(prop)
         } else if (System.properties[prop]) {
@@ -126,12 +115,8 @@ class GradleHelpers {
 
     static Reader expand(Project prj, String string){
         Template template;
-        try {
-            SimpleTemplateEngine engine = new SimpleTemplateEngine()
-            template = engine.createTemplate(string)
-        } finally {
-            //original.close();
-        }
+        SimpleTemplateEngine engine = new SimpleTemplateEngine()
+        template = engine.createTemplate(string)
         StringWriter writer = new StringWriter()
         template.make([project: prj]).writeTo(writer)
         return new StringReader(writer.toString())

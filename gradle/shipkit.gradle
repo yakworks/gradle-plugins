@@ -1,4 +1,4 @@
-
+//
 shipkit {
   team.developers = ['basejump:Joshua Burnett']
   gitHub.repository = "yakworks/gradle-plugins"
@@ -8,13 +8,5 @@ shipkit {
   releaseNotes.publicationRepository = "https://plugins.gradle.org/plugin/yakworks.shipyak"
 }
 
-//apply plugin: 'org.shipkit.upgrade-dependency'
-
-//remove doclint warnings that pollute javadoc logs when building with java8
-if (JavaVersion.current().isJava8Compatible()) {
-  allprojects {
-    tasks.withType(Javadoc) {
-      options.addStringOption('Xdoclint:none', '-quiet')
-    }
-  }
-}
+//Here as a placeholder as shipkit blows up without it. All config is done in shipyak.yml
+//shipkit { }

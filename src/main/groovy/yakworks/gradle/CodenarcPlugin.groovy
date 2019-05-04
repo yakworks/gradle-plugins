@@ -1,11 +1,17 @@
+/*
+* Copyright 2019. Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+*/
 package yakworks.gradle
 
+import groovy.transform.CompileDynamic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.plugins.quality.CodeNarcPlugin
+
 /**
  * sets up codenarc with predefined defaults the way we want them.
  */
+@CompileDynamic
 class CodenarcPlugin implements Plugin<Project> {
 
     //final static String CODENARC_VERSION = "1.3"

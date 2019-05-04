@@ -1,18 +1,7 @@
 /*
- * Copyright 2014-2016 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright 2019. Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+*/
 package yakworks.gradle.config
 
 import groovy.transform.CompileStatic
@@ -36,7 +25,7 @@ import yakworks.commons.ConfigMap
  */
 @CompileStatic
 class YamlConfigPlugin implements Plugin<Project> {
-    private final static Logger LOG = Logging.getLogger(YamlConfigPlugin)
+    //private final static Logger LOG = Logging.getLogger(YamlConfigPlugin)
 
     ConfigMap config
 
@@ -119,9 +108,9 @@ class YamlConfigPlugin implements Plugin<Project> {
     /**
      * load the ymlSource file, ymlSource should be some type of reader
      */
-    Map loadYaml(ymlSource){
+    Map loadYaml(Reader ymlSource){
         Yaml yaml = new Yaml()
-        Map loaded = yaml.load((Reader)ymlSource)
+        Map loaded = yaml.load(ymlSource)
         //loaded = yaml.load((Reader)ymlSource)
         //println loaded
         return loaded

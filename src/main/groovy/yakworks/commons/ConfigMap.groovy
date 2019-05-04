@@ -1,17 +1,7 @@
-/* Copyright 2018 9ci Inc
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+/*
+* Copyright 2019. Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+*/
 package yakworks.commons
 
 import groovy.transform.CompileDynamic
@@ -29,7 +19,7 @@ import java.util.regex.Pattern
 @CompileStatic
 class ConfigMap implements Map<String, Object>, Cloneable {
 
-    private static final Pattern SPLIT_PATTERN = ~/\./
+    //private static final Pattern SPLIT_PATTERN = ~/\./
     private static final String SPRING_PROFILES = 'spring.profiles.active'
     private static final String SPRING = 'spring'
     private static final String PROFILES = 'profiles'
@@ -46,7 +36,7 @@ class ConfigMap implements Map<String, Object>, Cloneable {
         path = []
         dottedPath = ""
         bindingMap = [:]
-        delegateMap = new LinkedHashMap<>()
+        delegateMap = [:]
     }
 
     public ConfigMap(ConfigMap rootConfig, List<String> path) {
@@ -54,7 +44,7 @@ class ConfigMap implements Map<String, Object>, Cloneable {
         this.rootConfig = rootConfig
         this.path = path
         dottedPath = path.join('.')
-        delegateMap = new LinkedHashMap<>()
+        delegateMap = [:]
     }
 
     private ConfigMap(ConfigMap rootConfig, List<String> path, Map<String, Object> delegateMap) {
@@ -175,7 +165,8 @@ class ConfigMap implements Map<String, Object>, Cloneable {
         return !springProfileDefined && hasSpringProfiles
     }
 
-    protected void mergeMapEntry(ConfigMap rootMap, String path, ConfigMap targetMap, String sourceKey, Object sourceValue, boolean parseFlatKeys, boolean isNestedSet = false) {
+    protected void mergeMapEntry(ConfigMap rootMap, String path, ConfigMap targetMap, String sourceKey, Object sourceValue,
+                                 boolean parseFlatKeys, boolean isNestedSet = false) {
         Object currentValue = targetMap.containsKey(sourceKey) ? targetMap.get(sourceKey) : null
         Object newValue
         if(sourceValue instanceof Map) {
@@ -205,7 +196,7 @@ class ConfigMap implements Map<String, Object>, Cloneable {
                 if(subMap instanceof Map) {
                     subMap.remove(sourceKey)
                 }
-                def keysToRemove = rootMap.keySet().findAll() { String key ->
+                def keysToRemove = rootMap.keySet().findAll { String key ->
                     key.startsWith("${path}.")
                 }
                 for(key in keysToRemove) {
@@ -221,7 +212,7 @@ class ConfigMap implements Map<String, Object>, Cloneable {
         }
     }
 
-    protected Object mergeMapEntry(ConfigMap targetMap, String sourceKey, newValue) {
+    protected Object mergeMapEntry(ConfigMap targetMap, String sourceKey, Object newValue) {
         targetMap.put(sourceKey, newValue)
     }
 
@@ -258,7 +249,7 @@ class ConfigMap implements Map<String, Object>, Cloneable {
         bindingMap.putAll(vars)
     }
     void addToBinding(String var, Object val){
-        bindingMap.put(var,val)
+        bindingMap.put(var, val)
     }
 
     /**
@@ -322,12 +313,12 @@ class ConfigMap implements Map<String, Object>, Cloneable {
         StringBuilder accumulatedPath = new StringBuilder()
         boolean isFirst = true
         for(String pathElement : path) {
-            if(!isFirst) {
-                accumulatedPath.append(".").append(pathElement)
-            }
-            else {
+            if(isFirst) {
                 isFirst = false
                 accumulatedPath.append(pathElement)
+            }
+            else {
+                accumulatedPath.append(".").append(pathElement)
             }
 
             Object currentItem = currentMap.get(pathElement)
@@ -389,9 +380,9 @@ class ConfigMap implements Map<String, Object>, Cloneable {
         return treeMap
     }
 
-    @CompileDynamic //FIXME this should not need CompileDynamic, compile works fine but it shows an annoying error on intellij
-    Map injectTrampoline(flat, nester){
-        flat.inject [:], nester.trampoline()
+    //@CompileDynamic //FIXME this should not need CompileDynamic, compile works fine but it shows an annoying error on intellij
+    Map injectTrampoline(Map flat, Closure nester){
+        (Map)flat.inject([:], nester.trampoline())
     }
 
     public Map<String, Object> toFlatConfig() {
@@ -431,7 +422,7 @@ class ConfigMap implements Map<String, Object>, Cloneable {
                         }
                         int index = 0
                         for(Object item: (Collection)value) {
-                            String collectionKey = "${fullKey}[${index}]".toString()
+                            String collectionKey = "${fullKey}[${index}]"
                             flatConfig.put(collectionKey, forceStrings ? String.valueOf(item) : item)
                             index++
                         }
@@ -450,7 +441,7 @@ class ConfigMap implements Map<String, Object>, Cloneable {
 
     @Override
     boolean equals(Object obj) {
-        return delegateMap.equals(obj)
+        return delegateMap == obj
     }
 
     /**
@@ -461,6 +452,8 @@ class ConfigMap implements Map<String, Object>, Cloneable {
         groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(toNormalMap()))
     }
 
+    @SuppressWarnings(['ExplicitCallToGetAtMethod', 'EqualsAndHashCode', 'ToStringReturnsNull', 'BooleanMethodReturnsNull'])
+    @EqualsAndHashCode
     @CompileStatic
     static class NullSafeNavigator implements Map<String, Object>{
         final ConfigMap parent
@@ -521,22 +514,22 @@ class ConfigMap implements Map<String, Object>, Cloneable {
 
         @Override
         Object put(String key, Object value) {
-            throw new UnsupportedOperationException("Configuration cannot be modified");
+            throw new UnsupportedOperationException("Configuration cannot be modified")
         }
 
         @Override
         Object remove(Object key) {
-            throw new UnsupportedOperationException("Configuration cannot be modified");
+            throw new UnsupportedOperationException("Configuration cannot be modified")
         }
 
         @Override
         void putAll(Map<? extends String, ?> m) {
-            throw new UnsupportedOperationException("Configuration cannot be modified");
+            throw new UnsupportedOperationException("Configuration cannot be modified")
         }
 
         @Override
         void clear() {
-            throw new UnsupportedOperationException("Configuration cannot be modified");
+            throw new UnsupportedOperationException("Configuration cannot be modified")
         }
 
         @Override
@@ -585,7 +578,7 @@ class ConfigMap implements Map<String, Object>, Cloneable {
         }
 
         public Object invokeMethod(String name, Object args) {
-            throw new NullPointerException("Cannot invoke method " + name + "() on NullSafeNavigator");
+            throw new UnsupportedOperationException("Cannot invoke method " + name + "() on NullSafeNavigator")
         }
 
         public boolean equals(Object to) {
@@ -601,7 +594,7 @@ class ConfigMap implements Map<String, Object>, Cloneable {
         }
 
         public Object plus(Object o) {
-            throw new NullPointerException("Cannot invoke method plus on NullSafeNavigator")
+            throw new UnsupportedOperationException("Cannot invoke method plus on NullSafeNavigator")
         }
 
         public boolean is(Object other) {
@@ -609,8 +602,7 @@ class ConfigMap implements Map<String, Object>, Cloneable {
         }
 
         public Object asType(Class c) {
-            if(c==Boolean || c==boolean) return false
-            return null
+            return ((c == Boolean) || (c == boolean)) ? false : null
         }
 
         public String toString() {

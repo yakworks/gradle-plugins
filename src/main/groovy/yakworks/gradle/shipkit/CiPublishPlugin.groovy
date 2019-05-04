@@ -1,3 +1,7 @@
+/*
+* Copyright 2019. Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+*/
 package yakworks.gradle.shipkit
 
 import groovy.transform.CompileStatic
@@ -13,9 +17,7 @@ import org.shipkit.internal.gradle.java.JavaPublishPlugin
 import org.shipkit.internal.gradle.release.CiReleasePlugin
 import org.shipkit.internal.gradle.release.ReleaseNeededPlugin
 import org.shipkit.internal.gradle.release.ReleasePlugin
-import org.shipkit.internal.gradle.release.tasks.ReleaseNeeded
 import org.shipkit.internal.gradle.util.ProjectUtil
-import yakworks.commons.Shell
 import yakworks.commons.Shell
 
 /**
@@ -32,7 +34,7 @@ public class CiPublishPlugin implements Plugin<Project> {
 
     public void apply(final Project project) {
         ProjectUtil.requireRootProject(project, this.getClass())
-        ShipkitConfiguration conf = project.getPlugins().apply(ShipkitConfigurationPlugin.class).getConfiguration()
+        ShipkitConfiguration conf = project.plugins.apply(ShipkitConfigurationPlugin).configuration
 
         project.plugins.apply(CiReleasePlugin)
         project.plugins.apply(CirclePlugin)

@@ -1,3 +1,7 @@
+/*
+* Copyright 2019. Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+*/
 package yakworks.commons
 
 import groovy.transform.CompileStatic
@@ -45,8 +49,9 @@ class Maps {
      * @return the pruned map
      */
     static Map prune(Map map, boolean pruneEmpty = true) {
-        map.collectEntries { k, v -> [k, v instanceof Map ? prune(v as Map, pruneEmpty) : v]}
-        .findAll { k, v ->
+        map.collectEntries { k, v ->
+            [k, v instanceof Map ? prune(v as Map, pruneEmpty) : v]
+        }.findAll { k, v ->
             if(pruneEmpty){
                 if (v instanceof List || v instanceof Map || v instanceof String) {
                     return v

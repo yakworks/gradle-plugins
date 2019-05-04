@@ -1,3 +1,7 @@
+/*
+* Copyright 2019. Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+*/
 package yakworks.commons
 
 import groovy.transform.CompileStatic
@@ -54,7 +58,7 @@ class Pogo {
     //standard deep copy implementation
     //take from here https://stackoverflow.com/questions/13155127/deep-copy-map-in-groovy
     //also see @groovy.transform.AutoClone
-    def deepcopy(orig) {
+    def deepcopy(Object orig) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream()
         ObjectOutputStream oos = new ObjectOutputStream(bos)
         oos.writeObject(orig)
