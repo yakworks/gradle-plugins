@@ -4,8 +4,8 @@ description: Plugin tools to automate CI versioning, releasing, tagging and publ
 author: Yak.Works
 group: org.yakworks
 
-#github:
-#  fullName: yakworks/gradle-plugins # will try and pick this up based on checkout repo
+github:
+  fullName: yakworks/gradle-plugins # will try and pick this up based on checkout repo
 
 team:
   developers: ['basejump: Joshua Burnett']
