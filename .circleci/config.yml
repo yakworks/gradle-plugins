@@ -39,7 +39,7 @@ jobs:
 
       - run:
           name: gradle check tests.
-          command: ./gradlew check
+          command: ./gradlew check --stacktrace
 
       - save_cache:
           paths:
@@ -50,7 +50,7 @@ jobs:
 
       - run:
           name: does perform release, this will fire publishPlugins since its a gradle plugin
-          command: ./gradlew ciPerformRelease
+          command: ./gradlew ciPerformRelease --stacktrace
 
       - store_artifacts:
           path: plugin/build/reports/tests/test/
