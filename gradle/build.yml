@@ -1,11 +1,11 @@
 # see defaults options https://github.com/yakworks/gradle-plugins/tree/master/src/main/resources/configs/defaults.yml
 title: ShipYak Gradle Plugins
 description: Plugin tools to automate CI versioning, releasing, tagging and publishing
-author: 9ci Inc
+author: Yak.Works
 group: org.yakworks
 
 #github:
-#  fullName: basejump/gorm-tools # will try and pick this up based on checkout repo
+#  fullName: yakworks/gradle-plugins # will try and pick this up based on checkout repo
 
 team:
   developers: ['basejump: Joshua Burnett']
@@ -21,9 +21,6 @@ maven:
   #repoUrl: http://repo.9ci.com/grails-plugins
   snapshotUrl: http://repo.9ci.com/oss-snapshots
 
-spotless:
-  licenseHeader: |
-    ${'/*\n* Copyright \$YEAR. ' + config.author + '. Licensed under the Apache License, Version 2.0 (the "License")\n' +
-    '* You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0\n' +
-    '*/'
-    }
+codenarc:
+  main:
+    ignoreFailures: false

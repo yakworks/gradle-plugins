@@ -1,3 +1,7 @@
+/*
+* Copyright 2019. Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+*/
 package yakworks.gradle.shipkit
 
 import groovy.transform.CompileStatic
@@ -62,7 +66,7 @@ class MavenRepoReleasePlugin implements Plugin<Project> {
                     if (userSpecifiedRepo != null) {
                         updateNotes.publicationRepository = userSpecifiedRepo
                     } else {
-                        String groupPath = subproject.group.toString().replace('.','/')
+                        String groupPath = subproject.group.toString().replace('.', '/')
                         //Otherwise build it by hand
                         updateNotes.publicationRepository = "${config['maven.publishUrl']}/${groupPath}/${subproject.name}/"
                     }

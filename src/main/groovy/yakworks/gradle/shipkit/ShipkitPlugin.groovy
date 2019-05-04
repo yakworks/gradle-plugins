@@ -1,30 +1,12 @@
+/*
+* Copyright 2019. Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+*/
 package yakworks.gradle.shipkit
 
-import com.jfrog.bintray.gradle.BintrayExtension
-import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
-import org.gradle.api.internal.ClosureBackedAction
-import org.gradle.api.logging.Logger
-import org.gradle.api.logging.Logging
-import org.gradle.api.publish.PublishingExtension
-import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
-import org.shipkit.internal.gradle.bintray.BintrayReleasePlugin
-import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
-import org.shipkit.internal.gradle.git.GitPlugin
-import org.shipkit.internal.gradle.java.JavaBintrayPlugin
-import org.shipkit.internal.gradle.java.JavaPublishPlugin
-import org.shipkit.internal.gradle.java.PomContributorsPlugin
-import org.shipkit.internal.gradle.release.ReleasePlugin
-import org.shipkit.internal.gradle.util.ProjectUtil
-import yakworks.commons.ConfigMap
-import yakworks.commons.Pogo
-import yakworks.gradle.DefaultsPlugin
-import yakworks.gradle.DocmarkPlugin
-import yakworks.gradle.config.YamlConfigPlugin
 
 /**
  * Use ShipyakPlugin

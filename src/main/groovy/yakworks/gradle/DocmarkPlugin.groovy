@@ -1,22 +1,15 @@
 /*
- * Copyright 2014-2016 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright 2019. Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+*/
 package yakworks.gradle
 
-import org.apache.tools.ant.    filters.ReplaceTokens
-import org.gradle.api.*
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
+import org.apache.tools.ant.filters.ReplaceTokens
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.javadoc.Groovydoc
@@ -28,7 +21,7 @@ import yakworks.gradle.shipkit.ShippablePlugin
 /**
  * Tasks and configuration for generating mkdocs and groovydocs.
  */
-//@CompileStatic
+@CompileStatic
 class DocmarkPlugin implements Plugin<Project> {
 
     public static final String UPDATE_README_TASK = "updateReadmeVersions"
@@ -68,6 +61,7 @@ class DocmarkPlugin implements Plugin<Project> {
         //rootProject.allprojects.findAll { prj -> prj.plugins.hasPlugin(BintrayPlugin) }
     }
 
+    @CompileDynamic
     private void addMkdocsTasks(Project prj) {
         ConfigMap config = prj.config
         Task copyTask = prj.tasks.create(MKDOCS_COPY_TASK)
@@ -117,6 +111,7 @@ class DocmarkPlugin implements Plugin<Project> {
         }
     }
 
+    @CompileDynamic
     private void addGitPublish(Project project) {
         project.plugins.apply('org.ajoberstar.grgit')
         project.plugins.apply('org.ajoberstar.git-publish')
@@ -167,13 +162,14 @@ class DocmarkPlugin implements Plugin<Project> {
     }
 
     String replaceVersionRegex(Project prj, String content) {
-        String updatedContent = content.replaceFirst(/(?i)version:\s*[\d\.]+[^\s]+/, "Version: $prj.version")
+        String version = (prj.version as String).trim()
+        String updatedContent = content.replaceFirst(/(?i)version:\s*[\d\.]+[^\s]+/, "Version: $version")
         //VersionInfo info = project.getExtensions().getByType(VersionInfo.class)
         getShippableProjects(prj).each { p ->
             //update any subproject dependencies examples, ie `gorm-tools:6.1.0"`
-            updatedContent = updatedContent.replaceFirst(/${p.name}:[\d\.]+[^"]+/, "${p.name}:${prj.version.trim()}")
+            updatedContent = updatedContent.replaceFirst(/${p.name}:[\d\.]+[^"]+/, "${p.name}:$version")
             //update any dependencies for plugin style versions, ie `id "yakworks.gorm-tools" version "1.2.3"`
-            updatedContent = updatedContent.replaceFirst(/(?i)${p.name}"\sversion\s"[\d\.]+[^\s]+"/, "${p.name}\" version \"$prj.version\"")
+            updatedContent = updatedContent.replaceFirst(/(?i)${p.name}"\sversion\s"[\d\.]+[^\s]+"/, "${p.name}\" version \"$version\"")
         }
         return updatedContent
     }
@@ -187,8 +183,11 @@ class DocmarkPlugin implements Plugin<Project> {
     /**
      * Adds the groovydocMerge task to meld together all publishable source sets into single docs
      */
+    @CompileDynamic
     private void addGroovydocMergeTask(Project project) {
-        //modeled from here https://github.com/nebula-plugins/gradle-aggregate-javadocs-plugin/blob/master/src/main/groovy/nebula/plugin/javadoc/NebulaAggregateJavadocPlugin.groovy
+        /* modeled from here:
+            https://github.com/nebula-plugins/gradle-aggregate-javadocs-plugin/blob/
+            master/src/main/groovy/nebula/plugin/javadoc/NebulaAggregateJavadocPlugin.groovy*/
         //println "addCombineGroovyDocsTask"
         Task tsk = project.task(GROOVYDOC_MERGE_TASK, type: Groovydoc, overwrite: true)
         //do it after entire project evaluated so
@@ -214,6 +213,7 @@ class DocmarkPlugin implements Plugin<Project> {
     /**
      * updates the groovydoc links so they are clickable into external docs
      */
+    @CompileDynamic
     private void groovydocLinks(Task tsk) {
         tsk.with {
             noTimestamp = true

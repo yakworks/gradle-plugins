@@ -1,18 +1,7 @@
 /*
- * Copyright 2014-2016 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright 2019. Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+*/
 package yakworks.gradle.shipkit
 
 import com.jfrog.bintray.gradle.BintrayExtension
@@ -60,7 +49,8 @@ class MavenConfPlugin implements Plugin<Project> {
                 }
 
                 if (project['isSnapshot'] || !isBintray) {
-                    LOG.lifecycle("calling setupMavenPublishRepo because either isSnapshot is true: ${project['isSnapshot']} , or bintray.enabled is false?: $isBintray ")
+                    LOG.lifecycle("calling setupMavenPublishRepo because either isSnapshot is true: ${project['isSnapshot']} ," +
+                        " or bintray.enabled is false?: $isBintray ")
                     setupMavenPublishRepo(project)
                 }
 
@@ -90,7 +80,7 @@ class MavenConfPlugin implements Plugin<Project> {
      * Taken from GrailsCentralPublishGradlePlugin in grails-core. its the 'org.grails.grails-plugin-publish'
      * Cleans up dependencies without versions and removes the bom dependencyManagement stuff and adds the grails-plugin.xml artefact
      */
-    //FIXME I don't think this is how it should be done as it doesnt include the BOM deps
+    @SuppressWarnings('NestedBlockDepth')
     @CompileDynamic
     private void cleanDepsInPom(Project project) {
         project.plugins.withType(MavenPublishPlugin) {
@@ -123,16 +113,16 @@ class MavenConfPlugin implements Plugin<Project> {
     @CompileDynamic
     private void configBintray(Project project, ConfigMap config) {
         project.afterEvaluate { prj ->
-            println "configBintray for ${prj.name}"
-            final BintrayExtension bintray = project.getExtensions().getByType(BintrayExtension.class)
+            //println "configBintray for ${prj.name}"
+            final BintrayExtension bintray = project.getExtensions().getByType(BintrayExtension)
             config.evalAll() //make sure StringTemplates are evaluated
             bintray.user = config['bintray.user']
             bintray.key = config['bintray.key']
 
             final BintrayExtension.PackageConfig pkg = bintray.getPkg()
-            Pogo.merge(pkg,config['bintray.pkg'])
-            Pogo.merge(pkg.version.gpg,config['bintray.pkg.version.gpg'])
-            Pogo.merge(pkg.version.mavenCentralSync,config['bintray.pkg.version.mavenCentralSync'])
+            Pogo.merge(pkg, config['bintray.pkg'])
+            Pogo.merge(pkg.version.gpg, config['bintray.pkg.version.gpg'])
+            Pogo.merge(pkg.version.mavenCentralSync, config['bintray.pkg.version.mavenCentralSync'])
 
             pkg.name = prj.name
             pkg.version.name = prj.version
@@ -141,7 +131,7 @@ class MavenConfPlugin implements Plugin<Project> {
 
     private void configGrailsBintray(Project project) {
         project.afterEvaluate { prj ->
-            final BintrayExtension bintray = project.getExtensions().getByType(BintrayExtension.class)
+            final BintrayExtension bintray = project.getExtensions().getByType(BintrayExtension)
             bintray.pkg.version.attributes = ["grails-plugin": "${prj['group']}:${prj['name']}".toString()]
         }
     }
@@ -151,7 +141,7 @@ class MavenConfPlugin implements Plugin<Project> {
         def directory
         try {
             directory = project.sourceSets.main.groovy.outputDir
-        } catch (Exception e) {
+        } catch (e) {
             directory = project.sourceSets.main.output.classesDir
         }
         [source: "${directory}/META-INF/grails-plugin.xml".toString(),

@@ -1,3 +1,7 @@
+/*
+* Copyright 2019. Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+*/
 package yakworks.gradle.shipkit
 
 import groovy.transform.CompileStatic
@@ -12,9 +16,8 @@ import org.shipkit.internal.gradle.util.ProjectUtil
 import org.shipkit.internal.gradle.version.VersioningPlugin
 import org.shipkit.internal.util.PropertiesUtil
 import yakworks.commons.ConfigMap
-import yakworks.commons.Pogo
-import yakworks.gradle.config.YamlConfigPlugin
 import yakworks.commons.Shell
+import yakworks.gradle.config.YamlConfigPlugin
 
 import static yakworks.gradle.GradleHelpers.prop
 
@@ -25,10 +28,9 @@ import static yakworks.gradle.GradleHelpers.prop
 @CompileStatic
 public class ConfigYakPlugin implements Plugin<Project> {
 
-    private final static Logger LOG = Logging.getLogger(ConfigYakPlugin);
+    private final static Logger LOG = Logging.getLogger(ConfigYakPlugin)
 
     ConfigMap config
-
 
     public void apply(final Project project) {
         ProjectUtil.requireRootProject(project, this.getClass())
@@ -78,7 +80,7 @@ public class ConfigYakPlugin implements Plugin<Project> {
 
     }
 
-    void setProps(pogo, cfgMap){
+    void setProps(Object pogo, Object cfgMap){
         ConfigMap curConfig = (ConfigMap)cfgMap
         InvokerHelper.setProperties(pogo, curConfig.evalAll().prune())
     }

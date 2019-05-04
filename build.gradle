@@ -6,9 +6,7 @@ buildscript {
   }
   dependencies {
     //classpath 'org.shipkit:shipkit:2.2.5'
-    classpath "org.yakworks:gradle-plugins:1.0.2-SNAPSHOT"
-    //classpath 'ru.vyarus:gradle-animalsniffer-plugin:+'
-    //classpath 'io.spring.gradle:dependency-lock:latest.release'
+    classpath "org.yakworks:gradle-plugins:1.0.2"
   }
 }
 
@@ -22,11 +20,12 @@ apply plugin: 'yakworks.gradle-plugin'
 
 //apply plugin: 'groovy'
 //apply plugin: 'org.shipkit.gradle-plugin'
+//group = 'org.yakworks'
 
 //apply plugin: 'com.gradle.plugin-publish'
 //apply plugin: 'spring.lock' //run gradle updateLocks
 
-//group = 'org.yakworks'
+
 
 repositories {
   jcenter()

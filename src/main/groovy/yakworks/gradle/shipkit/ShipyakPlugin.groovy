@@ -1,5 +1,8 @@
+/*
+* Copyright 2019. Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+*/
 package yakworks.gradle.shipkit
-
 
 import groovy.transform.CompileStatic
 import org.gradle.api.Plugin
@@ -38,7 +41,7 @@ class ShipyakPlugin implements Plugin<Project> {
 
         boolean isBintray = config['bintray.enabled']
         if(isBintray){
-            println "applying BintrayReleasePlugin isBintray=true"
+            //println "applying BintrayReleasePlugin isBintray=true"
             project.plugins.apply(BintrayReleasePlugin)
         } else{
             //we are publishing lib to artifactory
@@ -66,8 +69,6 @@ class ShipyakPlugin implements Plugin<Project> {
             final Task gitPublishDocsTask = project.tasks.getByName(gitPublishDocsTaskName)
             gitPublishDocsTask.mustRunAfter(GitPlugin.GIT_PUSH_TASK)
             performRelease.dependsOn(gitPublishDocsTask)
-        } else {
-            //LOG.lifecycle("Doc will not be published as enableDocsPublish is false" )
         }
     }
 
