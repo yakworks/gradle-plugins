@@ -7,6 +7,7 @@ package yakworks.gradle
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.apache.tools.ant.filters.ReplaceTokens
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -30,13 +31,18 @@ class DocmarkPlugin implements Plugin<Project> {
     public static final String GIT_PUSH_TASK = "gitPublishPush" // ajoberstar's GitPublishPlugin.PUSH_TASK
     //public static final String TEST_RELEASE_TASK = "testRelease"
 
+    @CompileDynamic
     void apply(Project rootProject) {
+        if (rootProject.rootProject != rootProject) {
+            throw new GradleException('yakworks.defaults must only be applied to the root project')
+        }
         //ShipkitConfiguration conf = rootProject.plugins.apply(ShipkitConfigurationPlugin).configuration
         //do after groovy is applied to pubProjects above
         addGroovydocMergeTask(rootProject)
 
-        boolean enableDocsPublish = rootProject.hasProperty('enableDocsPublish')? Boolean.valueOf(rootProject['enableDocsPublish'].toString()) : true
-        if(enableDocsPublish) {
+        //boolean enableDocsPublish = rootProject.hasProperty('enableDocsPublish')? Boolean.valueOf(rootProject['enableDocsPublish'].toString()) : true
+        boolean enableDocsPublish = rootProject.config['docs.enabled']
+        if(rootProject.file('mkdocs.yml').exists() && enableDocsPublish) {
             addMkdocsTasks(rootProject)
             addGitPublish(rootProject)
         }

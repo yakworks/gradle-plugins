@@ -38,8 +38,9 @@ class DocsReleasePlugin implements Plugin<Project> {
         File rmeFile = project.file('README.md')
         GitPlugin.registerChangesForCommitIfApplied([rmeFile], 'README.md versions', updateReadme)
 
-        // if docs are enabled then wire up dependency chains so performRelease fires the docs build and publish
-        if(config['docs.enabled']) {
+        // if docs are enabled and mkdocs.yml file exists
+        // then wire up dependency chains so performRelease fires the docs build and publish
+        if(project.file('mkdocs.yml').exists() && config['docs.enabled']) {
             String gitPublishDocsTaskName = 'gitPublishPush'
             if (project.hasProperty(ShipkitConfigurationPlugin.DRY_RUN_PROPERTY)) {
                 gitPublishDocsTaskName = 'gitPublishCopy'
