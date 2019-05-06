@@ -81,26 +81,38 @@ class GrailsPlugin implements Plugin<Project> {
     @SuppressWarnings('NestedBlockDepth')
     @CompileDynamic
     void cleanDepsInPom(Project project) {
-        project.plugins.withType(MavenPublishPlugin) {
-            project.extensions.configure PublishingExtension, new ClosureBackedAction( {
-                publications {
-                    javaLibrary(MavenPublication) {
-                        artifact getGrailsPluginArtifact(project)
-                        pom.withXml {
-                            Node pomNode = asNode()
-                            if (pomNode.dependencyManagement) {
-                                pomNode.dependencyManagement[0].replaceNode {}
-                            }
-                            pomNode.dependencies.dependency.findAll {
-                                it.version.text().isEmpty()
-                            }.each {
-                                it.replaceNode {}
-                            }
+        project.extensions.configure PublishingExtension, new ClosureBackedAction({
+            publications {
+                javaLibrary(MavenPublication) {
+                    artifact getGrailsPluginArtifact(project)
+                    pom.withXml {
+                        Node pomNode = asNode()
+                        if (pomNode.dependencyManagement) {
+                            pomNode.dependencyManagement[0].replaceNode {}
+                        }
+                        pomNode.dependencies.dependency.findAll {
+                            it.version.text().isEmpty()
+                        }.each {
+                            it.replaceNode {}
+                        }
+
+                        //simce gradle 4.8 garbarge exclusions show up, get rid of them
+                        pomNode.dependencies.dependency.exclusions.exclusion.findAll { Node dep ->
+                            dep.artifactId.text() in ['grails-plugin-async', 'grails-plugin-events', 'grails-plugin-converters',
+                                                      'grails-plugin-gsp', 'grails-plugin-testing', 'grails-datastore-simple']
+                        }.each {
+                            it.replaceNode {}
+                        }
+                        //now get ride of the empty exclusions
+                        pomNode.dependencies.dependency.exclusions.findAll { Node dep ->
+                            !dep.value()
+                        }.each {
+                            it.replaceNode {}
                         }
                     }
                 }
-            })
-        }
+            }
+        })
     }
 
     @CompileDynamic

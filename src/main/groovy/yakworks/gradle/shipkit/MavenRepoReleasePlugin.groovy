@@ -10,8 +10,10 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.shipkit.gradle.configuration.ShipkitConfiguration
+import org.shipkit.gradle.notes.UpdateReleaseNotesOnGitHubTask
 import org.shipkit.gradle.notes.UpdateReleaseNotesTask
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
+import org.shipkit.internal.gradle.notes.ReleaseNotesPlugin
 import org.shipkit.internal.gradle.release.ReleasePlugin
 import yakworks.commons.ConfigMap
 
@@ -62,14 +64,22 @@ class MavenRepoReleasePlugin implements Plugin<Project> {
                 subproject.afterEvaluate {
                     //UpdateReleaseNotesTask needs to be modified as its hard coded to use bintray when writing out the release-notes
                     UpdateReleaseNotesTask updateNotes = (UpdateReleaseNotesTask) project[UPDATE_NOTES_TASK]
+                    UpdateReleaseNotesOnGitHubTask updateNotesOnGitHub = (UpdateReleaseNotesOnGitHubTask) project.getTasks().getByName(
+                        ReleaseNotesPlugin.UPDATE_NOTES_ON_GITHUB_TASK)
+
                     String userSpecifiedRepo = shipkitConf.lenient.releaseNotes.publicationRepository
+                    //println "userSpecifiedRepo : $userSpecifiedRepo"
+                    ///println "updateNotes.publicationRepository : ${updateNotes.publicationRepository}"
                     if (userSpecifiedRepo != null) {
                         updateNotes.publicationRepository = userSpecifiedRepo
+                        updateNotesOnGitHub.publicationRepository = userSpecifiedRepo
                     } else {
                         String groupPath = subproject.group.toString().replace('.', '/')
                         //Otherwise build it by hand
                         updateNotes.publicationRepository = "${config['maven.publishUrl']}/${groupPath}/${subproject.name}/"
+                        updateNotesOnGitHub.publicationRepository = updateNotes.publicationRepository
                     }
+                    //println "updateNotes.publicationRepository : ${updateNotes.publicationRepository}"
                 }
 
                 //Making git push run as late as possible because it is an operation that is hard to reverse.
