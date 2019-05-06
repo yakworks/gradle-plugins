@@ -202,7 +202,7 @@ This add a yaml config. These are the defaults.
        - 'gradle/*.gradle'
  
  codenarc:
-   toolVersion: 1.3
+   toolVersion: 1.0.3
    config: prj.yakworks.getCodenarcRuleSet()
    reportFormat: 'html'
    maxPriority1Violations: 0
