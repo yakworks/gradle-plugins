@@ -42,15 +42,22 @@ class GrailsPlugin implements Plugin<Project> {
         //post processing cleanup
         addGrailsPluginBintrayAttribute(project)
         cleanDepsInPom(project)
+
         addGrailsRepos(project)
     }
 
     @CompileDynamic
     static addGrailsRepos(Project project) {
-        //add our default grails repositories to search.
-        RepositoryHandler rh = project.repositories
-        rh.maven { url "https://repo.grails.org/grails/core" }
-        rh.maven { url "https://dl.bintray.com/9ci/grails-plugins"}
+        project.rootProject.allprojects { Project prj ->
+            ['org.grails.grails-plugin', 'org.grails.grails-web'].each { plugId ->
+                prj.plugins.withId(plugId) {
+                    //add our default grails repositories to search.
+                    RepositoryHandler rh = prj.repositories
+                    rh.maven { url "https://repo.grails.org/grails/core" }
+                    rh.maven { url "https://dl.bintray.com/9ci/grails-plugins" }
+                }
+            }
+        }
     }
 
     /**

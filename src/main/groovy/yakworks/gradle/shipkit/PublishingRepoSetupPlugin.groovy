@@ -12,6 +12,7 @@ import org.gradle.api.internal.ClosureBackedAction
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.shipkit.internal.gradle.java.JavaBintrayPlugin
 import org.shipkit.internal.gradle.util.ProjectUtil
 import yakworks.commons.ConfigMap
@@ -56,17 +57,19 @@ class PublishingRepoSetupPlugin implements Plugin<Project> {
     @CompileDynamic
     void setupMavenPublishRepo(Project project){
         LOG.lifecycle("Set PublishingExtension with URL: ${config['maven.publishUrl']}")
-        project.extensions.configure PublishingExtension, new ClosureBackedAction( {
-            repositories {
-                maven {
-                    url config.maven.publishUrl
-                    credentials {
-                        username config.maven.user
-                        password config.maven.key
+        project.plugins.withType(MavenPublishPlugin) {
+            project.extensions.configure PublishingExtension, new ClosureBackedAction({
+                repositories {
+                    maven {
+                        url config.maven.publishUrl
+                        credentials {
+                            username config.maven.user
+                            password config.maven.key
+                        }
                     }
                 }
-            }
-        })
+            })
+        }
     }
 
     /**
