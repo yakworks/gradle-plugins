@@ -82,7 +82,7 @@ public class CiPublishPlugin implements Plugin<Project> {
         ReleaseNeededTask rtask = (ReleaseNeededTask)project.rootProject.tasks.getByName(ReleaseNeededPlugin.ASSERT_RELEASE_NEEDED_TASK)
         String branch = System.getenv("CIRCLE_BRANCH")
         boolean releasableBranch = branch?.matches(rtask.releasableBranchRegex)
-        boolean skipEnvVariable = System.getenv('SKIP_RELEASE').toBoolean()
+        boolean skipEnvVariable = System.getenv('SKIP_RELEASE')?.toBoolean()
         boolean skippedByCommitMessage = rtask.commitMessage?.contains("[ci skip-release]")
 
         LOG.lifecycle("Should Release SNAPSHOT on branch [${rtask.branch}] :\n" +
