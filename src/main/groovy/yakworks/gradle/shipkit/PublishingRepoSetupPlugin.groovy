@@ -12,22 +12,20 @@ import org.gradle.api.internal.ClosureBackedAction
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.publish.PublishingExtension
-import org.gradle.api.publish.maven.MavenPublication
-import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.shipkit.internal.gradle.java.JavaBintrayPlugin
-import org.shipkit.internal.gradle.java.JavaPublishPlugin
 import org.shipkit.internal.gradle.util.ProjectUtil
 import yakworks.commons.ConfigMap
 import yakworks.commons.Pogo
+import yakworks.gradle.ShippablePlugin
 
 /**
- * Setup Bintray and/or Maven
+ * Finalize setup for Bintray and/or Maven (artifactory) based on isSnapshot and bintray.enabled
  * Should be applied after JavaPublishPlugin so that can do the maven setups first
- * should only be put on rootprojects
+ * only apply on rootprojects
  */
 @CompileDynamic
-class MavenConfPlugin implements Plugin<Project> {
-    private final static Logger LOG = Logging.getLogger(MavenConfPlugin)
+class PublishingRepoSetupPlugin implements Plugin<Project> {
+    private final static Logger LOG = Logging.getLogger(PublishingRepoSetupPlugin)
 
     ConfigMap config
 
@@ -42,20 +40,15 @@ class MavenConfPlugin implements Plugin<Project> {
                 if (isBintray) {
                     project.plugins.apply(JavaBintrayPlugin)
                     configBintray(project, config)
-
-                    project.plugins.withId("yakworks.grails-plugin") {
-                        configGrailsBintray(project)
-                    }
                 }
 
                 if (project['isSnapshot'] || !isBintray) {
-                    LOG.lifecycle("calling setupMavenPublishRepo because either isSnapshot is true: ${project['isSnapshot']} ," +
-                        " or bintray.enabled is false?: $isBintray ")
+                    LOG.lifecycle("calling setupMavenPublishRepo because one of the following is true\n" +
+                        "isSnapshot = true: ${project['isSnapshot']} , " +
+                        "bintray.enabled = false: $isBintray ")
                     setupMavenPublishRepo(project)
                 }
 
-                cleanDepsInPom(project)
-                //wireUpDocPublishing(project)
             }
         }
     }
@@ -74,37 +67,6 @@ class MavenConfPlugin implements Plugin<Project> {
                 }
             }
         })
-    }
-
-    /**
-     * Taken from GrailsCentralPublishGradlePlugin in grails-core. its the 'org.grails.grails-plugin-publish'
-     * Cleans up dependencies without versions and removes the bom dependencyManagement stuff and adds the grails-plugin.xml artefact
-     */
-    @SuppressWarnings('NestedBlockDepth')
-    @CompileDynamic
-    private void cleanDepsInPom(Project project) {
-        project.plugins.withType(MavenPublishPlugin) {
-            project.extensions.configure PublishingExtension, new ClosureBackedAction( {
-                publications {
-                    javaLibrary(MavenPublication) {
-                        project.plugins.withId("yakworks.grails-plugin") {
-                            artifact getGrailsPluginArtifact(project)
-                        }
-                        pom.withXml {
-                            Node pomNode = asNode()
-                            if (pomNode.dependencyManagement) {
-                                pomNode.dependencyManagement[0].replaceNode {}
-                            }
-                            pomNode.dependencies.dependency.findAll {
-                                it.version.text().isEmpty()
-                            }.each {
-                                it.replaceNode {}
-                            }
-                        }
-                    }
-                }
-            })
-        }
     }
 
     /**
@@ -127,25 +89,5 @@ class MavenConfPlugin implements Plugin<Project> {
             pkg.name = prj.name
             pkg.version.name = prj.version
         }
-    }
-
-    private void configGrailsBintray(Project project) {
-        project.afterEvaluate { prj ->
-            final BintrayExtension bintray = project.getExtensions().getByType(BintrayExtension)
-            bintray.pkg.version.attributes = ["grails-plugin": "${prj['group']}:${prj['name']}".toString()]
-        }
-    }
-
-    @CompileDynamic
-    protected Map<String, String> getGrailsPluginArtifact(Project project) {
-        def directory
-        try {
-            directory = project.sourceSets.main.groovy.outputDir
-        } catch (e) {
-            directory = project.sourceSets.main.output.classesDir
-        }
-        [source: "${directory}/META-INF/grails-plugin.xml".toString(),
-         classifier: "plugin",
-         extension: 'xml']
     }
 }

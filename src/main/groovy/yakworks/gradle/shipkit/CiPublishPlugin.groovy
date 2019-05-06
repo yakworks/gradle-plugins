@@ -39,16 +39,7 @@ public class CiPublishPlugin implements Plugin<Project> {
         project.plugins.apply(CiReleasePlugin)
         project.plugins.apply(CirclePlugin)
 
-        //add a check shell command. simply depending on it does not seem to fire it so we hard wire it this way
-        //down the line, during snapshot, we check for code changes that are not just docs changes
-        //and have the root ciPublish depend on this if there are.
-        //NOT USED, Works locally but not on circle
-        //            ShipkitExecTask ciCheckTask = project.task(CI_CHECK_TASK, type:ShipkitExecTask){
-        //                description = "Runs the `gradle check` in a sep command process"
-        //                execCommands.add(execCommand("check tests", ["./gradlew", 'check', '--no-daemon']))
-        //                //execCommands.add(execCommand("check tests", ["./gradlew", 'check', '--no-daemon'], ExecCommandFactory.stopExecution()))
-        //            }
-
+        //if its a CI run
         if(System.getenv('CI')) {
             def ciPubTask = project.task(CI_PUBLISH_TASK)
 
@@ -101,20 +92,26 @@ public class CiPublishPlugin implements Plugin<Project> {
             " - skippedByCommitMessage: " + skippedByCommitMessage + "\n"
         )
 
+        //if any of the above doesn't fail it then
         if(releasableBranch && !rtask.isPullRequest() && !skipEnvVariable && !skippedByCommitMessage) {
+
             String commitRange = Shell.exec('echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev')
             def gitDiff = "git diff --name-only $commitRange"
             def grepReg = $/"(README\.md|mkdocs\.yml|docs/)"/$
 
             boolean hasAppChanges = ['sh', '-c', gitDiff + ' | grep --invert-match -E ' + grepReg].execute().text.trim().length() > 0
             boolean hasDocChanges = ['sh', '-c', gitDiff + ' | grep -E ' + grepReg].execute().text.trim().length() > 0
+
             LOG.lifecycle(" - Has application changes and will run publish: " + hasAppChanges + "\n" +
                 " - Docs have changed will run `:gitPublishPush` : " + hasDocChanges)
+
             if(hasAppChanges){
                 String publishMavSnap = "${project.getPath()}:$MavenRepoReleasePlugin.MAVEN_PUBLISH_REPO_TASK"
                 ciPublishTask.dependsOn(publishMavSnap)
             }
-            if(hasDocChanges) ciPublishTask.dependsOn(':gitPublishPush')
+            if(hasDocChanges){
+                ciPublishTask.dependsOn(':gitPublishPush')
+            }
         } else {
             LOG.lifecycle("SNAPSHOT publish will be skipped. See Logs above")
         }

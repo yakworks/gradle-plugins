@@ -25,8 +25,6 @@ apply plugin: 'yakworks.gradle-plugin'
 //apply plugin: 'com.gradle.plugin-publish'
 //apply plugin: 'spring.lock' //run gradle updateLocks
 
-
-
 repositories {
   jcenter()
   maven { url "https://plugins.gradle.org/m2/" }
@@ -99,14 +97,14 @@ gradlePlugin {
     }
     gradlePluginPlugin {
       id = 'yakworks.gradle-plugin'
-      implementationClass = 'yakworks.gradle.shipkit.ShipYakGradlePlugin'
+      implementationClass = 'yakworks.gradle.shipkit.GradlePluginPlugin'
       displayName = 'ShipYak Gradle Plugin'
       description = 'Wrapper around shipkit.gradle-plugin to use defaults and CircleCI'
       //tags = defTags
     }
     shipyakPlugin {
       id = 'yakworks.shipyak'
-      implementationClass = 'yakworks.gradle.shipkit.ShipyakPlugin'
+      implementationClass = 'yakworks.gradle.shipkit.ShipYakRootPlugin'
       displayName = 'ShipYak Root Project'
       description = 'ShipYak Root Project, Does the defaults to get ShipYak and ShipKit setup. Usually you would apply one of the others but if multi-project then put this on the root'
       //tags = defTags

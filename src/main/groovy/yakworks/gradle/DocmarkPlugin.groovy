@@ -13,10 +13,7 @@ import org.gradle.api.Task
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.javadoc.Groovydoc
-import org.shipkit.gradle.configuration.ShipkitConfiguration
-import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import yakworks.commons.ConfigMap
-import yakworks.gradle.shipkit.ShippablePlugin
 
 /**
  * Tasks and configuration for generating mkdocs and groovydocs.
@@ -29,10 +26,12 @@ class DocmarkPlugin implements Plugin<Project> {
     public static final String MKDOCS_BUILD_TASK = "mkdocsBuild"
     public static final String PUBLISH_DOCS_TASK = "publishDocs"
     public static final String GROOVYDOC_MERGE_TASK = "groovydocMerge"
+
+    public static final String GIT_PUSH_TASK = "gitPublishPush" // ajoberstar's GitPublishPlugin.PUSH_TASK
     //public static final String TEST_RELEASE_TASK = "testRelease"
 
     void apply(Project rootProject) {
-        ShipkitConfiguration conf = rootProject.plugins.apply(ShipkitConfigurationPlugin).configuration
+        //ShipkitConfiguration conf = rootProject.plugins.apply(ShipkitConfigurationPlugin).configuration
         //do after groovy is applied to pubProjects above
         addGroovydocMergeTask(rootProject)
 
@@ -48,7 +47,7 @@ class DocmarkPlugin implements Plugin<Project> {
         pubDocsTask.with {
             group = JavaBasePlugin.DOCUMENTATION_GROUP
             description = 'Builds and publishes docs to github'
-            dependsOn 'gitPublishPush'
+            dependsOn GIT_PUSH_TASK
         }
     }
 
