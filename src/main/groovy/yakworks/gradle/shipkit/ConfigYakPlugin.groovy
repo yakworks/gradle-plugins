@@ -50,12 +50,17 @@ public class ConfigYakPlugin implements Plugin<Project> {
         //sets the fullname repo from git if its null
         ConfigMap ghConfig = (ConfigMap)config.github
         String gslug = ghConfig.fullName
+        LOG.lifecycle("github.fullName is $gslug")
         if (!gslug) {
             //println "gslug was null so using sed to get config from git"
             String sedPart = $/sed -n 's#.*/\(.*/[^.]*\)\.git#\1#p'/$
-            gslug = Shell.exec("git config --get remote.origin.url | $sedPart")
+            String getRemote = "git config --get remote.origin.url | $sedPart"
+            gslug = Shell.exec(getRemote)
             //the sed above should have gotten back owner/repo
             config.merge('github.fullName', gslug)
+            LOG.lifecycle("github.fullName was not set so getting it from $getRemote \n" +
+                "ghConfig.fullName : ${ghConfig.fullName} , " +
+                "gslug from cmd is $gslug")
         }
 
         //github
