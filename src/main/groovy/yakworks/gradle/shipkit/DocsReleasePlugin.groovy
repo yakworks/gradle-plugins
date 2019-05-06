@@ -1,5 +1,5 @@
 /*
-* Copyright 2019. Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* Copyright 2019 Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
 * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 */
 package yakworks.gradle.shipkit
@@ -21,13 +21,11 @@ import yakworks.gradle.DefaultsPlugin
 import yakworks.gradle.DocmarkPlugin
 
 /**
- * Continuous delivery for Java/Groovy/Grails with CirclePlugin and Bintray.
- * Intended for root project of your Gradle project because it applies some configuration to 'allprojects'.
- * Adds plugins and tasks to setup automated releasing for a typical Java/Groovy/Grails multi-project build.
+ * Wires up the README updates and the docs build and publishing to the performRelease task
  */
 @CompileStatic
-class ShipyakPlugin implements Plugin<Project> {
-    private final static Logger LOG = Logging.getLogger(ShipyakPlugin)
+class DocsReleasePlugin implements Plugin<Project> {
+    private final static Logger LOG = Logging.getLogger(DocsReleasePlugin)
 
     ConfigMap config
 
@@ -36,31 +34,12 @@ class ShipyakPlugin implements Plugin<Project> {
 
         config = project.plugins.apply(ConfigYakPlugin).config
 
-        project.plugins.apply(CiPublishPlugin)
-        project.plugins.apply(DefaultsPlugin)
-
-        boolean isBintray = config['bintray.enabled']
-        if(isBintray){
-            //println "applying BintrayReleasePlugin isBintray=true"
-            project.plugins.apply(BintrayReleasePlugin)
-        } else{
-            //we are publishing lib to artifactory
-            project.plugins.apply(MavenRepoReleasePlugin)
-        }
-        project.plugins.apply(PomContributorsPlugin)
-
-        wireUpDocPublishing(project)
-    }
-
-    //Sets dependendsOn and wires up so gitPush will take into account the README updates and the Mkdocs will get run after a release
-    void wireUpDocPublishing(Project project){
-        final Task updateReadme = project.tasks.getByName(DocmarkPlugin.UPDATE_README_TASK)
-        final File rmeFile = project.file('README.md')
+        Task updateReadme = project.tasks.getByName(DocmarkPlugin.UPDATE_README_TASK)
+        File rmeFile = project.file('README.md')
         GitPlugin.registerChangesForCommitIfApplied([rmeFile], 'README.md versions', updateReadme)
 
-        final Task performRelease = project.tasks.getByName(ReleasePlugin.PERFORM_RELEASE_TASK)
-        boolean enableDocsPublish = config['docs.enabled']
-        if(enableDocsPublish) {
+        // if docs are enabled then wire up dependency chains so performRelease fires the docs build and publish
+        if(config['docs.enabled']) {
             String gitPublishDocsTaskName = 'gitPublishPush'
             if (project.hasProperty(ShipkitConfigurationPlugin.DRY_RUN_PROPERTY)) {
                 gitPublishDocsTaskName = 'gitPublishCopy'
@@ -68,6 +47,7 @@ class ShipyakPlugin implements Plugin<Project> {
             //LOG.lifecycle("gitPublishDocsTaskName $gitPublishDocsTaskName" )
             final Task gitPublishDocsTask = project.tasks.getByName(gitPublishDocsTaskName)
             gitPublishDocsTask.mustRunAfter(GitPlugin.GIT_PUSH_TASK)
+            Task performRelease = project.tasks.getByName(ReleasePlugin.PERFORM_RELEASE_TASK)
             performRelease.dependsOn(gitPublishDocsTask)
         }
     }

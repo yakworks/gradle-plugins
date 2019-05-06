@@ -1,5 +1,5 @@
 /*
-* Copyright 2019. Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* Copyright 2019 Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
 * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 */
 package yakworks.gradle
@@ -14,7 +14,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.tasks.javadoc.Javadoc
-import yakworks.gradle.shipkit.ShippablePlugin
 
 @CompileStatic
 class DefaultsPlugin implements Plugin<Project> {
@@ -24,28 +23,27 @@ class DefaultsPlugin implements Plugin<Project> {
             throw new GradleException('yakworks.defaults must only be applied to the root project')
         }
 
-        //setup defaults props
-
-        //apply default plugins
+        //apply some helpful  default plugins
+        //this is a wrapper on the normal IDEA plugin that make config better
         rootProject.plugins.apply("com.github.erdi.extended-idea")
         //rootProject.plugins.apply('com.dorongold.task-tree')
 
         rootProject.allprojects { Project prj ->
+
             prj.plugins.withId('java') {
                 //this is for CI to cache dependencies see https://github.com/palantir/gradle-configuration-resolver-plugin
                 prj.plugins.apply('com.palantir.configuration-resolver')
 
                 addDefaultRepos(prj)
-
                 silentJavadocWarnings(prj)
-
             }
-            //if its a groovy library then add codeNarc in
+            //add codenarc to groovy projects that are shippable
             prj.plugins.withType(ShippablePlugin){
                 prj.plugins.withId('groovy') {
                     prj.plugins.apply(CodenarcPlugin)
                 }
             }
+
             addSpotless(prj)
         }
 
@@ -53,14 +51,15 @@ class DefaultsPlugin implements Plugin<Project> {
 
     }
 
-    @CompileDynamic
+    /**
+     * Add the jcenter and mavenCentral repos as defaults
+     */
+    //@CompileDynamic
     void addDefaultRepos(Project prj) {
         //add our default repositories to search.
         RepositoryHandler rh = prj.repositories
         rh.jcenter()
         rh.mavenCentral()
-        rh.maven { url "https://repo.grails.org/grails/core" }
-        rh.maven { url "https://dl.bintray.com/9ci/grails-plugins"}
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
-* Copyright 2019. Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* Copyright 2019 Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
 * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 */
 package yakworks.gradle.shipkit
@@ -17,6 +17,7 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.shipkit.internal.gradle.java.JavaPublishPlugin
 import org.shipkit.internal.gradle.snapshot.LocalSnapshotPlugin
+import yakworks.gradle.ShippablePlugin
 
 /**
  * A marker for a grails plugin, "yakworks.grails-plugin", will apply GrailsPluginPublishPlugin later after config
@@ -26,6 +27,7 @@ class GrailsWebPlugin implements Plugin<Project> {
     private final static Logger log = Logging.getLogger(GrailsWebPlugin)
 
     void apply(Project project) {
+        project.rootProject.plugins.apply(ShipYakRootPlugin)
         project.plugins.apply(ShippablePlugin)
 
         project.plugins.apply('war')
@@ -34,7 +36,10 @@ class GrailsWebPlugin implements Plugin<Project> {
 
         //setup deploy
         setupMavenWarPublish(project)
-        project.rootProject.plugins.apply(MavenConfPlugin) //should come last after setupMavenWarPublish as it needs to have MavenPublishPlugin
+        //should come last after setupMavenWarPublish as it needs to have MavenPublishPlugin
+        project.rootProject.plugins.apply(PublishingRepoSetupPlugin)
+
+        GrailsPlugin.addGrailsRepos(project)
     }
 
     @CompileDynamic
