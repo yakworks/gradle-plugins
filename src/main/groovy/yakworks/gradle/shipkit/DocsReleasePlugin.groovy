@@ -41,9 +41,9 @@ class DocsReleasePlugin implements Plugin<Project> {
         // if docs are enabled and mkdocs.yml file exists
         // then wire up dependency chains so performRelease fires the docs build and publish
         if(project.file('mkdocs.yml').exists() && config['docs.enabled']) {
-            String gitPublishDocsTaskName = 'gitPublishPush'
+            String gitPublishDocsTaskName = DocmarkPlugin.PUBLISH_DOCS_TASK
             if (project.hasProperty(ShipkitConfigurationPlugin.DRY_RUN_PROPERTY)) {
-                gitPublishDocsTaskName = 'gitPublishCopy'
+                gitPublishDocsTaskName = DocmarkPlugin.GH_COPY_DOCS_TASK
             }
             //LOG.lifecycle("gitPublishDocsTaskName $gitPublishDocsTaskName" )
             final Task gitPublishDocsTask = project.tasks.getByName(gitPublishDocsTaskName)

@@ -15,6 +15,7 @@ import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.javadoc.Groovydoc
 import yakworks.commons.ConfigMap
+import yakworks.commons.Shell
 
 /**
  * Tasks and configuration for generating mkdocs and groovydocs.
@@ -26,9 +27,11 @@ class DocmarkPlugin implements Plugin<Project> {
     public static final String MKDOCS_COPY_TASK = "mkdocsPrepare"
     public static final String MKDOCS_BUILD_TASK = "mkdocsBuild"
     public static final String PUBLISH_DOCS_TASK = "publishDocs"
+    public static final String GH_COPY_DOCS_TASK = "ghCopyDocs"
+    public static final String GH_PUSH_DOCS_TASK = "ghPushDocs"
     public static final String GROOVYDOC_MERGE_TASK = "groovydocMerge"
 
-    public static final String GIT_PUSH_TASK = "gitPublishPush" // ajoberstar's GitPublishPlugin.PUSH_TASK
+    //public static final String GIT_PUSH_TASK = "gitPublishPush" // ajoberstar's GitPublishPlugin.PUSH_TASK
     //public static final String TEST_RELEASE_TASK = "testRelease"
 
     @CompileDynamic
@@ -40,21 +43,22 @@ class DocmarkPlugin implements Plugin<Project> {
         //do after groovy is applied to pubProjects above
         addGroovydocMergeTask(rootProject)
 
-        //boolean enableDocsPublish = rootProject.hasProperty('enableDocsPublish')? Boolean.valueOf(rootProject['enableDocsPublish'].toString()) : true
-        boolean enableDocsPublish = rootProject.config['docs.enabled']
-        if(rootProject.file('mkdocs.yml').exists() && enableDocsPublish) {
-            addMkdocsTasks(rootProject)
-            addGitPublish(rootProject)
-        }
-
-        addUpdateReadmeVersions(rootProject)
-
         Task pubDocsTask = rootProject.tasks.create(PUBLISH_DOCS_TASK)
         pubDocsTask.with {
             group = JavaBasePlugin.DOCUMENTATION_GROUP
             description = 'Builds and publishes docs to github'
-            dependsOn GIT_PUSH_TASK
         }
+
+        //boolean enableDocsPublish = rootProject.hasProperty('enableDocsPublish')? Boolean.valueOf(rootProject['enableDocsPublish'].toString()) : true
+        boolean enableDocsPublish = rootProject.config['docs.enabled']
+        if(rootProject.file('mkdocs.yml').exists() && enableDocsPublish) {
+            addMkdocsTasks(rootProject)
+            addGhPublishTasks(rootProject)
+            pubDocsTask.dependsOn GH_PUSH_DOCS_TASK
+            //addGitPublish(rootProject)
+        }
+
+        addUpdateReadmeVersions(rootProject)
     }
 
     //this should be called from inside of an afterEvaluate so the JavaLibraryPlugin will have been applied properly to subs
@@ -117,40 +121,104 @@ class DocmarkPlugin implements Plugin<Project> {
     }
 
     @CompileDynamic
-    private void addGitPublish(Project project) {
-        //project.plugins.apply('org.ajoberstar.grgit')
-        project.plugins.apply('org.ajoberstar.git-publish')
-        ConfigMap config = project.config
+    private void addGhPublishTasks(Project prj) {
+        ConfigMap config = prj.config
+        String mkdocsDir = "$prj.buildDir/mkdocs"
+        String ghPagesDir = "$mkdocsDir/gh-pages"
+        String intoGhPagesDir = prj.property('isSnapshot') ? "$ghPagesDir/snapshot" : ghPagesDir
+        String repoUrl = "https://${prj.config.github.writeAuthToken}@github.com/${prj.config.github.fullName}.git"
 
-        project.gitPublish {
-            repoUri = "${config.github.repoUrl}.git".toString()
-            branch = 'gh-pages'
-            contents {
-                from "$project.buildDir/mkdocs/site"
-                if (project.property('isSnapshot')) { //put in own dir and update relative path
-                    into 'snapshot'  //this sets the base relative dir for the rest of the inserts
-                }
-                from(project.groovydocMerge){ //project.groovydocMerge.outputs.files) {
-                    into 'api'
-                }
+        Task checkout = prj.tasks.create('ghPagesCheckout')
+        checkout.with {
+            group = JavaBasePlugin.DOCUMENTATION_GROUP
+            description = 'Check out gh-pages'
+            doLast {
+                Shell.exec("rm -rf gh-pages", mkdocsDir)
+                Shell.exec("git clone $repoUrl -b gh-pages gh-pages --single-branch", mkdocsDir)
+
+                String rmrfdir = prj.property('isSnapshot') ? "snapshot/." : "."
+                Shell.exec("git rm -rf $rmrfdir", ghPagesDir)
             }
-
-            // (include=keep) if its a snapshot preserve is all, otherwise wipe it
-            preserve {
-                if (project.property('isSnapshot')) {
-                    include "*/**"
-                    exclude "snapshot"
-                }
-            }
-
-            // message used when committing changes
-            commitMessage = "Docs published for ${project.version} release [skip ci]".toString()
+            dependsOn MKDOCS_BUILD_TASK
         }
 
-        project.gitPublishCopy.dependsOn MKDOCS_BUILD_TASK
-        project.gitPublishCopy.mustRunAfter MKDOCS_BUILD_TASK
-        project.gitPublishCopy.inputs.files project.groovydocMerge //forces the copy task to depend on up to date groovydoc
+        Task copyTask = prj.tasks.create(GH_COPY_DOCS_TASK)
+        copyTask.with {
+            group = JavaBasePlugin.DOCUMENTATION_GROUP
+            description = 'Copy mkdocs into gh-pages'
+            doLast {
+                prj.copy {
+                    from "$mkdocsDir/site"
+                    into intoGhPagesDir
+                }
+                prj.copy {
+                    from(prj.groovydocMerge) //project.groovydocMerge.outputs.files) {
+                    into "$intoGhPagesDir/api"
+                }
+            }
+            dependsOn checkout
+            dependsOn GROOVYDOC_MERGE_TASK
+        }
+
+        Task gpush = prj.tasks.create(GH_PUSH_DOCS_TASK)
+        gpush.with {
+            group = JavaBasePlugin.DOCUMENTATION_GROUP
+            description = 'git publish push'
+            doLast {
+                Shell.exec("git add -A .", "$ghPagesDir")
+                if(Shell.exec("git status -s", "$ghPagesDir")){
+                    List<String> cmds = []
+                    cmds << "git config credential.helper 'cache --timeout=120'"
+                    cmds << "git config --local user.email ${prj.config.git.config.email}"
+                    cmds << "git config --local user.name ${prj.config.git.config.user}"
+                    cmds << "git commit -a -m \"Docs published for ${prj.version} release [skip ci]\""
+                    cmds << "git push -q $repoUrl gh-pages"
+                    cmds.each{ String cmd ->
+                        Shell.exec(cmd, ghPagesDir)
+                    }
+                }
+                //Shell.exec("rm -rf $ghPagesDir")
+            }
+            dependsOn copyTask
+        }
+
     }
+
+//    @CompileDynamic
+//    private void addGitPublish(Project project) {
+//        //project.plugins.apply('org.ajoberstar.grgit')
+//        project.plugins.apply('org.ajoberstar.git-publish')
+//        ConfigMap config = project.config
+//
+//        project.gitPublish {
+//            repoUri = "${config.github.repoUrl}.git".toString()
+//            branch = 'gh-pages'
+//            contents {
+//                from "$project.buildDir/mkdocs/site"
+//                if (project.property('isSnapshot')) { //put in own dir and update relative path
+//                    into 'snapshot'  //this sets the base relative dir for the rest of the inserts
+//                }
+//                from(project.groovydocMerge){ //project.groovydocMerge.outputs.files) {
+//                    into 'api'
+//                }
+//            }
+//
+//            // (include=keep) if its a snapshot preserve is all, otherwise wipe it
+//            preserve {
+//                if (project.property('isSnapshot')) {
+//                    include "*/**"
+//                    exclude "snapshot"
+//                }
+//            }
+//
+//            // message used when committing changes
+//            commitMessage = "Docs published for ${project.version} release [skip ci]".toString()
+//        }
+//
+//        project.gitPublishCopy.dependsOn MKDOCS_BUILD_TASK
+//        project.gitPublishCopy.mustRunAfter MKDOCS_BUILD_TASK
+//        project.gitPublishCopy.inputs.files project.groovydocMerge //forces the copy task to depend on up to date groovydoc
+//    }
 
     /** Updates the version in the README.md */
     //https://stackoverflow.com/questions/17465353/how-to-replace-a-string-for-a-buildvariant-with-gradle-in-android-studio/17572644#17572644

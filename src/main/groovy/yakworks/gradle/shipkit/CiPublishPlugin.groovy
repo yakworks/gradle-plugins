@@ -19,6 +19,7 @@ import org.shipkit.internal.gradle.release.ReleaseNeededPlugin
 import org.shipkit.internal.gradle.release.ReleasePlugin
 import org.shipkit.internal.gradle.util.ProjectUtil
 import yakworks.commons.Shell
+import yakworks.gradle.DocmarkPlugin
 
 /**
  * Why?: Shipkit has CiReleasePlugin. This does special snapshot wiring and sets up detection
@@ -110,7 +111,7 @@ public class CiPublishPlugin implements Plugin<Project> {
                 ciPublishTask.dependsOn(publishMavSnap)
             }
             if(hasDocChanges){
-                ciPublishTask.dependsOn(':gitPublishPush')
+                ciPublishTask.dependsOn(DocmarkPlugin.PUBLISH_DOCS_TASK)
             }
         } else {
             LOG.lifecycle("SNAPSHOT publish will be skipped. See Logs above")
