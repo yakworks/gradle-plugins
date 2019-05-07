@@ -118,10 +118,12 @@ class DocmarkPlugin implements Plugin<Project> {
 
     @CompileDynamic
     private void addGitPublish(Project project) {
-        project.plugins.apply('org.ajoberstar.grgit')
+        //project.plugins.apply('org.ajoberstar.grgit')
         project.plugins.apply('org.ajoberstar.git-publish')
+        ConfigMap config = project.config
 
         project.gitPublish {
+            repoUri = "${config.github.repoUrl}.git".toString()
             branch = 'gh-pages'
             contents {
                 from "$project.buildDir/mkdocs/site"
