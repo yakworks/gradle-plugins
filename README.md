@@ -18,7 +18,7 @@ In the root project apply the defaults plugin:
 
 ```groovy
 plugins {
-  id 'org.yakworks.defaults' version '1.0.0'
+  id 'org.yakworks.defaults' version '1.1.3'
 }
 ```
 
@@ -27,6 +27,23 @@ In a grails plugin
 ```groovy
 apply plugin: "yakworks.grails-plugin"
 
+```
+
+or
+
+```
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "org.yakworks:gradle-plugins:1.1.3"
+  }
+}
+
+apply plugin: "yakworks.shipyak"
 ```
 ## Tasks
 
