@@ -5,7 +5,7 @@ buildscript {
     maven { url "https://plugins.gradle.org/m2/" }
   }
   dependencies {
-    classpath "org.yakworks:gradle-plugins:1.0.6"
+    classpath "org.yakworks:gradle-plugins:1.1.0"
   }
 }
 
@@ -38,7 +38,7 @@ dependencies {
   //runtime 'org.ajoberstar.grgit:grgit-gradle:3.1.1'
   //runtime 'org.ajoberstar:gradle-git-publish:2.1.1'
   // 3rd party plugins
-  compile 'com.diffplug.spotless:spotless-plugin-gradle:3.14.0'
+  compile 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
   runtime "gradle.plugin.com.github.erdi:idea-gradle-plugins:2.1"
   runtime "gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.2.0"
 

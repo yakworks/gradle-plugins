@@ -10,14 +10,11 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
-import org.shipkit.internal.gradle.bintray.BintrayReleasePlugin
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.git.GitPlugin
-import org.shipkit.internal.gradle.java.PomContributorsPlugin
 import org.shipkit.internal.gradle.release.ReleasePlugin
 import org.shipkit.internal.gradle.util.ProjectUtil
 import yakworks.commons.ConfigMap
-import yakworks.gradle.DefaultsPlugin
 import yakworks.gradle.DocmarkPlugin
 
 /**
@@ -32,7 +29,7 @@ class DocsReleasePlugin implements Plugin<Project> {
     public void apply(final Project project) {
         ProjectUtil.requireRootProject(project, this.getClass())
 
-        config = project.plugins.apply(ConfigYakPlugin).config
+        config = project.plugins.apply(YamlConfigShipYakPlugin).config
 
         Task updateReadme = project.tasks.getByName(DocmarkPlugin.UPDATE_README_TASK)
         File rmeFile = project.file('README.md')

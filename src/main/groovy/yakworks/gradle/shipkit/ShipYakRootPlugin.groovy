@@ -29,7 +29,7 @@ class ShipYakRootPlugin implements Plugin<Project> {
     public void apply(final Project project) {
         ProjectUtil.requireRootProject(project, this.getClass())
 
-        config = project.plugins.apply(ConfigYakPlugin).config
+        config = project.plugins.apply(YamlConfigShipYakPlugin).config
 
         project.plugins.apply(CiPublishPlugin)
         project.plugins.apply(DefaultsPlugin)

@@ -4,8 +4,6 @@
 */
 package yakworks.gradle
 
-import com.diffplug.gradle.spotless.SpotlessExtension
-import com.diffplug.gradle.spotless.SpotlessPlugin
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.gradle.api.GradleException
@@ -44,7 +42,7 @@ class DefaultsPlugin implements Plugin<Project> {
                 }
             }
 
-            addSpotless(prj)
+            prj.plugins.apply(SpotlessYakPlugin)
         }
 
         rootProject.plugins.apply(DocmarkPlugin)
@@ -53,13 +51,21 @@ class DefaultsPlugin implements Plugin<Project> {
 
     /**
      * Add the jcenter and mavenCentral repos as defaults
+     * Also adds the epo.grails.org/grails/core if they are grails projects
      */
-    //@CompileDynamic
+    @CompileDynamic
     void addDefaultRepos(Project prj) {
         //add our default repositories to search.
         RepositoryHandler rh = prj.repositories
         rh.jcenter()
         rh.mavenCentral()
+
+        ['org.grails.grails-plugin', 'org.grails.grails-web'].each { plugId ->
+            prj.plugins.withId(plugId) {
+                rh.maven { url "https://repo.grails.org/grails/core" }
+                rh.maven { url "https://dl.bintray.com/9ci/grails-plugins" }
+            }
+        }
     }
 
     /**
@@ -73,57 +79,4 @@ class DefaultsPlugin implements Plugin<Project> {
             }
         }
     }
-
-    @CompileDynamic
-    private void addSpotless(Project project) {
-        SpotlessExtension spotless = project.plugins.apply(SpotlessPlugin).extension
-
-        //make sure spotless runs first in the checks
-        project.plugins.withId('codenarc') {
-            project.tasks.getByName('codenarcMain').dependsOn('spotlessCheck')
-        }
-
-        spotlessFromConfig project, spotless, 'groovyGradle'
-
-        project.plugins.withId('groovy') {
-            spotlessFromConfig project, spotless, 'groovy'
-
-            //broken out from normal groovy format so it doesn't try and add the license header
-            spotless.format 'grailsConf', {
-                target 'grails-app/conf/**/*.groovy'
-                trimTrailingWhitespace()
-                indentWithSpaces(4) // this only checks for tabs and can replace with 4 spaces it it finds them
-                endWithNewline()
-            }
-        }
-    }
-
-    @CompileDynamic
-    void spotlessFromConfig(Project project, SpotlessExtension spotless, String formatName){
-        Map cfg = project.config.spotless[formatName]
-
-        spotless."$formatName" {
-            target project.fileTree('.') {
-                cfg.includes.each{
-                    include it
-                }
-                cfg.excludes.each{
-                    exclude it
-                }
-            }
-            if(cfg.endWithNewline) endWithNewline()
-            if(cfg.trimTrailingWhitespace) trimTrailingWhitespace()
-            if(cfg.indentWithSpaces) indentWithSpaces(cfg.indentWithSpaces)
-
-            //if its a shippable item then makes sure a license header is applied (as opposed to an example or test project)
-            project.plugins.withType(ShippablePlugin){
-                if(cfg.licenseHeader){
-                    licenseHeader(cfg.licenseHeader)
-                } else if(cfg.licenseHeaderFile) {
-                    licenseHeader(cfg.licenseHeaderFile)
-                }
-            }
-        }
-    }
-
 }

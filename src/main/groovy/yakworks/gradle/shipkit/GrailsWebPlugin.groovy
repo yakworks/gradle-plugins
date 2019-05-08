@@ -38,8 +38,6 @@ class GrailsWebPlugin implements Plugin<Project> {
         setupMavenWarPublish(project)
         //should come last after setupMavenWarPublish as it needs to have MavenPublishPlugin
         project.rootProject.plugins.apply(PublishingRepoSetupPlugin)
-
-        GrailsPlugin.addGrailsRepos(project)
     }
 
     @CompileDynamic

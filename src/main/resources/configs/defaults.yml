@@ -98,17 +98,23 @@ spotless:
     '* You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0\n' +
     '*/'
     }
-  # licenseHeaderFile: # or you specify the file name of header file to use
-  groovy:
-    licenseHeader: $config.spotless.licenseHeader
+  groovyTests:
     indentWithSpaces: 4
     trimTrailingWhitespace: true
     endWithNewline: true
     includes:
-      - 'src/main/groovy/**/*.groovy'
-      - 'grails-app/**/*.groovy'
       - 'src/test/groovy/**/*.groovy'
       - 'src/integration-test/groovy/**/*.groovy'
+  groovy:
+    # licenseHeaderFile: # or you specify the file name of header file to use
+    licenseHeader: $config.spotless.licenseHeader
+    indentWithSpaces: 4
+    trimTrailingWhitespace: true
+    endWithNewline: true
+    importOrder: ['java','groovy','org','']
+    includes:
+      - 'src/main/groovy/**/*.groovy'
+      - 'grails-app/**/*.groovy'
     excludes:
       - '**/*.java'
       - '**/conf/**/*.groovy'

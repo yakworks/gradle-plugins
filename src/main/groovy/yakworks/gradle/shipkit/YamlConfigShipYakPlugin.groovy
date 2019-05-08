@@ -26,9 +26,9 @@ import static yakworks.gradle.GradleHelpers.prop
  * This should be the first one applied so it can setup the snapshot configuration and the yaml-config defaults
  */
 @CompileStatic
-public class ConfigYakPlugin implements Plugin<Project> {
+public class YamlConfigShipYakPlugin implements Plugin<Project> {
 
-    private final static Logger LOG = Logging.getLogger(ConfigYakPlugin)
+    private final static Logger LOG = Logging.getLogger(YamlConfigShipYakPlugin)
 
     ConfigMap config
 

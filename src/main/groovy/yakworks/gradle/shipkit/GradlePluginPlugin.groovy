@@ -23,7 +23,7 @@ class GradlePluginPlugin implements Plugin<Project> {
         //TODO not sure this should be required
         ProjectUtil.requireRootProject(project, this.getClass())
 
-        ConfigMap config = project.plugins.apply(ConfigYakPlugin).config
+        ConfigMap config = project.plugins.apply(YamlConfigShipYakPlugin).config
 
         project.plugins.apply(CiPublishPlugin)
         project.plugins.apply(DefaultsPlugin)
