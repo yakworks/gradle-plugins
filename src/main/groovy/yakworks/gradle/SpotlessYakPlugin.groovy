@@ -4,15 +4,13 @@
 */
 package yakworks.gradle
 
-import org.gradle.api.GradleException
-import org.gradle.api.JavaVersion
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-import org.gradle.api.artifacts.dsl.RepositoryHandler
-import org.gradle.api.tasks.javadoc.Javadoc
-import com.diffplug.gradle.spotless.SpotlessExtension
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
+
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+
+import com.diffplug.gradle.spotless.SpotlessExtension
 
 @CompileStatic
 class SpotlessYakPlugin implements Plugin<Project> {

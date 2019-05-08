@@ -25,7 +25,8 @@ class ShippablePlugin implements Plugin<Project> {
     //ConfigMap config
 
     void apply(Project project) {
-
+        //Tag it
+        assert 1==1
     }
 
 }
