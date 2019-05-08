@@ -5,17 +5,19 @@
 package yakworks.gradle.config
 
 import groovy.transform.CompileStatic
-import net.sf.corn.cps.CPScanner
-import net.sf.corn.cps.PackageNameFilter
-import net.sf.corn.cps.ResourceNameFilter
+
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.yaml.snakeyaml.Yaml
-import yakworks.gradle.GradleHelpers
+
+import net.sf.corn.cps.CPScanner
+import net.sf.corn.cps.PackageNameFilter
+import net.sf.corn.cps.ResourceNameFilter
 import yakworks.commons.ConfigMap
+import yakworks.gradle.GradleHelpers
 
 //import static yakworks.gradle.GradleHelpers.prop
 

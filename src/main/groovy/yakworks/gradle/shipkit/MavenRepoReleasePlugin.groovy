@@ -5,6 +5,7 @@
 package yakworks.gradle.shipkit
 
 import groovy.transform.CompileStatic
+
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -15,6 +16,7 @@ import org.shipkit.gradle.notes.UpdateReleaseNotesTask
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.notes.ReleaseNotesPlugin
 import org.shipkit.internal.gradle.release.ReleasePlugin
+
 import yakworks.commons.ConfigMap
 
 import static org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin.DRY_RUN_PROPERTY

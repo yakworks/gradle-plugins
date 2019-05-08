@@ -5,6 +5,7 @@
 package yakworks.gradle.shipkit
 
 import groovy.transform.CompileStatic
+
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
@@ -12,6 +13,7 @@ import org.gradle.api.logging.Logging
 import org.shipkit.internal.gradle.bintray.BintrayReleasePlugin
 import org.shipkit.internal.gradle.java.PomContributorsPlugin
 import org.shipkit.internal.gradle.util.ProjectUtil
+
 import yakworks.commons.ConfigMap
 import yakworks.gradle.DefaultsPlugin
 

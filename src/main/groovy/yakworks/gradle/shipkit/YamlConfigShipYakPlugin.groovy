@@ -5,6 +5,7 @@
 package yakworks.gradle.shipkit
 
 import groovy.transform.CompileStatic
+
 import org.codehaus.groovy.runtime.InvokerHelper
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -15,6 +16,7 @@ import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.util.ProjectUtil
 import org.shipkit.internal.gradle.version.VersioningPlugin
 import org.shipkit.internal.util.PropertiesUtil
+
 import yakworks.commons.ConfigMap
 import yakworks.commons.Shell
 import yakworks.gradle.config.YamlConfigPlugin

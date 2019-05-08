@@ -4,8 +4,8 @@
 */
 package yakworks.gradle.shipkit
 
-import com.jfrog.bintray.gradle.BintrayExtension
 import groovy.transform.CompileDynamic
+
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.internal.ClosureBackedAction
@@ -15,6 +15,8 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.shipkit.internal.gradle.java.JavaBintrayPlugin
 import org.shipkit.internal.gradle.util.ProjectUtil
+
+import com.jfrog.bintray.gradle.BintrayExtension
 import yakworks.commons.ConfigMap
 import yakworks.commons.Pogo
 import yakworks.gradle.ShippablePlugin

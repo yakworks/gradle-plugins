@@ -4,12 +4,13 @@
 */
 package yakworks.commons
 
+import java.util.regex.Pattern
+
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import groovy.transform.EqualsAndHashCode
-import org.codehaus.groovy.runtime.DefaultGroovyMethods
 
-import java.util.regex.Pattern
+import org.codehaus.groovy.runtime.DefaultGroovyMethods
 
 /**
  * Copied from org.grails.config.ConfigMap so we can use it as a gradle plugin here

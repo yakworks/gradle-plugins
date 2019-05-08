@@ -6,6 +6,7 @@ package yakworks.gradle
 
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
+
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -14,6 +15,7 @@ import org.gradle.api.Task
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.javadoc.Groovydoc
+
 import yakworks.commons.ConfigMap
 import yakworks.commons.Shell
 

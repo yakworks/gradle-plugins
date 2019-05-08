@@ -6,6 +6,7 @@ package yakworks.gradle.shipkit
 
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
+
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -17,6 +18,7 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.shipkit.internal.gradle.java.JavaPublishPlugin
 import org.shipkit.internal.gradle.snapshot.LocalSnapshotPlugin
+
 import yakworks.gradle.ShippablePlugin
 
 /**

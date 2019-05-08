@@ -111,7 +111,7 @@ spotless:
     indentWithSpaces: 4
     trimTrailingWhitespace: true
     endWithNewline: true
-    importOrder: ['java','groovy','org','']
+    importOrder: ['java', 'groovy', 'org', '', 'static ']
     includes:
       - 'src/main/groovy/**/*.groovy'
       - 'grails-app/**/*.groovy'

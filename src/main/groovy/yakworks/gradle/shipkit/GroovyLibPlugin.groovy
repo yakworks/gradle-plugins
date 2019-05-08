@@ -5,9 +5,11 @@
 package yakworks.gradle.shipkit
 
 import groovy.transform.CompileStatic
+
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.shipkit.internal.gradle.java.JavaPublishPlugin
+
 import yakworks.gradle.ShippablePlugin
 
 /**
