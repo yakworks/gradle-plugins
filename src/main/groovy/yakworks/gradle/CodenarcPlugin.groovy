@@ -55,6 +55,17 @@ class CodenarcPlugin implements Plugin<Project> {
                     exclude it
                 }
             }
+
+            Map cfgIntTest = prj.config.codenarc.integrationTest
+            prj.codenarcIntegrationTest {
+                if(cfgIntTest.enabled == false) {
+                    exclude '**/*'
+                }
+                ignoreFailures = cfgIntTest.ignoreFailures
+                cfgIntTest.excludes?.each{
+                    exclude it
+                }
+            }
         }
 
         prj.dependencies {

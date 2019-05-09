@@ -142,6 +142,10 @@ codenarc:
     enabled: false # if false will exclude all files by adding a exclude: '**/*', runs much faster with lots of tests
     ignoreFailures: true
     excludes:
+  integrationTest:
+    enabled: false # if false will exclude all files by adding a exclude: '**/*', runs much faster with lots of tests
+    ignoreFailures: true
+    excludes:
 # the mkdocs engine
 docs:
   enabled: true

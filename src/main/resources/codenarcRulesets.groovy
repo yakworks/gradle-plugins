@@ -1,6 +1,11 @@
+/**
+ * setup defs for codenarcIntegrationTest
+ */
+
 ruleset {
     ruleset('rulesets/basic.xml'){
         'EmptyClass' doNotApplyToFilesMatching: '.*Spec.groovy'
+        'EmptyMethod' doNotApplyToFilesMatching: ".*Controller.groovy"
     }
 
     ruleset('rulesets/braces.xml') {
@@ -34,6 +39,7 @@ ruleset {
         ].each{
             "$it"(enabled:false)
         }
+        'ReturnsNullInsteadOfEmptyCollection' doNotApplyToFilesMatching: ".*Controller.groovy"
         //FIXME enable PrivateFieldCouldBeFinal
         BuilderMethodWithSideEffects{
             methodNameRegex = '(make.*|build.*)'
@@ -44,7 +50,12 @@ ruleset {
 
     //ruleset('rulesets/enhanced.xml')//FIXME try adding in the src to classpath so theese work
 
-    ruleset('rulesets/exceptions.xml')
+    ruleset('rulesets/exceptions.xml'){
+        CatchException {
+            //doNotApplyToFileNames = "*Controller.groovy"
+            doNotApplyToClassNames = "*Controller"
+        }
+    }
 
     ruleset('rulesets/formatting.xml'){
         LineLength(doNotApplyToFilesMatching: '.*Spec.groovy', length:160)
@@ -65,6 +76,7 @@ ruleset {
 
     ruleset('rulesets/groovyism.xml'){
         'GetterMethodCouldBeProperty' enabled:false
+        'ExplicitCallToAndMethod' enabled:false
     }
 
     ruleset('rulesets/imports.xml'){
@@ -119,11 +131,14 @@ ruleset {
         //'ParameterCount' maxParameters: 6
         exclude 'CrapMetric'
         MethodCount {
-            doNotApplyToFilesMatching = '.*Spec.groovy'
-            maxMethods = 40
+            doNotApplyToClassNames = "*Controller"
+            maxMethods = 50
         }
         ParameterCount(maxParameters:7)
-        //exclude 'CyclomaticComplexity'
+        CyclomaticComplexity{
+            maxMethodComplexity = 40
+            maxClassAverageMethodComplexity = 40
+        }
     }
 
     ruleset('rulesets/unnecessary.xml'){
