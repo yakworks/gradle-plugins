@@ -136,6 +136,7 @@ codenarc:
   maxPriority2Violations: 2
   maxPriority3Violations: 4
   main:
+    enabled: true
     ignoreFailures: false
     excludes: # make this a list of excludes is wanted
   test:

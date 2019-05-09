@@ -38,39 +38,26 @@ class CodenarcPlugin implements Plugin<Project> {
                 maxPriority2Violations = cfg.maxPriority2Violations
                 maxPriority3Violations = cfg.maxPriority3Violations
             }
-            Map cfgMain = prj.config.codenarc.main
-            prj.codenarcMain {
-                ignoreFailures = cfgMain.ignoreFailures
-                cfgMain.excludes?.each{
-                    exclude it
-                }
-            }
-            Map cfgTest = prj.config.codenarc.test
-            prj.codenarcTest {
-                if(cfgTest.enabled == false) {
-                    exclude '**/*'
-                }
-                ignoreFailures = cfgTest.ignoreFailures
-                cfgTest.excludes?.each{
-                    exclude it
-                }
-            }
-
-            Map cfgIntTest = prj.config.codenarc.integrationTest
-            prj.codenarcIntegrationTest {
-                if(cfgIntTest.enabled == false) {
-                    exclude '**/*'
-                }
-                ignoreFailures = cfgIntTest.ignoreFailures
-                cfgIntTest.excludes?.each{
-                    exclude it
-                }
-            }
+            codenarcSettings(prj, "codenarcMain", cfg.main)
+            codenarcSettings(prj, "codenarcTest", cfg.test)
+            codenarcSettings(prj, "codenarcIntegrationTest", cfg.integrationTest)
         }
 
         prj.dependencies {
             delegate.codenarc("org.codenarc:CodeNarc:${prj.config.codenarc.toolVersion}")
             delegate.codenarc("io.9ci.yakworks:codenarc-extra:$CODENARC_EXTRA_VERSION")
+        }
+    }
+
+    void codenarcSettings(Project prj, String extName, cfg){
+        prj."$extName" {
+            if(cfg.enabled == false) {
+                exclude '**/*'
+            }
+            ignoreFailures = cfg.ignoreFailures
+            cfg.excludes?.each{
+                exclude it
+            }
         }
     }
 
