@@ -154,6 +154,7 @@ ruleset {
         exclude 'UnnecessarySubstring'
         exclude 'UnnecessaryElseStatement'
         exclude 'UnnecessarySemicolon'
+        exclude 'UnnecessaryObjectReferences'
     }
 
     ruleset('rulesets/unused.xml'){
