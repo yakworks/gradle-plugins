@@ -50,6 +50,7 @@ class CodenarcPlugin implements Plugin<Project> {
     }
 
     void codenarcSettings(Project prj, String extName, cfg){
+        if(!prj.findProperty(extName)) return
         prj."$extName" {
             if(cfg.enabled == false) {
                 exclude '**/*'
