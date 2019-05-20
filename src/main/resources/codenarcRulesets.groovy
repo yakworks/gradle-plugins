@@ -1,7 +1,6 @@
 /**
  * setup defs for codenarcIntegrationTest
  */
-
 ruleset {
     ruleset('rulesets/basic.xml'){
         'EmptyClass' doNotApplyToFilesMatching: '.*Spec.groovy'
@@ -19,7 +18,7 @@ ruleset {
          'MethodReturnTypeRequired', 'CouldBeSwitchStatement', 'InvertedCondition', 'TrailingComma',
          'VariableTypeRequired', 'FieldTypeRequired', 'PublicMethodsBeforeNonPublicMethods','NoJavaUtilDate',
          'StaticFieldsBeforeInstanceFields', //FIXME this should be enabled
-         'StaticMethodsBeforeInstanceMethods'
+         'StaticMethodsBeforeInstanceMethods', 'IfStatementCouldBeTernary'
         ].each{
             "$it"(enabled:false)
         }
@@ -35,7 +34,7 @@ ruleset {
     ruleset('rulesets/design.xml'){
         [
          'NestedForLoop', 'Instanceof',
-         'AbstractClassWithoutAbstractMethod', 'PrivateFieldCouldBeFinal'
+         'AbstractClassWithoutAbstractMethod', 'PrivateFieldCouldBeFinal', 'ImplementationAsType'
         ].each{
             "$it"(enabled:false)
         }
@@ -64,7 +63,7 @@ ruleset {
          'SpaceAfterCatch', 'SpaceAfterFor', 'SpaceAfterIf', 'SpaceAfterSwitch', 'SpaceAfterWhile',
          'SpaceAroundClosureArrow', 'SpaceAroundMapEntryColon', 'SpaceAroundOperator',
          'SpaceAfterOpeningBrace', 'SpaceAfterClosingBrace', 'SpaceBeforeOpeningBrace', 'SpaceBeforeClosingBrace',
-         'TrailingWhitespace','ClassEndsWithBlankLine', 'ClassStartsWithBlankLine'
+         'TrailingWhitespace','ClassEndsWithBlankLine', 'ClassStartsWithBlankLine', 'ConsecutiveBlankLines'
         ].each{
             "$it"(enabled:false)
         }
@@ -77,6 +76,7 @@ ruleset {
     ruleset('rulesets/groovyism.xml'){
         'GetterMethodCouldBeProperty' enabled:false
         'ExplicitCallToAndMethod' enabled:false
+        'ExplicitCallToOrMethod' enabled:false
     }
 
     ruleset('rulesets/imports.xml'){
@@ -155,6 +155,7 @@ ruleset {
         exclude 'UnnecessaryElseStatement'
         exclude 'UnnecessarySemicolon'
         exclude 'UnnecessaryObjectReferences'
+        exclude 'UnnecessaryCast'
     }
 
     ruleset('rulesets/unused.xml'){
