@@ -6,12 +6,14 @@ buildscript {
   }
   dependencies {
     classpath "org.yakworks:gradle-plugins:1.1.3"
+    classpath "com.adarshr:gradle-test-logger-plugin:1.6.0"
   }
 }
 
 plugins {
   id "com.dorongold.task-tree" version "1.3"
   id "com.gradle.plugin-publish" version "0.10.1"
+  id "com.adarshr.test-logger" version "1.6.0"
   id "java-gradle-plugin"
 }
 
@@ -41,6 +43,7 @@ dependencies {
   compile 'com.diffplug.spotless:spotless-plugin-gradle:3.23.0'
   runtime "gradle.plugin.com.github.erdi:idea-gradle-plugins:2.1"
   runtime "gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.2.0"
+  compile "com.adarshr:gradle-test-logger-plugin:1.6.0"
 
   compile 'org.shipkit:shipkit:2.2.5'
   compile 'org.yaml:snakeyaml:1.23'

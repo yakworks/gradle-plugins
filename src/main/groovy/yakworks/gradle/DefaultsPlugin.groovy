@@ -13,6 +13,15 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.tasks.javadoc.Javadoc
+import org.gradle.api.tasks.testing.Test
+
+import com.adarshr.gradle.testlogger.TestLoggerExtension
+import com.adarshr.gradle.testlogger.TestLoggerPlugin
+import com.adarshr.gradle.testlogger.renderer.AnsiTextRenderer
+import com.adarshr.gradle.testlogger.renderer.TextRenderer
+import com.adarshr.gradle.testlogger.theme.ThemeType
+import org.gradle.internal.logging.text.StyledTextOutputFactory;
+import static org.gradle.internal.logging.text.StyledTextOutput.Style;
 
 @CompileStatic
 class DefaultsPlugin implements Plugin<Project> {
@@ -35,6 +44,8 @@ class DefaultsPlugin implements Plugin<Project> {
 
                 addDefaultRepos(prj)
                 silentJavadocWarnings(prj)
+                applyTestLogger(prj)
+                prj.plugins.apply(SpotlessYakPlugin)
             }
             //add codenarc to groovy projects that are shippable
             prj.plugins.withType(ShippablePlugin){
@@ -77,6 +88,36 @@ class DefaultsPlugin implements Plugin<Project> {
         if (JavaVersion.current().isJava8Compatible()) {
             project.tasks.withType(Javadoc) {
                 options.addStringOption('Xdoclint:none', '-quiet')
+            }
+        }
+    }
+
+    /**
+     * adds the test logger
+     */
+    @CompileDynamic
+    void applyTestLogger(Project project) {
+        project.plugins.apply(TestLoggerPlugin)
+
+        def tle = project.extensions.getByType(TestLoggerExtension)
+        tle.setTheme(ThemeType.MOCHA)
+
+        //Always show test url for report
+        project.afterEvaluate {
+            project.tasks.withType(Test) { testTask ->
+                afterSuite { desc, result ->
+                    if (!desc.parent) {
+                        //Fix bad url on gradle tests.
+                        String reportUrl = testTask.reports.html.entryPoint
+                        if (reportUrl.endsWith('integrationTest/index.html'))
+                            reportUrl = reportUrl.replaceAll('integrationTest/index.html', 'index.html')
+//                        def tout = services.get(StyledTextOutputFactory).create("testReport")
+//                        tout.style(Style.Normal).text('  Report ')
+//                            .style(Style.Info).println("file:/$reportUrl")
+                        TextRenderer renderer = new AnsiTextRenderer()
+                        project.logger.quiet(renderer.render("[grey]  Report: [blue]file:/$reportUrl"))
+                    }
+                }
             }
         }
     }

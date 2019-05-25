@@ -1,0 +1,56 @@
+
+import org.gradle.internal.logging.text.StyledTextOutputFactory;
+import static org.gradle.internal.logging.text.StyledTextOutput.Style;
+
+ext.afterTestClosure = { TestDescriptor desc, TestResult result ->
+  //https://stackoverflow.com/questions/14516693/gradle-color-output
+  def tout = services.get(StyledTextOutputFactory).create("test-out")
+  def styType = (result.resultType == TestResult.ResultType.SUCCESS) ? Style.Success : Style.Failure
+
+  if(result.resultType == TestResult.ResultType.FAILURE){
+    tout.style(Style.Failure).text('  ✖︎ --')
+  } else if (result.resultType == TestResult.ResultType.SKIPPED){
+    tout.style(Style.Info).text('  ✖︎ --')
+  } else {
+    tout.style(Style.Success).text('  ✔︎ --')
+  }
+
+  tout.style(Style.Normal).text("[${desc.className}]").style(Style.Description).text(" > ${desc.name} ")
+
+  if(result.resultType == TestResult.ResultType.FAILURE){
+    tout.style(Style.Failure).println(" - ${result.resultType}")
+    tout.style(Style.Normal).println("${result.exception}")
+  } else if (result.resultType == TestResult.ResultType.SKIPPED){
+    tout.style(Style.FailureHeader).println(" - ${result.resultType}")
+  } else {
+    tout.style(Style.Success).println(' ')
+  }
+  //out.style(Style.ProgressStatus).text('This is ').style(Style.Failure).text('a multicolor ').style(Style.Identifier).println('line')
+  //logger.quiet "[${desc.className}] > ${desc.name} with result: ${result.resultType}"
+}
+
+
+ext.afterSuiteClosure = { desc, result ->
+  if (!desc.parent) {
+    // will match the outermost suite
+    def tout = services.get(StyledTextOutputFactory).create("an-ouput")
+    def output1ResType = result.resultType
+    def output2ResInfo = " ${result.testCount} tests, ${result.successfulTestCount} successes"
+    def output3ResFailed = result.failedTestCount ? ", ${result.failedTestCount} failures" : ''
+    def output4ResSkipped = result.skippedTestCount ? ", ${result.skippedTestCount} skipped" : ''
+    def output = "${output1ResType}${output2ResInfo}${output3ResFailed}${output4ResSkipped}"
+
+    def startItem = '  │  ', endItem = '  │'
+    def repeatLength = startItem.length() + output.length() + endItem.length() - 4
+    boolean isOk = result.resultType == TestResult.ResultType.SUCCESS
+    boolean skippedCount = result.skippedTestCount
+    def styType = isOk ? Style.Success : Style.Failure
+
+    tout.style(styType).text('\n' + '  ┌' + ('─' * repeatLength) + '┐' + '\n' + startItem)
+      .style(styType).text(output1ResType)
+      .style(Style.Info).text(output2ResInfo)
+      .style(Style.Failure).text(output3ResFailed)
+      .style(Style.Info).text(output4ResSkipped)
+      .style(styType).text(endItem + '\n' + '  └' + ('─' * repeatLength) + '┘').println()
+  }
+}
