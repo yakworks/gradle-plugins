@@ -14,14 +14,15 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
+import org.gradle.internal.logging.text.StyledTextOutputFactory
 
 import com.adarshr.gradle.testlogger.TestLoggerExtension
 import com.adarshr.gradle.testlogger.TestLoggerPlugin
 import com.adarshr.gradle.testlogger.renderer.AnsiTextRenderer
 import com.adarshr.gradle.testlogger.renderer.TextRenderer
 import com.adarshr.gradle.testlogger.theme.ThemeType
-import org.gradle.internal.logging.text.StyledTextOutputFactory;
-import static org.gradle.internal.logging.text.StyledTextOutput.Style;
+
+import static org.gradle.internal.logging.text.StyledTextOutput.Style
 
 @CompileStatic
 class DefaultsPlugin implements Plugin<Project> {
