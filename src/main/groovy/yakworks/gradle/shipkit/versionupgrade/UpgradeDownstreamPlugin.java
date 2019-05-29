@@ -75,8 +75,9 @@ public class UpgradeDownstreamPlugin implements Plugin<Project> {
         DeferredConfiguration.deferredConfiguration(project, new Runnable() {
             @Override
             public void run() {
-                notNull(upgradeDownstreamExtension.getRepositories(),
-                    "'upgradeDownstream.repositories'");
+                // notNull(upgradeDownstreamExtension.getRepositories(),
+                //     "'upgradeDownstream.repositories'");
+                if(upgradeDownstreamExtension.getRepositories() == null) return;
                 for (String consumerRepositoryName : upgradeDownstreamExtension.getRepositories()) {
                     //This is the fix, its not quiet and logs out the token. XXX flaw
                     String token = conf.getLenient().getGitHub().getWriteAuthToken();
