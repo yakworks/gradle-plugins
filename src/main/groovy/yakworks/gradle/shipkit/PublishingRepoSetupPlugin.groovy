@@ -46,9 +46,9 @@ class PublishingRepoSetupPlugin implements Plugin<Project> {
                 }
 
                 if (project['isSnapshot'] || !isBintray) {
-                    LOG.lifecycle("calling setupMavenPublishRepo because one of the following is true\n" +
+                    LOG.lifecycle("Set Maven PublishingExtension with URL: ${config['maven.publishUrl']} because one of the following is true\n" +
                         "isSnapshot = true: ${project['isSnapshot']} , " +
-                        "bintray.enabled = false: $isBintray ")
+                        "bintray.enabled is false: ${!isBintray} ")
                     setupMavenPublishRepo(project)
                 }
 
@@ -58,7 +58,6 @@ class PublishingRepoSetupPlugin implements Plugin<Project> {
 
     @CompileDynamic
     void setupMavenPublishRepo(Project project){
-        LOG.lifecycle("Set PublishingExtension with URL: ${config['maven.publishUrl']}")
         project.plugins.withType(MavenPublishPlugin) {
             project.extensions.configure PublishingExtension, new ClosureBackedAction({
                 repositories {

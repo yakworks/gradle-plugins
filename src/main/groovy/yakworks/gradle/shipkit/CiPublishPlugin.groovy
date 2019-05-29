@@ -61,19 +61,9 @@ public class CiPublishPlugin implements Plugin<Project> {
             } else {
                 ciPubTask.dependsOn(CiReleasePlugin.CI_PERFORM_RELEASE_TASK)
 
-                //do upgradeDownstream
-                project.plugins.withType(UpgradeDownstreamPlugin){
-                    def upgradeDownstreamExt = project.extensions.findByType(UpgradeDownstreamExtension)
-                    if (upgradeDownstreamExt?.repositories){
-                        ShipkitExecTask ciPerformReleaseTask = (ShipkitExecTask) project.task(CiReleasePlugin.CI_PERFORM_RELEASE_TASK)
-                        ciPerformReleaseTask.getExecCommands().add(execCommand(
-                            "Upgrading downstream projects", asList(GradleWrapper.getWrapperCommand(), '-q', UpgradeDownstreamPlugin.UPGRADE_DOWNSTREAM_TASK)));
-                    }
-                }
-
             }
 
-            addGitConfigUser(conf)
+            //addGitConfigUser(conf)
         }
         else { //
             def pubTask = project.task(PUBLISH_RELEASE_TASK)
@@ -86,6 +76,18 @@ public class CiPublishPlugin implements Plugin<Project> {
                 }
             } else {
                 pubTask.dependsOn(ReleasePlugin.PERFORM_RELEASE_TASK)
+            }
+        }
+
+        //do upgradeDownstream
+        project.plugins.withType(UpgradeDownstreamPlugin){
+            project.afterEvaluate {
+                def upgradeDownstreamExt = project.extensions.findByType(UpgradeDownstreamExtension)
+                if (upgradeDownstreamExt?.repositories) {
+                    ShipkitExecTask ciPerformReleaseTask = (ShipkitExecTask) project.tasks.getByName(CiReleasePlugin.CI_PERFORM_RELEASE_TASK)
+                    ciPerformReleaseTask.getExecCommands().add(execCommand(
+                        "Upgrading downstream projects", asList(GradleWrapper.getWrapperCommand(), '-q', UpgradeDownstreamPlugin.UPGRADE_DOWNSTREAM_TASK)));
+                }
             }
         }
 

@@ -52,7 +52,7 @@ public class YamlConfigShipYakPlugin implements Plugin<Project> {
         //sets the fullname repo from git if its null
         ConfigMap ghConfig = (ConfigMap)config.github
         String gslug = ghConfig.fullName
-        LOG.lifecycle("github.fullName is $gslug")
+        //LOG.lifecycle("github.fullName is $gslug")
         if (!gslug) {
             //println "gslug was null so using sed to get config from git"
             String sedPart = $/sed -n 's#.*/\(.*/[^.]*\)\.git#\1#p'/$
