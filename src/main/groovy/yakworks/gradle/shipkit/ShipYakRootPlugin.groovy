@@ -16,6 +16,7 @@ import org.shipkit.internal.gradle.util.ProjectUtil
 
 import yakworks.commons.ConfigMap
 import yakworks.gradle.DefaultsPlugin
+import yakworks.gradle.shipkit.versionupgrade.UpgradeDependencyPlugin
 
 /**
  * Continuous delivery for Java/Groovy/Grails with CirclePlugin and Bintray.
@@ -48,6 +49,7 @@ class ShipYakRootPlugin implements Plugin<Project> {
 
         project.plugins.apply(DocsReleasePlugin)
 
+        project.plugins.apply(UpgradeDependencyPlugin)
     }
 
 }
