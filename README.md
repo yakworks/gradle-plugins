@@ -39,7 +39,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "org.yakworks:gradle-plugins:1.1.10"
+    classpath "org.yakworks:gradle-plugins:1.1.11"
   }
 }
 
@@ -219,7 +219,7 @@ This add a yaml config. These are the defaults.
        - 'gradle/*.gradle'
  
  codenarc:
-   toolVersion: 1.1.10
+   toolVersion: 1.1.11
    config: prj.yakworks.getCodenarcRuleSet()
    reportFormat: 'html'
    maxPriority1Violations: 0
