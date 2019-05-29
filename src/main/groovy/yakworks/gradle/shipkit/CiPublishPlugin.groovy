@@ -12,17 +12,23 @@ import org.gradle.api.Task
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.shipkit.gradle.configuration.ShipkitConfiguration
+import org.shipkit.gradle.exec.ShipkitExecTask
 import org.shipkit.gradle.release.ReleaseNeededTask
 import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
 import org.shipkit.internal.gradle.java.JavaPublishPlugin
 import org.shipkit.internal.gradle.release.CiReleasePlugin
 import org.shipkit.internal.gradle.release.ReleaseNeededPlugin
 import org.shipkit.internal.gradle.release.ReleasePlugin
+import org.shipkit.internal.gradle.util.GradleWrapper
 import org.shipkit.internal.gradle.util.ProjectUtil
+import org.shipkit.internal.gradle.versionupgrade.UpgradeDownstreamExtension
 
 import yakworks.commons.Shell
 import yakworks.gradle.DocmarkPlugin
+import yakworks.gradle.shipkit.versionupgrade.UpgradeDownstreamPlugin
 
+import static java.util.Arrays.asList
+import static org.shipkit.internal.gradle.exec.ExecCommandFactory.execCommand
 /**
  * Why?: Shipkit has CiReleasePlugin. This does special snapshot wiring and sets up detection
  * for commits that only changed things like docs and should not perform a full release.
@@ -54,6 +60,15 @@ public class CiPublishPlugin implements Plugin<Project> {
                 }
             } else {
                 ciPubTask.dependsOn(CiReleasePlugin.CI_PERFORM_RELEASE_TASK)
+
+                //do upgradeDownstream
+                def upgradeDownstreamExt = project.extensions.findByType(UpgradeDownstreamExtension)
+                if (upgradeDownstreamExt?.repositories){
+                    ShipkitExecTask ciPerformReleaseTask = (ShipkitExecTask) project.task(CiReleasePlugin.CI_PERFORM_RELEASE_TASK)
+                    ciPerformReleaseTask.getExecCommands().add(execCommand(
+                        "Upgrading downstream projects", asList(GradleWrapper.getWrapperCommand(), '-q', UpgradeDownstreamPlugin.UPGRADE_DOWNSTREAM_TASK)));
+                }
+
             }
 
             addGitConfigUser(conf)
