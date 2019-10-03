@@ -7,8 +7,8 @@ jobs:
   build:
     docker:
       # docker image with python and mkdocs on it already as well, based on gradle:4.6-alpine
-      - image: dock9/gradle:4.6
-
+      - image: yakworks/alpine-java:jdk8-builder
+      
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
