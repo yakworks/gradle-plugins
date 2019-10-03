@@ -118,6 +118,7 @@ public class CiPublishPlugin implements Plugin<Project> {
         if(releasableBranch && !rtask.isPullRequest() && !skipEnvVariable && !skippedByCommitMessage) {
 
             String commitRange = Shell.exec('echo "$CIRCLE_COMPARE_URL" | rev | cut -d/ -f1 | rev')
+            //COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | sed 's:^.*/compare/::g')
             def gitDiff = "git diff --name-only $commitRange"
             def grepReg = $/"(README\.md|mkdocs\.yml|docs/)"/$
 

@@ -98,12 +98,16 @@ class YamlConfigPlugin implements Plugin<Project> {
     void loadClassPathDefaults(Project prj, ConfigMap config){
         List<URL> resources = CPScanner.scanResources(new PackageNameFilter("configs"), new ResourceNameFilter("defaults.yml"))
         //println "resources: $resources"
-        resources.each { URL url ->
+        Closure resEachClos = { URL url ->
             //def co = new ConfigMap()
             Reader ymlExpanded = url.newReader() //GradleHelpers.expand(prj, url.text)
             //co.putAll(loadYaml(ymlExpanded))
             config.merge(loadYaml(ymlExpanded))
         }
+        resources.each resEachClos
+
+        resources = CPScanner.scanResources(new PackageNameFilter("configs"), new ResourceNameFilter("build-defaults.yml"))
+        resources.each resEachClos
         config
     }
 

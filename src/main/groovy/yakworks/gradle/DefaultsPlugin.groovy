@@ -116,7 +116,7 @@ class DefaultsPlugin implements Plugin<Project> {
 //                        tout.style(Style.Normal).text('  Report ')
 //                            .style(Style.Info).println("file:/$reportUrl")
                         TextRenderer renderer = new AnsiTextRenderer()
-                        project.logger.quiet(renderer.render("[grey]  Report: [blue]file:/$reportUrl"))
+                        project.logger.quiet(renderer.render("[grey]  Report: [blue]file://$reportUrl"))
                     }
                 }
             }

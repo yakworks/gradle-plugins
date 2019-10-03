@@ -373,14 +373,14 @@ public class UpgradeDependencyPlugin implements Plugin<Project> {
     }
 
     private String getPullRequestDescription(UpgradeDependencyExtension versionUpgrade) {
-        return String.format("This pull request was automatically created by Shipkit's" +
+        return String.format("This pull request was automatically created by ShipYak's" +
                 " 'org.shipkit.upgrade-downstream' Gradle plugin (http://shipkit.org)." +
                 " Please merge it so that you are using fresh version of '%s' dependency.",
             versionUpgrade.getDependencyName());
     }
 
     private String getPullRequestTitle(UpgradeDependencyExtension versionUpgrade) {
-        return String.format("Version of %s upgraded to %s", versionUpgrade.getDependencyName(), versionUpgrade.getNewVersion());
+        return String.format("Version of %s upgraded to %s [ci skip-release]", versionUpgrade.getDependencyName(), versionUpgrade.getNewVersion());
     }
 
     private Spec<Task> wasBuildFileUpdatedSpec(final ReplaceVersionTask replaceVersionTask) {

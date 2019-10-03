@@ -32,14 +32,15 @@ class GrailsWebPlugin implements Plugin<Project> {
         project.rootProject.plugins.apply(ShipYakRootPlugin)
         project.plugins.apply(ShippablePlugin)
 
-        project.plugins.apply('war')
+        //project.plugins.apply('war')
         project.plugins.apply('groovy')
         project.plugins.apply("org.grails.grails-web")
 
         //setup deploy
-        setupMavenWarPublish(project)
+        //setupMavenWarPublish(project)
+
         //should come last after setupMavenWarPublish as it needs to have MavenPublishPlugin
-        project.rootProject.plugins.apply(PublishingRepoSetupPlugin)
+        //project.rootProject.plugins.apply(PublishingRepoSetupPlugin)
     }
 
     @CompileDynamic

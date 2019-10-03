@@ -16,7 +16,7 @@ import yakworks.gradle.DefaultsPlugin
 import yakworks.gradle.ShippablePlugin
 
 /**
- * yakworks.gradle-plugin , the shipkit one wont work as it depends on travis. This will work for circle.
+ * yakworks.gradle-plugin, the shipkit one wont work as it depends on travis. This will work for circle.
  */
 @CompileStatic
 class GradlePluginPlugin implements Plugin<Project> {
