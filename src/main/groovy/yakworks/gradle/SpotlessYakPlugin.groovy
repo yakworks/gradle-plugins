@@ -65,16 +65,19 @@ class SpotlessYakPlugin implements Plugin<Project> {
             /* if its a shippable library item then makes sure a license header is applied
             (as opposed to an example or test project)
             */
-            project.plugins.withType(ShippablePlugin){
-                if(cfg.licenseHeader){
-                    licenseHeader(cfg.licenseHeader)
-                } else if(cfg.licenseHeaderFile) {
-                    licenseHeader(cfg.licenseHeaderFile)
+            if(!project.plugins.hasPlugin(NotShippablePlugin)){
+                project.plugins.withType(ShippablePlugin){
+                    if(cfg.licenseHeader){
+                        licenseHeader(cfg.licenseHeader)
+                    } else if(cfg.licenseHeaderFile) {
+                        licenseHeader(cfg.licenseHeaderFile)
+                    }
                 }
             }
+
         }
 
-        if(formatName in ['groovy','groovyGradle']){
+        if(formatName in ['groovy', 'groovyGradle']){
             spotless."$formatName" clos
         } else {
             spotless.format formatName, clos

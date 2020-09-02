@@ -31,13 +31,14 @@ import static yakworks.gradle.GradleHelpers.prop
 public class YamlConfigShipYakPlugin implements Plugin<Project> {
 
     private final static Logger LOG = Logging.getLogger(YamlConfigShipYakPlugin)
+    static final String VERSION_FILE_NAME = "version.properties"
 
     ConfigMap config
 
     public void apply(final Project project) {
         ProjectUtil.requireRootProject(project, this.getClass())
         //addSnaphotTaskFromVersionProp has to be done before ShipkitConfiguration, so it can add the snapshot task to the startParams
-        addSnaphotTaskFromVersionProp(project)
+        //addSnaphotTaskFromVersionProp(project)
         /* turn down the loggin for ShipkitConfigurationPlugin so it doesn't warn about no shipkit.gradle file
         Logger shipkitConfigLogger = LoggerFactory.getLogger("ShipkitConfigurationPlugin");
         Level oldLogLevel = shipkitConfigLogger.getLevel();
@@ -83,8 +84,18 @@ public class YamlConfigShipYakPlugin implements Plugin<Project> {
         //releaseNotes
         setProps(shipConfig.releaseNotes, config['releaseNotes'])
 
+        // if version.properties uses the publishedVersion instead of previousVersion then use that
+        final File versionFile = project.file(VERSION_FILE_NAME)
+        final YakVersionInfo versionInfo = YakVersionInfo.fromFile(versionFile)
+        final String version = versionInfo.getVersion()
+        prop(project, 'isSnapshot', versionInfo.isSnapshot)
+        project.allprojects { Project prj ->
+            prj.setVersion(version)
+        }
+        if(versionInfo.previousVersion){
+            shipConfig.setPreviousReleaseVersion(versionInfo.previousVersion)
+        }
         setupMavenPublishProps(project, config)
-
     }
 
     void setProps(Object pogo, Object cfgMap){

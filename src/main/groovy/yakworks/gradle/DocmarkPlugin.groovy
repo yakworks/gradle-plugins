@@ -22,6 +22,7 @@ import yakworks.commons.Shell
 /**
  * Tasks and configuration for generating mkdocs and groovydocs.
  */
+@Deprecated
 @CompileStatic
 class DocmarkPlugin implements Plugin<Project> {
 
@@ -298,7 +299,7 @@ class DocmarkPlugin implements Plugin<Project> {
             excludes = ['**/*GrailsPlugin.groovy', '**/Application.groovy']
             link('http://download.oracle.com/javase/8/docs/api/', 'java.', 'org.xml', 'javax.', 'org.xml.')
             link("https://docs.spring.io/spring/docs/4.2.x/javadoc-api/", 'org.springframework')
-            link('http://groovy.codehaus.org/api/', 'groovy.', 'org.codehaus.groovy.')
+            link('https://docs.groovy-lang.org/latest/html/gapi/', 'groovy.', 'org.codehaus.groovy.', 'org.apache.groovy.')
             link('http://gorm.grails.org/latest/hibernate/api/', 'grails.gorm.', 'grails.orm', 'org.grails.datastore.', 'org.grails.orm.')
             link('https://docs.grails.org/latest/api', 'grails.', 'org.grails.')
             link('https://testing.grails.org/latest/api', 'grails.testing.', 'org.grails.testing.')

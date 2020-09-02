@@ -14,12 +14,10 @@ import org.gradle.api.logging.Logging
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.shipkit.internal.gradle.java.JavaBintrayPlugin
-import org.shipkit.internal.gradle.util.ProjectUtil
 
 import com.jfrog.bintray.gradle.BintrayExtension
 import yakworks.commons.ConfigMap
 import yakworks.commons.Pogo
-import yakworks.gradle.ShippablePlugin
 
 /**
  * Finalize setup for Bintray and/or Maven (artifactory) based on isSnapshot and bintray.enabled
@@ -32,27 +30,22 @@ class PublishingRepoSetupPlugin implements Plugin<Project> {
 
     ConfigMap config
 
-    void apply(Project rootProject) {
-        ProjectUtil.requireRootProject(rootProject, this.getClass())
-        config = rootProject.config
+    void apply(Project project) {
+        // ProjectUtil.requireRootProject(rootProject, this.getClass())
+        config = project.rootProject.config
 
-        rootProject.allprojects { Project project ->
-            project.plugins.withType(ShippablePlugin) {
-                boolean isBintray = config['bintray.enabled']
+        boolean isBintray = config['bintray.enabled']
 
-                if (isBintray) {
-                    project.plugins.apply(JavaBintrayPlugin)
-                    configBintray(project, config)
-                }
+        if (isBintray) {
+            project.plugins.apply(JavaBintrayPlugin)
+            configBintray(project, config)
+        }
 
-                if (project['isSnapshot'] || !isBintray) {
-                    LOG.lifecycle("Set Maven PublishingExtension with URL: ${config['maven.publishUrl']} because one of the following is true\n" +
-                        "isSnapshot = true: ${project['isSnapshot']} , " +
-                        "bintray.enabled is false: ${!isBintray} ")
-                    setupMavenPublishRepo(project)
-                }
-
-            }
+        if (project['isSnapshot'] || !isBintray) {
+            LOG.lifecycle("Set Maven PublishingExtension with URL: ${config['maven.publishUrl']} because one of the following is true\n" +
+                "isSnapshot = true: ${project['isSnapshot']} , " +
+                "bintray.enabled is false: ${!isBintray} ")
+            setupMavenPublishRepo(project)
         }
     }
 

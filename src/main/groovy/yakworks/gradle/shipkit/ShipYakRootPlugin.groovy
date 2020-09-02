@@ -48,11 +48,11 @@ class ShipYakRootPlugin implements Plugin<Project> {
         }
         project.plugins.apply(PomContributorsPlugin)
 
-        project.plugins.apply(DocsReleasePlugin)
+        // project.plugins.apply(DocsReleasePlugin)
 
-        project.plugins.apply(UpgradeDependencyPlugin)
+        // project.plugins.apply(UpgradeDependencyPlugin)
 
-        project.plugins.apply(UpgradeDownstreamPlugin)
+        // project.plugins.apply(UpgradeDownstreamPlugin)
 
     }
 

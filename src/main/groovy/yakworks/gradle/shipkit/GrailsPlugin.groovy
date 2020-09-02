@@ -17,6 +17,8 @@ import org.shipkit.internal.gradle.java.JavaLibraryPlugin
 import org.shipkit.internal.gradle.java.JavaPublishPlugin
 
 import com.jfrog.bintray.gradle.BintrayExtension
+import yakworks.gradle.CodenarcPlugin
+import yakworks.gradle.NotShippablePlugin
 import yakworks.gradle.ShippablePlugin
 
 /**
@@ -29,19 +31,23 @@ class GrailsPlugin implements Plugin<Project> {
         project.rootProject.plugins.apply(ShipYakRootPlugin)
         project.plugins.apply(ShippablePlugin)
         project.plugins.apply('groovy')
-
+        project.plugins.apply(CodenarcPlugin)
         //order is important here
         //ShippablePlugin/JavaLibraryPlugin has to come before the grails-plugin as it sets up the sourcesJar and javadocJar
         project.plugins.apply(JavaLibraryPlugin)
         project.plugins.apply("org.grails.grails-plugin")
-        //JavaPublishPlugin has to get applied after the grails-plugin has been applied or it doesn't add the dependencies to the pom properly
-        project.plugins.apply(JavaPublishPlugin)
-        //this should come last after JavaPublishPlugin as it finalizes the maven/bintray setups
-        project.rootProject.plugins.apply(PublishingRepoSetupPlugin)
 
-        //post processing cleanup
-        addGrailsPluginBintrayAttribute(project)
-        cleanDepsInPom(project)
+        if(!project.plugins.hasPlugin(NotShippablePlugin)){
+            //JavaPublishPlugin has to get applied after the grails-plugin has been applied or it doesn't add the dependencies to the pom properly
+            project.plugins.apply(JavaPublishPlugin)
+            //this should come last after JavaPublishPlugin as it finalizes the maven/bintray setups
+            project.plugins.apply(PublishingRepoSetupPlugin)
+            // project.rootProject.plugins.apply(PublishingRepoSetupPlugin)
+
+            //post processing cleanup
+            addGrailsPluginBintrayAttribute(project)
+            cleanDepsInPom(project)
+        }
 
     }
 

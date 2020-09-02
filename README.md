@@ -237,6 +237,15 @@ This add a yaml config. These are the defaults.
    enabled: true
 
 ```
+curl -v -i -X POST \
+curl -v -i \
+-H "Content-Type:application/json" \
+-H "Authorization: token 16b6a572f79d19b3967c28660d082890b8ce9905" \
+https://api.github.com/repos/9ci/rally/releases \
+-d '{"tag_name":"0.0.5","target_commitish": "develop","name": "0.0.5","body": "Description of the release","draft": false,"prerelease": false}'
+curl 
+/repos/:owner/:repo/releases
 
-
-
+curl -v -i \
+-H "Content-Type:application/json" \
+https://api.github.com/repos/9ci/rally/releases

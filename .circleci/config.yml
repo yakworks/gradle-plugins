@@ -7,24 +7,11 @@ jobs:
   build:
     docker:
       # docker image with python and mkdocs on it already as well, based on gradle:4.6-alpine
-      - image: yakworks/alpine-java:jdk8-builder
-      
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
-#    branches:
-#      only:
-#        - master
-
-    # working_directory: ~/repo
+      - image: yakworks/alpine-jdk:builder8
 
     environment:
-      # Customize the JVM maximum heap limit
-      # JVM_OPTS: -Xmx3200m
       MALLOC_ARENA_MAX: 2
-      GRADLE_OPTS: "-Xmx3200m -Dorg.gradle.daemon=false" #daemon false doesn't seem to get picked up by fork
+      GRADLE_OPTS: "-Xmx1500m -Dorg.gradle.daemon=false" #daemon false doesn't seem to get picked up by fork
       TERM: dumb
 
     parallelism: 1
@@ -48,9 +35,9 @@ jobs:
             - ~/.gradle
           key: v3-gradle-{{ checksum "build.gradle" }}
 
-      - run:
-          name: does perform release, this will fire publishPlugins since its a gradle plugin
-          command: ./gradlew ciPerformRelease --stacktrace
+#      - run:
+#          name: does perform release, this will fire publishPlugins since its a gradle plugin
+#          command: ./gradlew ciPerformRelease --stacktrace
 
       - store_artifacts:
           path: plugin/build/reports/tests/test/

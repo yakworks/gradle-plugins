@@ -24,11 +24,11 @@ import org.shipkit.internal.gradle.util.ProjectUtil
 import org.shipkit.internal.gradle.versionupgrade.UpgradeDownstreamExtension
 
 import yakworks.commons.Shell
-import yakworks.gradle.DocmarkPlugin
 import yakworks.gradle.shipkit.versionupgrade.UpgradeDownstreamPlugin
 
 import static java.util.Arrays.asList
 import static org.shipkit.internal.gradle.exec.ExecCommandFactory.execCommand
+
 /**
  * Why?: Shipkit has CiReleasePlugin. This does special snapshot wiring and sets up detection
  * for commits that only changed things like docs and should not perform a full release.
@@ -132,9 +132,9 @@ public class CiPublishPlugin implements Plugin<Project> {
                 String publishMavSnap = "${project.getPath()}:$MavenRepoReleasePlugin.MAVEN_PUBLISH_REPO_TASK"
                 ciPublishTask.dependsOn(publishMavSnap)
             }
-            if(hasDocChanges){
-                ciPublishTask.dependsOn(DocmarkPlugin.PUBLISH_DOCS_TASK)
-            }
+            // if(hasDocChanges){
+            //     ciPublishTask.dependsOn(DocmarkPlugin.PUBLISH_DOCS_TASK)
+            // }
         } else {
             LOG.lifecycle("SNAPSHOT publish will be skipped. See Logs above")
         }

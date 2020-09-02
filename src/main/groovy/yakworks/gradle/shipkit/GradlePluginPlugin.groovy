@@ -12,6 +12,7 @@ import org.shipkit.internal.gradle.release.GradlePortalReleasePlugin
 import org.shipkit.internal.gradle.util.ProjectUtil
 
 import yakworks.commons.ConfigMap
+import yakworks.gradle.CodenarcPlugin
 import yakworks.gradle.DefaultsPlugin
 import yakworks.gradle.ShippablePlugin
 
@@ -29,10 +30,11 @@ class GradlePluginPlugin implements Plugin<Project> {
 
         project.plugins.apply(CiPublishPlugin)
         project.plugins.apply(DefaultsPlugin)
-        project.plugins.apply(DocsReleasePlugin)
+        // project.plugins.apply(DocsReleasePlugin)
 
         project.plugins.apply(ShippablePlugin)
         project.plugins.apply('groovy')
+        project.plugins.apply(CodenarcPlugin)
         project.plugins.apply(GradlePortalReleasePlugin);
     }
 

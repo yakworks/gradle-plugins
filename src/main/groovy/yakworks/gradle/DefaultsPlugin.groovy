@@ -49,16 +49,17 @@ class DefaultsPlugin implements Plugin<Project> {
                 prj.plugins.apply(SpotlessYakPlugin)
             }
             //add codenarc to groovy projects that are shippable
-            prj.plugins.withType(ShippablePlugin){
-                prj.plugins.withId('groovy') {
-                    prj.plugins.apply(CodenarcPlugin)
-                }
-            }
+            // prj.plugins.withType(ShippablePlugin){
+            //     prj.plugins.withId('groovy') {
+            //         prj.plugins.apply(CodenarcPlugin)
+            //     }
+            // }
 
             prj.plugins.apply(SpotlessYakPlugin)
         }
+        rootProject.plugins.apply(GroovydocMergePlugin)
 
-        rootProject.plugins.apply(DocmarkPlugin)
+        // rootProject.plugins.apply(DocmarkPlugin)
 
     }
 

@@ -22,6 +22,7 @@ import yakworks.gradle.DocmarkPlugin
 /**
  * Wires up the README updates and the docs build and publishing to the performRelease task
  */
+@Deprecated
 @CompileStatic
 class DocsReleasePlugin implements Plugin<Project> {
     private final static Logger LOG = Logging.getLogger(DocsReleasePlugin)

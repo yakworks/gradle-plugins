@@ -19,6 +19,7 @@ import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.shipkit.internal.gradle.java.JavaPublishPlugin
 import org.shipkit.internal.gradle.snapshot.LocalSnapshotPlugin
 
+import yakworks.gradle.CodenarcPlugin
 import yakworks.gradle.ShippablePlugin
 
 /**
@@ -34,6 +35,7 @@ class GrailsWebPlugin implements Plugin<Project> {
 
         //project.plugins.apply('war')
         project.plugins.apply('groovy')
+        project.plugins.apply(CodenarcPlugin)
         project.plugins.apply("org.grails.grails-web")
 
         //setup deploy

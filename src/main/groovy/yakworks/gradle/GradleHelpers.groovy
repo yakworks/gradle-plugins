@@ -62,7 +62,7 @@ class GradleHelpers {
         }
     }
 
-    static void setupPublishProps(Project prj) {
+    static void oldSetupPublishProps(Project prj) {
         // sets up default composed props on ext from base props in gradle.properties
         //!!!properties should go there, not here!!
         // its assumed that certain props exists already as base lines to use

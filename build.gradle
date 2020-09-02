@@ -5,13 +5,13 @@ buildscript {
     maven { url "https://plugins.gradle.org/m2/" }
   }
   dependencies {
-    classpath "org.yakworks:gradle-plugins:1.1.8"
+    classpath "org.yakworks:gradle-plugins:1.2.0"
   }
 }
 
 plugins {
   id "com.dorongold.task-tree" version "1.3"
-  id "com.gradle.plugin-publish" version "0.10.1"
+  id "com.gradle.plugin-publish" version "0.12.0"
   id "java-gradle-plugin"
 }
 
@@ -107,6 +107,27 @@ gradlePlugin {
       implementationClass = 'yakworks.gradle.shipkit.ShipYakRootPlugin'
       displayName = 'ShipYak Root Project'
       description = 'ShipYak Root Project, Does the defaults to get ShipYak and ShipKit setup. Usually you would apply one of the others but if multi-project then put this on the root'
+      //tags = defTags
+    }
+    shippablePlugin {
+      id = 'yakworks.shippable'
+      implementationClass = 'yakworks.gradle.ShippablePlugin'
+      displayName = 'ShipYak Shippable Plugin'
+      description = 'ShipYak Shippable Plugin, marker for a shippable lib'
+      //tags = defTags
+    }
+    notShippablePlugin {
+      id = 'yakworks.not-shippable'
+      implementationClass = 'yakworks.gradle.NotShippablePlugin'
+      displayName = 'ShipYak Not Shippable Marker'
+      description = 'ShipYak Not Shippable Marker, marks a lib as not shippable'
+      //tags = defTags
+    }
+    groovydocMerge {
+      id = 'yakworks.groovydoc-merge'
+      implementationClass = 'yakworks.gradle.GroovydocMergePlugin'
+      displayName = 'Yakworks Groovydoc'
+      description = 'Yakworks Groovydoc merges together all the groovydocs for shippable libs in a project'
       //tags = defTags
     }
 //    shipkitPlugin { //DEPRECATED
