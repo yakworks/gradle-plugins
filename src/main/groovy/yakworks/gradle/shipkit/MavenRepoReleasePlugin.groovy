@@ -35,8 +35,10 @@ class MavenRepoReleasePlugin implements Plugin<Project> {
     public final static String MAVEN_PUBLISH_REPO_TASK = "publish${PUBLICATION_NAME.capitalize()}PublicationToMavenRepository"
 
     void apply(final Project project) {
-        ReleasePlugin releasePlugin = project.plugins.apply(ReleasePlugin) //should have already been done by now
-        ShipkitConfiguration shipkitConf = project.plugins.apply(ShipkitConfigurationPlugin).configuration
+        ReleasePlugin releasePlugin = project.plugins.apply(ReleasePlugin) as ReleasePlugin //should have already been done by now
+
+        def skplugin = project.plugins.apply(ShipkitConfigurationPlugin) as ShipkitConfigurationPlugin
+        ShipkitConfiguration shipkitConf = skplugin.configuration
 
         Task gitPush = (Task)project.property(GIT_PUSH_TASK)
         Task performRelease = project.tasks.getByName(PERFORM_RELEASE_TASK)
