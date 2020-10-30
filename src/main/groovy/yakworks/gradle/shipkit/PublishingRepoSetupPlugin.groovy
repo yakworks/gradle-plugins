@@ -8,11 +8,11 @@ import groovy.transform.CompileDynamic
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.internal.ClosureBackedAction
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
+import org.gradle.util.ClosureBackedAction
 import org.shipkit.internal.gradle.java.JavaBintrayPlugin
 
 import com.jfrog.bintray.gradle.BintrayExtension

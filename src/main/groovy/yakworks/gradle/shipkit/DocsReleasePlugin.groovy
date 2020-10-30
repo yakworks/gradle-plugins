@@ -4,7 +4,7 @@
 */
 package yakworks.gradle.shipkit
 
-import groovy.transform.CompileStatic
+import groovy.transform.CompileDynamic
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -23,7 +23,7 @@ import yakworks.gradle.DocmarkPlugin
  * Wires up the README updates and the docs build and publishing to the performRelease task
  */
 @Deprecated
-@CompileStatic
+@CompileDynamic
 class DocsReleasePlugin implements Plugin<Project> {
     private final static Logger LOG = Logging.getLogger(DocsReleasePlugin)
 

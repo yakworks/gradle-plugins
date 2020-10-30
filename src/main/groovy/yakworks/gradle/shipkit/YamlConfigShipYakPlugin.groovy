@@ -47,8 +47,10 @@ public class YamlConfigShipYakPlugin implements Plugin<Project> {
         // When you want to return to the old log level
         shipkitConfigLogger.setLevel(oldLogLevel);
          */
-        ShipkitConfiguration shipConfig = project.plugins.apply(ShipkitConfigurationPlugin).configuration
-        config = project.plugins.apply(YamlConfigPlugin).config
+        def skplugin = project.plugins.apply(ShipkitConfigurationPlugin) as ShipkitConfigurationPlugin
+        ShipkitConfiguration shipConfig = skplugin.configuration
+        def ymlplugin = project.plugins.apply(YamlConfigPlugin) as YamlConfigPlugin
+        config = ymlplugin.config
 
         //sets the fullname repo from git if its null
         ConfigMap ghConfig = (ConfigMap)config.github

@@ -16,8 +16,6 @@ import org.shipkit.internal.gradle.util.ProjectUtil
 
 import yakworks.commons.ConfigMap
 import yakworks.gradle.DefaultsPlugin
-import yakworks.gradle.shipkit.versionupgrade.UpgradeDependencyPlugin
-import yakworks.gradle.shipkit.versionupgrade.UpgradeDownstreamPlugin
 
 /**
  * Continuous delivery for Java/Groovy/Grails with CirclePlugin and Bintray.
@@ -33,7 +31,8 @@ class ShipYakRootPlugin implements Plugin<Project> {
     public void apply(final Project project) {
         ProjectUtil.requireRootProject(project, this.getClass())
 
-        config = project.plugins.apply(YamlConfigShipYakPlugin).config
+        def skplugin = project.plugins.apply(YamlConfigShipYakPlugin) as YamlConfigShipYakPlugin
+        config = skplugin.config
 
         project.plugins.apply(CiPublishPlugin)
         project.plugins.apply(DefaultsPlugin)
