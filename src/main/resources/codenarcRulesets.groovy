@@ -11,6 +11,17 @@ ruleset {
         'IfStatementBraces' enabled: false
     }
 
+    ruleset('rulesets/comments.xml'){
+        ['JavadocEmptyLastLine', 'JavadocMissingThrowsDescription',
+         'JavadocMissingExceptionDescription', 'ClassJavadoc'].each{
+            "$it"(enabled:false)
+        }
+
+        ClassJavadoc{
+            doNotApplyToFilesMatching = ".*/src/test/.*|.*GrailsPlugin.groovy|.*Application.groovy"
+        }
+    }
+
     ruleset('rulesets/concurrency.xml')
 
     ruleset('rulesets/convention.xml'){
@@ -18,11 +29,14 @@ ruleset {
          'MethodReturnTypeRequired', 'CouldBeSwitchStatement', 'InvertedCondition', 'TrailingComma',
          'VariableTypeRequired', 'FieldTypeRequired', 'PublicMethodsBeforeNonPublicMethods','NoJavaUtilDate',
          'StaticFieldsBeforeInstanceFields', //FIXME this should be enabled
-         'StaticMethodsBeforeInstanceMethods', 'IfStatementCouldBeTernary'
+         'StaticMethodsBeforeInstanceMethods', 'IfStatementCouldBeTernary',
+         'ImplicitReturnStatement', 'ImplicitClosureParameter'
         ].each{
             "$it"(enabled:false)
         }
-
+        CompileStatic  {
+            doNotApplyToFilesMatching = ".*/src/test/.*|.*GrailsPlugin.groovy|.*Application.groovy"
+        }
         //FIXME enable this
 //        FieldTypeRequired {
 //            doNotApplyToFilesMatching = ".*/grails-app/domain/.*|.*GrailsPlugin.groovy|.*Application.groovy|.*UrlMappings.groovy|.*BootStrap.groovy"
@@ -45,7 +59,11 @@ ruleset {
         }
     }
 
-    //ruleset('rulesets/dry.xml') // doesn't do much for us
+    // ruleset('rulesets/dry.xml'){
+    //     ['DuplicateNumberLiteral', 'DuplicateStringLiteral'].each{
+    //         "$it"(enabled:false)
+    //     }
+    // } // doesn't do much for us and we end up commenting out because of map constructors
 
     //ruleset('rulesets/enhanced.xml')//FIXME try adding in the src to classpath so theese work
 
@@ -139,6 +157,9 @@ ruleset {
             maxMethodComplexity = 40
             maxClassAverageMethodComplexity = 40
         }
+        ClassSize {
+            maxLines = 750
+        }
     }
 
     ruleset('rulesets/unnecessary.xml'){
@@ -165,12 +186,12 @@ ruleset {
         exclude 'UnusedMethodParameter' //FIXME this should be enabled
         exclude 'UnusedVariable'
     }
-
-    ruleset('rulesets/codenarc-extra.xml') {
-        CompileStatic  {
-            doNotApplyToFilesMatching = ".*/src/test/.*|.*GrailsPlugin.groovy|.*Application.groovy"
-        }
-    }
+    //
+    // ruleset('rulesets/codenarc-extra.xml') {
+    //     CompileStatic  {
+    //         doNotApplyToFilesMatching = ".*/src/test/.*|.*GrailsPlugin.groovy|.*Application.groovy"
+    //     }
+    // }
 
     def getRule = { name ->
         //def ruleClass = org.codenarc.ruleregistry.RuleRegistryHolder.ruleRegistry?.getRuleClass(name)

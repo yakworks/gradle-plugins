@@ -16,7 +16,7 @@ import org.gradle.api.Project
 class CodenarcPlugin implements Plugin<Project> {
 
     //final static String CODENARC_VERSION = "1.3"
-    final static String CODENARC_EXTRA_VERSION = "1.0.2"
+    //final static String CODENARC_EXTRA_VERSION = "1.0.2"
 
     void apply(Project prj) {
         prj.plugins.apply('codenarc')
@@ -45,7 +45,7 @@ class CodenarcPlugin implements Plugin<Project> {
 
         prj.dependencies {
             delegate.codenarc("org.codenarc:CodeNarc:${prj.config.codenarc.toolVersion}")
-            delegate.codenarc("io.9ci.yakworks:codenarc-extra:$CODENARC_EXTRA_VERSION")
+            // delegate.codenarc("io.9ci.yakworks:codenarc-extra:$CODENARC_EXTRA_VERSION")
         }
     }
 

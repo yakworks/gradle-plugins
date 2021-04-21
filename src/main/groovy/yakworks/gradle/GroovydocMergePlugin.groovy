@@ -44,7 +44,7 @@ class GroovydocMergePlugin implements Plugin<Project> {
             https://github.com/nebula-plugins/gradle-aggregate-javadocs-plugin/blob/
             master/src/main/groovy/nebula/plugin/javadoc/NebulaAggregateJavadocPlugin.groovy*/
         //println "addCombineGroovyDocsTask"
-        Task tsk = project.task(GROOVYDOC_MERGE_TASK, type: Groovydoc, overwrite: true)
+        Task tsk = project.task(GROOVYDOC_MERGE_TASK, type: Groovydoc)
         //do it after entire project evaluated so
         project.gradle.projectsEvaluated {
             Set<Project> pubProjects = project.allprojects.findAll { prj ->
