@@ -21,7 +21,8 @@ class SpotlessYakPlugin implements Plugin<Project> {
 
     @CompileDynamic
     private void addSpotless(Project project) {
-        SpotlessExtension spotless = project.plugins.apply(com.diffplug.gradle.spotless.SpotlessPlugin).extension
+        project.plugins.apply(com.diffplug.gradle.spotless.SpotlessPlugin)
+        SpotlessExtension spotless = project.getExtensions().getByName('spotless')
 
         //make sure spotless runs first in the checks
         project.plugins.withId('codenarc') {

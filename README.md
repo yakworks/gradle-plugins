@@ -181,7 +181,7 @@ This add a yaml config. These are the defaults.
  # normal maven setting can be configured if not publishing to bintray and using an maven repo such as artifactory
  # If using bintray for primary and a maven repo for snapshots then just setup user/key and the repoUrl here.
  # if not using bintray then set enabled= false on it and setup repoUrl and a snapshotUrl if they differ.
- # Currently not suported to have 2 different credentials
+ # Currently not suporte have 2 different credentials
  maven:
    user: '${props.findAny("MAVEN_REPO_USER")}' # see notes above about env variables like this
    key: '${props.findAny("MAVEN_REPO_KEY")}'
