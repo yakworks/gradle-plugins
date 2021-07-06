@@ -13,14 +13,12 @@ import org.gradle.api.logging.Logging
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.util.ClosureBackedAction
-import org.shipkit.internal.gradle.java.JavaBintrayPlugin
 
-import com.jfrog.bintray.gradle.BintrayExtension
 import yakworks.commons.ConfigMap
 import yakworks.commons.Pogo
 
 /**
- * Finalize setup for Bintray and/or Maven (artifactory) based on isSnapshot and bintray.enabled
+ * Finalize setup for Maven (artifactory) based on isSnapshot
  * Should be applied after JavaPublishPlugin so that can do the maven setups first
  * only apply on rootprojects
  */
@@ -34,19 +32,7 @@ class PublishingRepoSetupPlugin implements Plugin<Project> {
         // ProjectUtil.requireRootProject(rootProject, this.getClass())
         config = project.rootProject.config
 
-        boolean isBintray = config['bintray.enabled']
-
-        if (isBintray) {
-            project.plugins.apply(JavaBintrayPlugin)
-            configBintray(project, config)
-        }
-
-        if (project['isSnapshot'] || !isBintray) {
-            // LOG.lifecycle("Set Maven PublishingExtension with URL: ${config['maven.publishUrl']} because one of the following is true\n" +
-            //     "isSnapshot = true: ${project['isSnapshot']} , " +
-            //     "bintray.enabled is false: ${!isBintray} ")
-            setupMavenPublishRepo(project)
-        }
+        setupMavenPublishRepo(project)
     }
 
     @CompileDynamic
@@ -66,25 +52,4 @@ class PublishingRepoSetupPlugin implements Plugin<Project> {
         }
     }
 
-    /**
-     * sets up the bintray task defaults
-     */
-    @CompileDynamic
-    private void configBintray(Project project, ConfigMap config) {
-        project.afterEvaluate { prj ->
-            //println "configBintray for ${prj.name}"
-            final BintrayExtension bintray = project.getExtensions().getByType(BintrayExtension)
-            config.evalAll() //make sure StringTemplates are evaluated
-            bintray.user = config['bintray.user']
-            bintray.key = config['bintray.key']
-
-            final BintrayExtension.PackageConfig pkg = bintray.getPkg()
-            Pogo.merge(pkg, config['bintray.pkg'])
-            Pogo.merge(pkg.version.gpg, config['bintray.pkg.version.gpg'])
-            Pogo.merge(pkg.version.mavenCentralSync, config['bintray.pkg.version.mavenCentralSync'])
-
-            pkg.name = prj.name
-            pkg.version.name = prj.version
-        }
-    }
 }

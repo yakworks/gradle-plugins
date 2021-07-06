@@ -35,10 +35,6 @@ println "config.git.config.user" + git['config.user']
 //println config.github.repo
 //println config.github.issuesUrl
 //println config.websiteUrl
-////println config.bintray
-//assert config['bintray.pkg.websiteUrl']
-////println config.bintray
-//println config.bintray.pkg.licenses
 
 DumperOptions dops = new DumperOptions()
 dops.setIndent(2)

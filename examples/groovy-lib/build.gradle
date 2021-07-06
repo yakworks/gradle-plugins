@@ -10,7 +10,6 @@ buildscript {
 }
 apply plugin:"groovy"
 apply plugin:"yakworks.shipyak"
-apply plugin: "org.shipkit.java"
 
 dependencies {
     // Use the latest Groovy version for building this library
@@ -28,6 +27,4 @@ repositories {
 }
 
 //println config.prettyPrint()
-//println config.bintray.user
-//println config.bintray.key
 //println config.git.releasable.grepDocs

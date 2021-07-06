@@ -43,11 +43,9 @@ class YamlConfigPlugin implements Plugin<Project> {
             configFileNames = prj.property('configFiles').toString().split(',') as List
         } else {
             //do defaults for config.groovy and config.yml
-            configFileNames.add("${prj.rootDir}/gradle.yml")
             configFileNames.add("${prj.rootDir}/build.yml")
             configFileNames.add("${prj.rootDir}/gradle/config.yml")
             configFileNames.add("${prj.rootDir}/gradle/build.yml")
-            configFileNames.add("${prj.rootDir}/gradle/shipkit.yml")
         }
         configFileNames = configFileNames as List<String>
 

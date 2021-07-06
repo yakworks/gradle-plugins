@@ -12,11 +12,7 @@ import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.util.ClosureBackedAction
-import org.shipkit.internal.gradle.java.JavaBintrayPlugin
-import org.shipkit.internal.gradle.java.JavaLibraryPlugin
-import org.shipkit.internal.gradle.java.JavaPublishPlugin
 
-import com.jfrog.bintray.gradle.BintrayExtension
 import yakworks.gradle.CodenarcPlugin
 import yakworks.gradle.NotShippablePlugin
 import yakworks.gradle.ShippablePlugin
@@ -34,35 +30,20 @@ class GrailsPlugin implements Plugin<Project> {
         project.plugins.apply(CodenarcPlugin)
         //order is important here
         //ShippablePlugin/JavaLibraryPlugin has to come before the grails-plugin as it sets up the sourcesJar and javadocJar
-        project.plugins.apply(JavaLibraryPlugin)
+        project.plugins.apply(JavaSourcesDocJarPlugin)
         project.plugins.apply("org.grails.grails-plugin")
 
         if(!project.plugins.hasPlugin(NotShippablePlugin)){
             //JavaPublishPlugin has to get applied after the grails-plugin has been applied or it doesn't add the dependencies to the pom properly
             project.plugins.apply(JavaPublishPlugin)
-            //this should come last after JavaPublishPlugin as it finalizes the maven/bintray setups
+            //this should come last after JavaPublishPlugin as it finalizes the maven setups
             project.plugins.apply(PublishingRepoSetupPlugin)
             // project.rootProject.plugins.apply(PublishingRepoSetupPlugin)
 
             //post processing cleanup
-            addGrailsPluginBintrayAttribute(project)
             cleanDepsInPom(project)
         }
 
-    }
-
-    /**
-     * adds grails-plugin attibute to bintray pkg. not really sure if or why this is needed
-     * @param project
-     */
-    //@CompileDynamic
-    void addGrailsPluginBintrayAttribute(Project project) {
-        project.plugins.withType(JavaBintrayPlugin) {
-            project.afterEvaluate { prj ->
-                final BintrayExtension bintray = project.getExtensions().getByType(BintrayExtension)
-                bintray.pkg.version.attributes = ["grails-plugin": "${prj['group']}:${prj['name']}".toString()]
-            }
-        }
     }
 
     /**

@@ -11,14 +11,10 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
-import org.shipkit.gradle.configuration.ShipkitConfiguration
-import org.shipkit.internal.gradle.configuration.ShipkitConfigurationPlugin
-import org.shipkit.internal.gradle.util.ProjectUtil
-import org.shipkit.internal.gradle.version.VersioningPlugin
-import org.shipkit.internal.util.PropertiesUtil
 
 import yakworks.commons.ConfigMap
-import yakworks.commons.Shell
+import yakworks.gradle.util.ProjectUtil
+import yakworks.gradle.util.PropertiesUtil
 import yakworks.gradle.config.YamlConfigPlugin
 
 import static yakworks.gradle.GradleHelpers.prop
@@ -37,54 +33,15 @@ public class YamlConfigShipYakPlugin implements Plugin<Project> {
 
     public void apply(final Project project) {
         ProjectUtil.requireRootProject(project, this.getClass())
-        //addSnaphotTaskFromVersionProp has to be done before ShipkitConfiguration, so it can add the snapshot task to the startParams
-        //addSnaphotTaskFromVersionProp(project)
-        /* turn down the loggin for ShipkitConfigurationPlugin so it doesn't warn about no shipkit.gradle file
-        Logger shipkitConfigLogger = LoggerFactory.getLogger("ShipkitConfigurationPlugin");
-        Level oldLogLevel = shipkitConfigLogger.getLevel();
-        shipkitConfigLogger.setLevel(Level.ERROR); // or whatever level you want
-
-        // When you want to return to the old log level
-        shipkitConfigLogger.setLevel(oldLogLevel);
-         */
-        def skplugin = project.plugins.apply(ShipkitConfigurationPlugin) as ShipkitConfigurationPlugin
-        ShipkitConfiguration shipConfig = skplugin.configuration
         def ymlplugin = project.plugins.apply(YamlConfigPlugin) as YamlConfigPlugin
         config = ymlplugin.config
 
         //sets the fullname repo from git if its null
-        ConfigMap ghConfig = (ConfigMap)config.github
+        ConfigMap ghConfig = (ConfigMap)config.project
         String gslug = ghConfig.fullName
-        //LOG.lifecycle("github.fullName is $gslug")
-        if (!gslug) {
-            //println "gslug was null so using sed to get config from git"
-            String sedPart = $/sed -n 's#.*/\(.*/[^.]*\)\.git#\1#p'/$
-            String getRemote = "git config --get remote.origin.url | $sedPart"
-            gslug = Shell.exec(getRemote)
-            //the sed above should have gotten back owner/repo
-            config.merge('github.fullName', gslug)
-            LOG.lifecycle("github.fullName was not set so getting it from $getRemote \n" +
-                "ghConfig.fullName : ${ghConfig.fullName} , " +
-                "gslug from cmd is $gslug")
-        }
-
-        //github
-        setProps(shipConfig.gitHub, ghConfig)
-        //println "ghConfig $ghConfig"
-        shipConfig.gitHub.repository = ghConfig.fullName
-        //println "gitHubConfig['readOnlyAuthToken'] ${ghConfig.readOnlyAuthToken}"
-        //println "gitHubConfig['writeAuthToken'] ${ghConfig.writeAuthToken}"
-
-        //git
-        setProps(shipConfig.git, config['git'])
-        shipConfig.git.user = config['git.config.user']
-        shipConfig.git.email = config['git.config.email']
-
-        //team
-        setProps(shipConfig.team, config['team'])
 
         //releaseNotes
-        setProps(shipConfig.releaseNotes, config['releaseNotes'])
+        //setProps(shipConfig.releaseNotes, config['releaseNotes'])
 
         // if version.properties uses the publishedVersion instead of previousVersion then use that
         final File versionFile = project.file(VERSION_FILE_NAME)
@@ -94,31 +51,12 @@ public class YamlConfigShipYakPlugin implements Plugin<Project> {
         project.allprojects { Project prj ->
             prj.setVersion(version)
         }
-        if(versionInfo.previousVersion){
-            shipConfig.setPreviousReleaseVersion(versionInfo.previousVersion)
-        }
         setupMavenPublishProps(project, config)
     }
 
     void setProps(Object pogo, Object cfgMap){
         ConfigMap curConfig = (ConfigMap)cfgMap
         InvokerHelper.setProperties(pogo, curConfig.evalAll().prune())
-    }
-
-    void addSnaphotTaskFromVersionProp(Project project) {
-        final File versionFile = project.file(VersioningPlugin.VERSION_FILE_NAME);
-        boolean bSnapshot = PropertiesUtil.readProperties(versionFile).getProperty("snapshot")?.toBoolean()
-        List startTasks = project.gradle.startParameter.taskNames
-        prop(project, 'isSnapshot', startTasks.contains('snapshot') || bSnapshot)
-
-        boolean excludedTasks = startTasks.any { ['resolveConfigurations', 'clean'].contains(it) }
-
-        if(prop(project, 'isSnapshot') && !excludedTasks) {
-            startTasks.add(0, 'snapshot')
-            project.gradle.startParameter.taskNames = startTasks
-            LOG.lifecycle("  Snapshot set in versions file. Added snapshot task.")
-            //println project.gradle.startParameter.taskNames
-        }
     }
 
     void setupMavenPublishProps(final Project prj, ConfigMap config){

@@ -6,14 +6,13 @@ package yakworks.gradle.shipkit
 
 import groovy.transform.CompileStatic
 
-import org.shipkit.internal.util.PropertiesUtil
-import org.shipkit.version.VersionInfo
+import yakworks.gradle.util.PropertiesUtil
 
 /**
  * handles the snapshot property in the version.props file
  */
 @CompileStatic
-class YakVersionInfo implements VersionInfo {
+class YakVersionInfo {
 
     String version
     String previousVersion

@@ -30,7 +30,6 @@ class GroovydocMergePlugin implements Plugin<Project> {
         if (rootProject.rootProject != rootProject) {
             throw new GradleException('yakworks.defaults must only be applied to the root project')
         }
-        //ShipkitConfiguration conf = rootProject.plugins.apply(ShipkitConfigurationPlugin).configuration
         //do after groovy is applied to pubProjects above
         addGroovydocMergeTask(rootProject)
     }

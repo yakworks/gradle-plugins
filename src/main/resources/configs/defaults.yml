@@ -7,9 +7,9 @@
 title: # short title used for javadocs and documentation
 description: # REQUIRED
 author: 9ci Inc # REQUIRED author for docs, copyright, and spotless licenseHeader too. Can be legal Org name or user name
-license: &License Apache-2.0 # REQUIRED will be used in the docs, pom and bintray upload
+license: &License Apache-2.0 # REQUIRED will be used in the docs, pom
 # the pointer to the docs for this project
-websiteUrl: &SiteUrl ${"https://" + config.github.owner + ".github.io/" + config.github.repo}
+websiteUrl: &SiteUrl ${"https://" + config.project.owner + ".github.io/" + config.project.repo}
 
 # everything before the first separator will get set on the project property
 # or project.ext and standards for gradle.properties should be followed.
@@ -32,12 +32,12 @@ git:
     grepDocs: ${config.git.releasable.circleDiff +  ' | grep -E (README\\.md|mkdocs\\.yml|docs/)' }
     grepRelease: ${config.git.releasable.diff +  ' | grep --invert-match -E (README\\.md|mkdocs\\.yml|docs/|src/examples/|src/test/)' }
 
-github:
+project:
   fullName: # REQUIRED (example: yakworks/gradle-plugins) if none specified then will try to find from git config --get remote.origin.url
-  owner: ${config.github.fullName.split('/')[0]} # example: yakworks
-  repo: ${config.github.fullName.split('/')[1]} # example: gradle-plugins
-  repoUrl: &GithubUrl ${'https://github.com/' + config.github.fullName}
-  issuesUrl: &IssuesUrl ${config.github.repoUrl + '/issues'}
+  owner: ${config.project.fullName.split('/')[0]} # example: yakworks
+  repo: ${config.project.fullName.split('/')[1]} # example: gradle-plugins
+  repoUrl: &GithubUrl ${'https://github.com/' + config.project.fullName}
+  issuesUrl: &IssuesUrl ${config.project.repoUrl + '/issues'}
   #DO NOT set and checkin your token in yml here. Use a env var or gradle.properties
   writeAuthToken: '${System.getenv("GRGIT_USER") ?: System.getenv("GH_WRITE_TOKEN") ?: project.findProperty("gitHubToken")}'
   readOnlyAuthToken: '${System.getenv("GRGIT_USER") ?: System.getenv("GH_WRITE_TOKEN") ?: project.findProperty("gitHubToken") ?: "e7fe8fcdd6ffed5c38498c4c79b2a68e6f6ed1bb"}'
@@ -51,42 +51,12 @@ team:
 releaseNotes:
   file: docs/release-notes.md
 
-# see docs here https://github.com/bintray/gradle-bintray-plugin. the yml supported options are below
-# this gets setup for each publishable project. If this is enabled then its assumed this is the primary place to publish
-bintray:
-  enabled: false # set this to true to turn on
-  #Note: properties such as BINTRAY_USER should be setup as system env variables, normally the case for CI
-  # or the camelCase variant can be put in ~/.gradle/gradle.properties or even assigned in ext props.
-  #DO NOT set or checkin your token in yml here and push to github, in case that wasn't obvious
-  user: ${findAnyProperty("BINTRAY_USER")} # REQUIRED findAny searches for BINTRAY_USER env and then looks for bintrayUser
-  key: ${props.findAny("BINTRAY_KEY")} # REQUIRED findAny searches for BINTRAY_KEY env and then looks for bintrayKey
-  pkg:
-    repo: # REQUIRED ex: grails-plugins
-    userOrg: ${config.github.owner} # -> the github owner by default
-    name: # this will get set from each subprojects name during runtime
-    websiteUrl: *SiteUrl
-    issueTrackerUrl: *IssuesUrl
-    vcsUrl: *GithubUrl
-    licenses: [ *License ]
-    publicDownloadNumbers: true
-    githubRepo: ${config.github.fullName} #Optional Github repository
-    githubReleaseNotesFile: README.md #Github readme file
-    version:
-      name: ${project.version}
-      gpg:
-        sign: false
-      mavenCentralSync:
-        sync: false
-# normal maven setting can be configured if not publishing to bintray and using an maven repo such as artifactory
-# If using bintray for primary and a maven repo for snapshots then just setup user/key and the repoUrl here.
-# if not using bintray then set enabled= false on it and setup repoUrl and a snapshotUrl if they differ.
-# Currently not suported to have 2 different credentials
 maven:
   user: '${props.findAny("MAVEN_REPO_USER")}' # see notes above about env variables like this
   key: '${props.findAny("MAVEN_REPO_KEY")}'
   publishUrl: # NOT normally set in config.yml. this plugin will assign it either repoUrl or snapshotUrl depending on whether snapshot is true in version.properties
   repoUrl: 'http://repo.9ci.com/grails-plugins'
-  snapshotUrl: # set this when not using bintray and you have a different url for snapshots
+  snapshotUrl:
 
 #spotless helps keep your code clean and spotless.
 spotless:

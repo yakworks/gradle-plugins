@@ -14,9 +14,6 @@ releaseNotes:
   file: docs/release-notes.md
   publicationRepository: https://plugins.gradle.org/plugin/yakworks.shipyak
 
-bintray:
-  enabled: false
-
 maven:
   #repoUrl: http://repo.9ci.com/grails-plugins
   snapshotUrl: http://repo.9ci.com/oss-snapshots

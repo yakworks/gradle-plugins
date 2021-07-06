@@ -68,10 +68,11 @@ ruleset {
     //ruleset('rulesets/enhanced.xml')//FIXME try adding in the src to classpath so theese work
 
     ruleset('rulesets/exceptions.xml'){
-        CatchException {
-            //doNotApplyToFileNames = "*Controller.groovy"
-            doNotApplyToClassNames = "*Controller"
-        }
+        // CatchException {
+        //     //doNotApplyToFileNames = "*Controller.groovy"
+        //     doNotApplyToClassNames = "*Controller"
+        // }
+        CatchException(enabled:false)
     }
 
     ruleset('rulesets/formatting.xml'){
@@ -79,6 +80,7 @@ ruleset {
 
         ['BlockEndsWithBlankLine', 'BlockStartsWithBlankLine',
          'SpaceAfterCatch', 'SpaceAfterFor', 'SpaceAfterIf', 'SpaceAfterSwitch', 'SpaceAfterWhile',
+         'SpaceInsideParentheses', 'SpaceAfterMethodCallName',
          'SpaceAroundClosureArrow', 'SpaceAroundMapEntryColon', 'SpaceAroundOperator',
          'SpaceAfterOpeningBrace', 'SpaceAfterClosingBrace', 'SpaceBeforeOpeningBrace', 'SpaceBeforeClosingBrace',
          'TrailingWhitespace','ClassEndsWithBlankLine', 'ClassStartsWithBlankLine', 'ConsecutiveBlankLines'
@@ -129,7 +131,8 @@ ruleset {
         VariableName {
             finalRegex='[a-zA-Z][a-zA-Z0-9_]*'
         }
-        //exclude 'ConfusingMethodName'
+        exclude 'MethodName'
+        exclude 'ConfusingMethodName'
         exclude 'FactoryMethodName'
     }
 
@@ -144,18 +147,22 @@ ruleset {
     }
 
     ruleset('rulesets/size.xml'){
-        'AbcMetric' doNotApplyToFilesMatching: '.*Spec.groovy'
         'MethodSize' doNotApplyToFilesMatching: '.*Spec.groovy'
         //'ParameterCount' maxParameters: 6
         exclude 'CrapMetric'
+        AbcMetric {
+            doNotApplyToFilesMatching = '.*Spec.groovy'
+            maxMethodAbcScore = 75
+            maxClassAverageMethodAbcScore = 75
+        }
         MethodCount {
             doNotApplyToClassNames = "*Controller"
             maxMethods = 50
         }
         ParameterCount(maxParameters:7)
         CyclomaticComplexity{
-            maxMethodComplexity = 40
-            maxClassAverageMethodComplexity = 40
+            maxMethodComplexity = 30
+            maxClassAverageMethodComplexity = 30
         }
         ClassSize {
             maxLines = 750

@@ -8,8 +8,6 @@ import groovy.transform.CompileStatic
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.shipkit.internal.gradle.java.JavaLibraryPlugin
-import org.shipkit.internal.gradle.java.JavaPublishPlugin
 
 import yakworks.gradle.CodenarcPlugin
 import yakworks.gradle.NotShippablePlugin
@@ -26,12 +24,12 @@ class GroovyLibPlugin implements Plugin<Project> {
         project.plugins.apply(ShippablePlugin)
         project.plugins.apply('groovy')
         project.plugins.apply(CodenarcPlugin)
-        project.plugins.apply(JavaLibraryPlugin)
+        project.plugins.apply(JavaSourcesDocJarPlugin)
 
         if(!project.plugins.hasPlugin(NotShippablePlugin)){
             //JavaPublishPlugin has to get applied after the grails-plugin has been applied or it doesn't add the dependencies to the pom properly
             project.plugins.apply(JavaPublishPlugin)
-            //this should come last after JavaPublishPlugin as it finalizes the maven/bintray setups
+            //this should come last after JavaPublishPlugin as it finalizes the maven setups
             project.plugins.apply(PublishingRepoSetupPlugin)
             // project.rootProject.plugins.apply(PublishingRepoSetupPlugin)
         }

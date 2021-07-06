@@ -71,13 +71,12 @@ class DefaultsPlugin implements Plugin<Project> {
     void addDefaultRepos(Project prj) {
         //add our default repositories to search.
         RepositoryHandler rh = prj.repositories
-        rh.jcenter()
+        //rh.jcenter()
         rh.mavenCentral()
 
         ['org.grails.grails-plugin', 'org.grails.grails-web'].each { plugId ->
             prj.plugins.withId(plugId) {
                 rh.maven { url "https://repo.grails.org/grails/core" }
-                rh.maven { url "https://dl.bintray.com/9ci/grails-plugins" }
             }
         }
     }

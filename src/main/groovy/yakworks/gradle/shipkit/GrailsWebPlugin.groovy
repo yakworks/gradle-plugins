@@ -16,8 +16,6 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.util.ClosureBackedAction
-import org.shipkit.internal.gradle.java.JavaPublishPlugin
-import org.shipkit.internal.gradle.snapshot.LocalSnapshotPlugin
 
 import yakworks.gradle.CodenarcPlugin
 import yakworks.gradle.ShippablePlugin

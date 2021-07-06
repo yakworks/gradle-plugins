@@ -10,15 +10,13 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
-import org.shipkit.internal.gradle.bintray.BintrayReleasePlugin
-import org.shipkit.internal.gradle.java.PomContributorsPlugin
-import org.shipkit.internal.gradle.util.ProjectUtil
+import yakworks.gradle.util.ProjectUtil
 
 import yakworks.commons.ConfigMap
 import yakworks.gradle.DefaultsPlugin
 
 /**
- * Continuous delivery for Java/Groovy/Grails with CirclePlugin and Bintray.
+ * Continuous delivery for Java/Groovy/Grails with CirclePlugin.
  * Intended for root project of your Gradle project because it applies some configuration to 'allprojects'.
  * Adds plugins and tasks to setup automated releasing for a typical Java/Groovy/Grails multi-project build.
  */
@@ -32,26 +30,8 @@ class ShipYakRootPlugin implements Plugin<Project> {
         ProjectUtil.requireRootProject(project, this.getClass())
 
         def skplugin = project.plugins.apply(YamlConfigShipYakPlugin) as YamlConfigShipYakPlugin
-        config = skplugin.config
 
-        project.plugins.apply(CiPublishPlugin)
         project.plugins.apply(DefaultsPlugin)
-
-        boolean isBintray = config['bintray.enabled']
-        if(isBintray){
-            //println "applying BintrayReleasePlugin isBintray=true"
-            project.plugins.apply(BintrayReleasePlugin)
-        } else {
-            //we are publishing lib to artifactory or some other maven repo
-            project.plugins.apply(MavenRepoReleasePlugin)
-        }
-        project.plugins.apply(PomContributorsPlugin)
-
-        // project.plugins.apply(DocsReleasePlugin)
-
-        // project.plugins.apply(UpgradeDependencyPlugin)
-
-        // project.plugins.apply(UpgradeDownstreamPlugin)
 
     }
 
