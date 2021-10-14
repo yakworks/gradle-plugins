@@ -7,7 +7,7 @@ jobs:
   build:
     docker:
       # docker image with python and mkdocs on it already as well, based on gradle:4.6-alpine
-      - image: yakworks/alpine-jdk:builder8
+      - image: yakworks/builder:jdk8
 
     environment:
       MALLOC_ARENA_MAX: 2
