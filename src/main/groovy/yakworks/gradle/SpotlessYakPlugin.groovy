@@ -29,7 +29,7 @@ class SpotlessYakPlugin implements Plugin<Project> {
             project.tasks.getByName('codenarcMain').dependsOn('spotlessCheck')
         }
 
-        spotlessFromConfig project, spotless, 'groovyGradle'
+        // spotlessFromConfig project, spotless, 'groovyGradle'
 
         project.plugins.withId('groovy') {
             spotlessFromConfig project, spotless, 'groovy'
