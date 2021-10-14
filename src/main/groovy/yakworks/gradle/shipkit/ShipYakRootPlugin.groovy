@@ -10,10 +10,10 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
-import yakworks.gradle.util.ProjectUtil
 
 import yakworks.commons.ConfigMap
 import yakworks.gradle.DefaultsPlugin
+import yakworks.gradle.util.ProjectUtil
 
 /**
  * Continuous delivery for Java/Groovy/Grails with CirclePlugin.

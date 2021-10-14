@@ -5,14 +5,14 @@ buildscript {
     maven { url "https://plugins.gradle.org/m2/" }
   }
   dependencies {
-    classpath "org.yakworks:gradle-plugins:2.0.1"
+    classpath "org.yakworks:gradle-plugins:2.1.1-SNAPSHOT"
     classpath "gradle.plugin.com.github.erdi:idea-gradle-plugins:2.2"
   }
 }
 
 plugins {
   id "com.dorongold.task-tree" version "1.5"
-  id "com.gradle.plugin-publish" version "0.12.0"
+  id "com.gradle.plugin-publish" version "0.16.0"
   id "java-gradle-plugin"
 }
 
@@ -41,8 +41,8 @@ dependencies {
   // 3rd party plugins
   compile 'com.diffplug.spotless:spotless-plugin-gradle:5.7.0'
   runtime "gradle.plugin.com.github.erdi:idea-gradle-plugins:2.2"
-  runtime "gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.4.0"
-  compile "com.adarshr:gradle-test-logger-plugin:1.6.0"
+  // runtime "gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.4.0"
+  compile "com.adarshr:gradle-test-logger-plugin:2.1.1"
 
   compile 'org.yaml:snakeyaml:1.27'
   //runtime 'com.netflix.nebula:gradle-lint-plugin:+'
@@ -160,9 +160,9 @@ pluginBundle {
   }
 }
 
-wrapper {
-  gradleVersion = '5.6.4'
-}
+// wrapper {
+//   gradleVersion = '5.6.4'
+// }
 
 // spotless.formats.groovy.target 'src/main/groovy/**/*.groovy'
 // gradleLint.excludedRules = ['transitive-duplicate-dependency-class']

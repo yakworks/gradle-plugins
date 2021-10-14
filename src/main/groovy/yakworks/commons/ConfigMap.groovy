@@ -255,8 +255,6 @@ class ConfigMap implements Map<String, Object>, Cloneable {
 
     /**
      * Evals the text using a GStringTemplateEngine
-     * @param text
-     * @return
      */
     String templateEval(String text){
         Map binding = [config:rootConfig] + rootConfig.getBindingMap()
@@ -348,8 +346,6 @@ class ConfigMap implements Map<String, Object>, Cloneable {
     /**
      * returns an "un-optimized" map combining the denormalized keys with dots and removes duplicate keys
      * basically puts it back into a "normalized" map
-     *
-     * @return
      */
     public Map<String, Object> toNormalMap() {
         //return toFlatConfig()
@@ -447,7 +443,6 @@ class ConfigMap implements Map<String, Object>, Cloneable {
 
     /**
      * Uses JsonOutput.prettyPrint to give a pretty and more human readable string
-     * @return
      */
     String prettyPrint() {
         groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(toNormalMap()))

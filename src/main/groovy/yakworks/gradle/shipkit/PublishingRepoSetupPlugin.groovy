@@ -15,7 +15,6 @@ import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.util.ClosureBackedAction
 
 import yakworks.commons.ConfigMap
-import yakworks.commons.Pogo
 
 /**
  * Finalize setup for Maven (artifactory) based on isSnapshot

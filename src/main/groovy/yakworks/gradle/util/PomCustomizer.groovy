@@ -1,20 +1,24 @@
+/*
+* Copyright 2021 Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
+* You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+*/
 package yakworks.gradle.util
 
-import groovy.transform.CompileStatic;
-import groovy.util.Node;
-import groovy.xml.QName;
-import org.gradle.api.Action;
-import org.gradle.api.Project;
-import org.gradle.api.XmlProvider;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
-import org.gradle.api.publish.maven.MavenPublication;
+import groovy.transform.CompileStatic
+import groovy.xml.QName
+
+import org.gradle.api.Action
+import org.gradle.api.Project
+import org.gradle.api.XmlProvider
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
+import org.gradle.api.publish.maven.MavenPublication
 
 import yakworks.commons.ConfigMap
-import yakworks.gradle.util.team.TeamMember;
+import yakworks.gradle.util.team.TeamMember
 
-import static yakworks.gradle.util.BuildConventions.contributorsFile;
-import static yakworks.gradle.util.team.TeamParser.parsePerson;
+import static yakworks.gradle.util.BuildConventions.contributorsFile
+import static yakworks.gradle.util.team.TeamParser.parsePerson
 
 /**
  * Customizes the pom file. Intended to be used with Gradle's 'maven-publish' plugin.
@@ -22,7 +26,7 @@ import static yakworks.gradle.util.team.TeamParser.parsePerson;
 @CompileStatic
 class PomCustomizer {
 
-    private static final Logger LOG = Logging.getLogger(PomCustomizer.class);
+    private static final Logger LOG = Logging.getLogger(PomCustomizer);
 
     /**
      * Customizes the pom. The method requires following properties on root project to function correctly:

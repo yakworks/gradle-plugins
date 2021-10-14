@@ -41,7 +41,7 @@ class DefaultsPlugin implements Plugin<Project> {
 
             prj.plugins.withId('java') {
                 //this is for CI to cache dependencies see https://github.com/palantir/gradle-configuration-resolver-plugin
-                prj.plugins.apply('com.palantir.configuration-resolver')
+                // prj.plugins.apply('com.palantir.configuration-resolver')
 
                 addDefaultRepos(prj)
                 silentJavadocWarnings(prj)

@@ -14,11 +14,6 @@ class Pogo {
 
     /**
      * Merge the a map, nested or not, onto the pogo. Uses the InvokerHelper.setProperties(values)
-     *
-     * @param pogo
-     * @param values
-     * @param args various options for performing the merge
-     *   - ignoreNulls : (boolean) default:true and if true will "prune" the map to remove null and blanks
      */
     static void merge( Map args = [:], Object pogo, Map values){
         boolean ignoreNulls = args.containsKey('ignoreNulls') ? args['ignoreNulls'] : true
