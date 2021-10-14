@@ -34,7 +34,7 @@ class DefaultsPlugin implements Plugin<Project> {
 
         //apply some helpful  default plugins
         //this is a wrapper on the normal IDEA plugin that make config better
-        rootProject.plugins.apply("com.github.erdi.extended-idea")
+        // rootProject.plugins.apply("com.github.erdi.extended-idea")
         //rootProject.plugins.apply('com.dorongold.task-tree')
 
         rootProject.allprojects { Project prj ->
