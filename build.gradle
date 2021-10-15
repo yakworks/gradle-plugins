@@ -5,7 +5,7 @@ buildscript {
     maven { url "https://plugins.gradle.org/m2/" }
   }
   dependencies {
-    classpath "org.yakworks:gradle-plugins:2.1.1-SNAPSHOT"
+    classpath "org.yakworks:gradle-plugins:2.6.1-SNAPSHOT"
     classpath "gradle.plugin.com.github.erdi:idea-gradle-plugins:2.2"
   }
 }
@@ -39,10 +39,10 @@ dependencies {
   //runtime 'org.ajoberstar.grgit:grgit-gradle:3.1.1'
   //runtime 'org.ajoberstar:gradle-git-publish:2.1.1'
   // 3rd party plugins
-  implementation 'com.diffplug.spotless:spotless-plugin-gradle:5.7.0'
+  implementation 'com.diffplug.spotless:spotless-plugin-gradle:5.17.0'
   implementation "gradle.plugin.com.github.erdi:idea-gradle-plugins:2.2"
   // runtime "gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.4.0"
-  implementation "com.adarshr:gradle-test-logger-plugin:2.1.1"
+  implementation "com.adarshr:gradle-test-logger-plugin:3.0.0"
 
   implementation 'org.yaml:snakeyaml:1.27'
   //runtime 'com.netflix.nebula:gradle-lint-plugin:+'
