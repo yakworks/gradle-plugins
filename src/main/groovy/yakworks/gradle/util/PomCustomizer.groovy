@@ -47,6 +47,7 @@ class PomCustomizer {
     /**
      * Customizes pom xml based on the provide configuration and settings
      */
+    @SuppressWarnings('ExplicitCallToGetAtMethod')
     static void customizePom(Node root, ConfigMap config,
                              String projectName, String projectDescription,
                              boolean isAndroidLibrary) {

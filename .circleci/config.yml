@@ -2,19 +2,12 @@
 #
 # Check https://circleci.com/docs/2.0/language-java/ for more details
 #
-version: 2
+version: 2.1
 jobs:
   build:
     docker:
       # docker image with python and mkdocs on it already as well, based on gradle:4.6-alpine
-      - image: yakworks/alpine-jdk:builder8
-
-    environment:
-      MALLOC_ARENA_MAX: 2
-      GRADLE_OPTS: "-Xmx1500m -Dorg.gradle.daemon=false" #daemon false doesn't seem to get picked up by fork
-      TERM: dumb
-
-    parallelism: 1
+      - image: yakworks/builder:jdk8
 
     steps:
       - checkout
@@ -35,10 +28,6 @@ jobs:
             - ~/.gradle
           key: v3-gradle-{{ checksum "build.gradle" }}
 
-#      - run:
-#          name: does perform release, this will fire publishPlugins since its a gradle plugin
-#          command: ./gradlew ciPerformRelease --stacktrace
-
       - store_artifacts:
           path: plugin/build/reports/tests/test/
           destination: test-reports/unit/
@@ -50,3 +39,31 @@ jobs:
       - store_test_results:
           path: plugin/build/test-results
 
+
+  # Not running yet, need to add in shipkit
+  pubish-plugin:
+    docker:
+      - image: yakworks/builder:jdk8
+    resource_class: 'medium+'
+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - v3-gradle-{{ checksum "build.gradle" }}
+
+      - run: make vault.decrypt
+      - run: make git.config-bot-user
+      - run: make ship.release
+      # if it meets the criteria to be IS_RELEASABLE, this will bump version and tag release on github
+      - run: make ship.version
+
+workflows:
+  build-flow:
+    jobs:
+      - build:
+          context: bot-context # context with shared ENV vars
+      - pubish-plugin:
+          context: bot-context
+          requires: [build]
+          filters: { branches: { only: [ master, /release\/.*/ ] } }
