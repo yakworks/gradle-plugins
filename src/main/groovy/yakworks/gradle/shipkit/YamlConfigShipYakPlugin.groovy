@@ -13,9 +13,8 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 
 import yakworks.commons.ConfigMap
-import yakworks.gradle.util.ProjectUtil
-import yakworks.gradle.util.PropertiesUtil
 import yakworks.gradle.config.YamlConfigPlugin
+import yakworks.gradle.util.ProjectUtil
 
 import static yakworks.gradle.GradleHelpers.prop
 

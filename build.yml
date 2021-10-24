@@ -1,0 +1,19 @@
+bot:
+  email: 9cibot@9ci.com
+  user: 9cibot
+
+vault_url: https://github.com/9ci/vault.git
+
+version:
+  # after release, will set version.properties back to snapshot=true
+  set_snapshot: true
+
+release:
+  changelog: CHANGELOG.md
+  branch_regex: master|release/.+
+
+team:
+  developers: ['basejump: Joshua Burnett']
+
+maven:
+  snapshotUrl: http://repo.9ci.com/oss-snapshots

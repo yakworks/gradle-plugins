@@ -2,6 +2,10 @@
 
 See it in action here https://github.com/yakworks/gorm-tools or in this project
 
+NOTE: publish this gradle plugin `gw login` and `gw publishPlugins` 
+
+Version 2.6+ for gradle5+
+
 ## What does it do?
 
 It's optimized for:

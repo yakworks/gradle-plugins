@@ -11,6 +11,8 @@ import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
@@ -34,14 +36,14 @@ class DefaultsPlugin implements Plugin<Project> {
 
         //apply some helpful  default plugins
         //this is a wrapper on the normal IDEA plugin that make config better
-        rootProject.plugins.apply("com.github.erdi.extended-idea")
-        //rootProject.plugins.apply('com.dorongold.task-tree')
+        // rootProject.plugins.apply("com.github.erdi.extended-idea")
+        // rootProject.plugins.apply('com.dorongold.task-tree')
 
         rootProject.allprojects { Project prj ->
 
             prj.plugins.withId('java') {
                 //this is for CI to cache dependencies see https://github.com/palantir/gradle-configuration-resolver-plugin
-                prj.plugins.apply('com.palantir.configuration-resolver')
+                // prj.plugins.apply('com.palantir.configuration-resolver')
 
                 addDefaultRepos(prj)
                 silentJavadocWarnings(prj)
@@ -59,8 +61,26 @@ class DefaultsPlugin implements Plugin<Project> {
         }
         rootProject.plugins.apply(GroovydocMergePlugin)
 
-        // rootProject.plugins.apply(DocmarkPlugin)
+        addResolveConfigurations(rootProject)
 
+    }
+
+    @CompileDynamic
+    void addResolveConfigurations(Project prj) {
+        prj.tasks.register('resolveConfigurations') {
+            description "Resolve and prefetch dependencies"
+            doLast {
+                def resolve = { ConfigurationContainer configurations ->
+                    configurations
+                    .findAll{ Configuration c -> c.isCanBeResolved() }
+                    .each{ c -> c.resolve() }
+                }
+                prj.allprojects.each { subProject ->
+                    resolve(subProject.buildscript.configurations)
+                    resolve(subProject.configurations)
+                }
+            }
+        }
     }
 
     /**

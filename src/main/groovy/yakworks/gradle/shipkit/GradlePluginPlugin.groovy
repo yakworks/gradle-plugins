@@ -8,12 +8,13 @@ import groovy.transform.CompileStatic
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import yakworks.gradle.util.ProjectUtil
 
 import yakworks.commons.ConfigMap
 import yakworks.gradle.CodenarcPlugin
 import yakworks.gradle.DefaultsPlugin
+import yakworks.gradle.NotShippablePlugin
 import yakworks.gradle.ShippablePlugin
+import yakworks.gradle.util.ProjectUtil
 
 /**
  * yakworks.gradle-plugin, the shipkit one wont work as it depends on travis. This will work for circle.
@@ -36,6 +37,15 @@ class GradlePluginPlugin implements Plugin<Project> {
         project.plugins.apply('groovy')
         project.plugins.apply(CodenarcPlugin)
         //project.plugins.apply(GradlePortalReleasePlugin);
+
+        if(!project.plugins.hasPlugin(NotShippablePlugin)){
+            //JavaPublishPlugin has to get applied after the grails-plugin has been applied or it doesn't add the dependencies to the pom properly
+            project.plugins.apply(JavaPublishPlugin)
+            //this should come last after JavaPublishPlugin as it finalizes the maven setups
+            project.plugins.apply(PublishingRepoSetupPlugin)
+            // project.rootProject.plugins.apply(PublishingRepoSetupPlugin)
+        }
+
     }
 
 }

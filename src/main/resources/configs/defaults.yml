@@ -89,14 +89,14 @@ spotless:
       - '**/*.java'
       - '**/conf/**/*.groovy'
       # - 'grails-app/init/**/*.groovy'
-  groovyGradle:
-    indentWithSpaces: 2
-    trimTrailingWhitespace: true
-    endWithNewline: true
-    includes:
-      - '**/*.gradle'
-      - 'build.gradle'
-      - 'gradle/*.gradle'
+  # groovyGradle:
+  #   indentWithSpaces: 2
+  #   trimTrailingWhitespace: true
+  #   endWithNewline: true
+  #   includes:
+  #     - '**/*.gradle'
+  #     - 'build.gradle'
+  #     - 'gradle/*.gradle'
 
 codenarc:
   toolVersion: 2.1.0
