@@ -36,15 +36,9 @@ class GradlePluginPlugin implements Plugin<Project> {
         project.plugins.apply(ShippablePlugin)
         project.plugins.apply('groovy')
         project.plugins.apply(CodenarcPlugin)
-        //project.plugins.apply(GradlePortalReleasePlugin);
 
-        if(!project.plugins.hasPlugin(NotShippablePlugin)){
-            //JavaPublishPlugin has to get applied after the grails-plugin has been applied or it doesn't add the dependencies to the pom properly
-            project.plugins.apply(JavaPublishPlugin)
-            //this should come last after JavaPublishPlugin as it finalizes the maven setups
-            project.plugins.apply(PublishingRepoSetupPlugin)
-            // project.rootProject.plugins.apply(PublishingRepoSetupPlugin)
-        }
+        project.plugins.apply(JavaPublishPlugin)
+        // project.plugins.apply(PublishingRepoSetupPlugin)
 
     }
 

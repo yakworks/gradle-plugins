@@ -12,8 +12,10 @@ import groovy.transform.EqualsAndHashCode
 
 import org.codehaus.groovy.runtime.DefaultGroovyMethods
 
+import yakworks.commons.map.Maps
+
 /**
- * Copied from org.grails.config.ConfigMap so we can use it as a gradle plugin here
+ * Copied from org.grails.config.NavigableMap so we can use it as a gradle plugin here
  * This is like groovy's ConfigObject but better.
  */
 @EqualsAndHashCode
@@ -249,8 +251,8 @@ class ConfigMap implements Map<String, Object>, Cloneable {
     void addToBinding(Map vars){
         bindingMap.putAll(vars)
     }
-    void addToBinding(String var, Object val){
-        bindingMap.put(var, val)
+    void addToBinding(String varName, Object val){
+        bindingMap.put(varName, val)
     }
 
     /**

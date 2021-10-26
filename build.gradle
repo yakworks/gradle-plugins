@@ -6,16 +6,23 @@ buildscript {
   }
   dependencies {
     classpath "org.yakworks:gradle-plugins:$vShipyak"
+    classpath "io.github.gradle-nexus:publish-plugin:1.1.0"
   }
 }
 
 plugins {
   id "com.dorongold.task-tree" version "1.5"
+  id 'groovy'
+  id 'java-gradle-plugin'
+  // id 'maven-publish'
   id "com.gradle.plugin-publish" version "0.16.0"
-  id "java-gradle-plugin"
 }
 
+apply plugin: 'signing'
+apply plugin: "io.github.gradle-nexus.publish-plugin"
 apply plugin: 'yakworks.gradle-plugin'
+
+group "org.yakworks"
 
 repositories {
   mavenCentral()
@@ -31,6 +38,7 @@ dependencies {
   implementation gradleApi()
   implementation localGroovy()
 
+  implementation "org.yakworks:commons:$vYakworksCommon"
   implementation "com.diffplug.spotless:spotless-plugin-gradle:$vSpotless"
   implementation "com.adarshr:gradle-test-logger-plugin:$vTestLogger"
   implementation "org.yaml:snakeyaml:$vSnakeyaml"
@@ -46,6 +54,17 @@ dependencies {
   testImplementation gradleTestKit()
 }
 
+signing {
+  useGpgCmd()
+  sign publishing.publications.javaLibrary
+}
+
+nexusPublishing {
+  repositories {
+    sonatype()
+  }
+}
+
 //if its a CI we need to get the gradle plugin credentials
 if(!findProperty('gradle.publish.key')) ext['gradle.publish.key'] = System.getenv('GRADLE_PUBLISH_KEY')
 if(!findProperty('gradle.publish.secret')) ext['gradle.publish.secret'] = System.getenv('GRADLE_PUBLISH_SECRET')
@@ -54,6 +73,7 @@ def defTags = ['grails', 'groovy', 'shipkit', 'spotless', 'circleCI', 'continuou
                'mkdocs', 'markdown', 'documentation']
 
 gradlePlugin {
+  automatedPublishing = false
   plugins {
     defaultsPlugin {
       id = 'yakworks.defaults'
@@ -118,13 +138,6 @@ gradlePlugin {
       description = 'Yakworks Groovydoc merges together all the groovydocs for shippable libs in a project'
       //tags = defTags
     }
-//    shipkitPlugin { //DEPRECATED
-//      id = 'yakworks.shipkit'
-//      implementationClass = 'yakworks.gradle.shipkit.ShipkitPlugin'
-//      displayName = 'DEPRECATED'
-//      description = 'DEPRECATED use yakworks.shipyak'
-//      //tags = defTags
-//    }
     yamlConfigPlugin {
       id = 'yakworks.yaml-config'
       implementationClass = 'yakworks.gradle.config.YamlConfigPlugin'
@@ -141,6 +154,7 @@ pluginBundle {
   //description = 'Plugin providing opinionated defaults and shipkit setup for Groovy, Grails and Gradle library/plugin projects. ' +
   //  'Enables hooks for automated releases and versioning and tags with CircleCI. Yaml config properties'
   tags = defTags
+
   mavenCoordinates {
     groupId = project.group
     artifactId = project.name

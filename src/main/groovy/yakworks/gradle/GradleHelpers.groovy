@@ -11,7 +11,7 @@ import groovy.transform.CompileStatic
 
 import org.gradle.api.Project
 
-import yakworks.commons.Props
+import yakworks.commons.lang.NameUtils
 
 @CompileStatic
 class GradleHelpers {
@@ -57,7 +57,7 @@ class GradleHelpers {
         } else if (System.properties[prop]) {
             return System.properties[prop]
         } else {
-            return prj.findProperty(Props.toCamelCase(prop)) //returns null if not found
+            return prj.findProperty(NameUtils.toCamelCase(prop)) //returns null if not found
         }
     }
 

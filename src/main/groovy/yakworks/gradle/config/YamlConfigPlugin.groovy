@@ -79,8 +79,10 @@ class YamlConfigPlugin implements Plugin<Project> {
 
         //assign the config object
         GradleHelpers.prop(prj, 'config', config)
-        //setup core project items if they exit
+
+        //setup core project items if they exist
         GradleHelpers.setPropIfEmpty(prj, 'description', config['description'])
+
         //assign group if in config
         if(config['group']){
             prj.allprojects { Project prjsub ->

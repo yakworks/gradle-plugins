@@ -29,9 +29,6 @@ class GroovyLibPlugin implements Plugin<Project> {
         if(!project.plugins.hasPlugin(NotShippablePlugin)){
             //JavaPublishPlugin has to get applied after the grails-plugin has been applied or it doesn't add the dependencies to the pom properly
             project.plugins.apply(JavaPublishPlugin)
-            //this should come last after JavaPublishPlugin as it finalizes the maven setups
-            project.plugins.apply(PublishingRepoSetupPlugin)
-            // project.rootProject.plugins.apply(PublishingRepoSetupPlugin)
         }
     }
 }
