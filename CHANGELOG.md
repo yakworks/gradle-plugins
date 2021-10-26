@@ -1,3 +1,8 @@
+### v2.6.6
+
+[Full Changelog](https://github.com/yakworks/gradle-plugins/compare/v2.6.5...v2.6.6)
+- remove unused classes, refactor JavaPublish to simplify, depend on yakworks:commons (#13) [link](https://github.com/yakworks/gradle-plugins/commit/3cc80e20b07e50a2b611f631e762544741ae0a24)
+
 ### v2.6.5
 
 [Full Changelog](https://github.com/yakworks/gradle-plugins/compare/v1.1.14...v2.6.5)
