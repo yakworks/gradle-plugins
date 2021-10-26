@@ -36,10 +36,6 @@ class GrailsPlugin implements Plugin<Project> {
         if(!project.plugins.hasPlugin(NotShippablePlugin)){
             //JavaPublishPlugin has to get applied after the grails-plugin has been applied or it doesn't add the dependencies to the pom properly
             project.plugins.apply(JavaPublishPlugin)
-            //this should come last after JavaPublishPlugin as it finalizes the maven setups
-            project.plugins.apply(PublishingRepoSetupPlugin)
-            // project.rootProject.plugins.apply(PublishingRepoSetupPlugin)
-
             //post processing cleanup
             cleanDepsInPom(project)
         }
@@ -48,7 +44,7 @@ class GrailsPlugin implements Plugin<Project> {
 
     /**
      * Taken from GrailsCentralPublishGradlePlugin in grails-core. its the 'org.grails.grails-plugin-publish'
-     * Cleans up dependencies without versions and removes the bom dependencyManagement stuff and adds the grails-plugin.xml artefact
+     * Removes dependencies without versions and removes the bom dependencyManagement stuff
      */
     @SuppressWarnings('NestedBlockDepth')
     @CompileDynamic
@@ -56,7 +52,7 @@ class GrailsPlugin implements Plugin<Project> {
         project.extensions.configure PublishingExtension, new ClosureBackedAction({
             publications {
                 javaLibrary(MavenPublication) {
-                    artifact getGrailsPluginArtifact(project)
+                    // artifact getGrailsPluginArtifact(project)
                     pom.withXml {
                         Node pomNode = asNode()
                         if (pomNode.dependencyManagement) {

@@ -4,7 +4,6 @@ import org.gradle.api.GradleException;
 
 import java.util.Collection;
 
-import static yakworks.gradle.util.ArgumentValidation.notNull;
 
 public class TeamParser {
 
@@ -21,7 +20,8 @@ public class TeamParser {
     }
 
     public static TeamMember parsePerson(String notation) throws InvalidInput {
-        notNull(notation, "Team member notation cannot be null");
+        //FIXME replace with Validate
+        // notNull(notation, "Team member notation cannot be null");
         String[] split = notation.split(":");
         if (split.length != 2) {
             throw invalidInput(notation);

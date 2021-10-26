@@ -2,12 +2,12 @@
 * Copyright 2019 Yak.Works - Licensed under the Apache License, Version 2.0 (the "License")
 * You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 */
-package yakworks.commons
+package yakworks.commons.map
 
 import spock.lang.Specification
+import yakworks.commons.map.Maps
 
 class MapsSpec extends Specification {
-    def instance = new Maps()
 
     def "merge a single map should return it self"(){
 
@@ -35,7 +35,7 @@ class MapsSpec extends Specification {
             baz: 'qux'
         ]
         then:
-        assertMapsEqual(expected, instance.merge(m0, m1))
+        assertMapsEqual(expected, Maps.merge(m0, m1))
     }
 
     void testMerge_Two_NoNesting_WithOverwriting () {
@@ -52,7 +52,7 @@ class MapsSpec extends Specification {
             foo: 'baz'
         ]
         then:
-        assertMapsEqual(expected, instance.merge(m0, m1))
+        assertMapsEqual(expected, Maps.merge(m0, m1))
     }
 
 
@@ -74,7 +74,7 @@ class MapsSpec extends Specification {
             foo: 'qux'
         ]
         then:
-        assertMapsEqual(expected, instance.merge(m0, m1, m2))
+        assertMapsEqual(expected, Maps.merge(m0, m1, m2))
     }
 
     void testMerge_Two_NestedOneLevel_NoOverwriting () {
@@ -100,7 +100,7 @@ class MapsSpec extends Specification {
             ]
         ]
         then:
-        assertMapsEqual(expected, instance.merge(m0, m1))
+        assertMapsEqual(expected, Maps.merge(m0, m1))
     }
 
 
@@ -130,7 +130,7 @@ class MapsSpec extends Specification {
             ]
         ]
         then:
-        assertMapsEqual(expected, instance.merge(m0, m1))
+        assertMapsEqual(expected, Maps.merge(m0, m1))
     }
 
 
@@ -190,7 +190,7 @@ class MapsSpec extends Specification {
             quiver: 'shatter'
         ]
         then:
-        assertMapsEqual(expected, instance.merge(m0, m1, m2))
+        assertMapsEqual(expected, Maps.merge(m0, m1, m2))
     }
 
 
@@ -217,7 +217,7 @@ class MapsSpec extends Specification {
             ]
         ]
         then:
-        assertMapsEqual(expected, instance.merge(m0, m1))
+        assertMapsEqual(expected, Maps.merge(m0, m1))
     }
 
     void deepPrune () {
