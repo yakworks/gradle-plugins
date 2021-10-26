@@ -1,3 +1,8 @@
+### v2.6.7
+
+[Full Changelog](https://github.com/yakworks/gradle-plugins/compare/v2.6.6...v2.6.7)
+- when calling snapshot task set isSnapshot to true if its not [link](https://github.com/yakworks/gradle-plugins/commit/48f7527fe3e207249c8662fe3703b438e208a410)
+
 ### v2.6.6
 
 [Full Changelog](https://github.com/yakworks/gradle-plugins/compare/v2.6.5...v2.6.6)
