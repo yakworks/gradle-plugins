@@ -24,6 +24,7 @@ import yakworks.commons.ConfigMap
 import yakworks.gradle.util.team.TeamMember
 
 import static java.util.Arrays.asList
+import static yakworks.gradle.GradleHelpers.prop
 import static yakworks.gradle.util.team.TeamParser.parsePerson
 
 /**
@@ -66,7 +67,7 @@ class JavaPublishPlugin implements Plugin<Project> {
             group = "Shipyak"
         }
 
-        configureSnapshotTask(project, snapshotTask);
+        checkForSnapshotTask(project, snapshotTask);
 
         project.getPlugins().apply(JavaSourcesDocJarPlugin);
         project.getPlugins().apply("maven-publish");
@@ -106,15 +107,15 @@ class JavaPublishPlugin implements Plugin<Project> {
         })
     }
 
-    static boolean configureSnapshotTask(Project proj, Task snapshotTask) {
+    void checkForSnapshotTask(Project proj, Task snapshotTask) {
         List<String> taskNames = proj.getGradle().getStartParameter().getTaskNames()
-        boolean isSnapshot = taskNames.contains(SNAPSHOT_TASK);
-        if (isSnapshot) {
+        if (taskNames.contains(SNAPSHOT_TASK)) {
             // if its not a snapshot version then make it one
             String ver = proj.getVersion().toString()
             if (!ver.endsWith("-SNAPSHOT")) {
                 proj.version = "${ver}-SNAPSHOT";
             }
+            prop(proj.rootProject, 'isSnapshot', true)
             // disable for now
             // def withName = { Task t -> ["javadoc", "groovydoc"].contains(t.getName())} as Spec<Task>
             // snapshotTask.getProject().getTasks().matching(withName("javadoc", "groovydoc")).all(doc -> {
@@ -122,7 +123,6 @@ class JavaPublishPlugin implements Plugin<Project> {
             //     doc.setEnabled(false);
             // });
         }
-        return isSnapshot;
     }
 
     void customizePom(final Project project, final ConfigMap config, final XmlProvider xml) {
