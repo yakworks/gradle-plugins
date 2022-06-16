@@ -1,3 +1,8 @@
+### v2.6.9
+
+[Full Changelog](https://github.com/yakworks/gradle-plugins/compare/v2.6.8...v2.6.9)
+- allowInsecureProtocol for when pushing to http [link](https://github.com/yakworks/gradle-plugins/commit/d31303d7a0fe78778ad52eb59d316fbf26f8b2a0)
+
 ### v2.6.8
 
 [Full Changelog](https://github.com/yakworks/gradle-plugins/compare/v2.6.7...v2.6.8)
