@@ -91,6 +91,7 @@ class JavaPublishPlugin implements Plugin<Project> {
                         username config.maven.user
                         password config.maven.key
                     }
+                    allowInsecureProtocol = true
                 }
             }
             publications {
