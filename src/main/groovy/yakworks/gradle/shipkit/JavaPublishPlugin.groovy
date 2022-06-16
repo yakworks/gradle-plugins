@@ -147,9 +147,9 @@ class JavaPublishPlugin implements Plugin<Project> {
         //TODO: all root.appendNode() need to be conditional
         root.appendNode("name", projectName);
 
-        if (!isAndroidLibrary && root.getAt(new QName("packaging")).isEmpty()) {
-            root.appendNode("packaging", "jar");
-        }
+        // if (!isAndroidLibrary && root.getAt(new QName("packaging")).isEmpty()) {
+        //     root.appendNode("packaging", "jar");
+        // }
 
         String repoLink = config['project']['repoUrl']
         root.appendNode("url", repoLink);
