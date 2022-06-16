@@ -1,3 +1,9 @@
+### v2.6.8
+
+[Full Changelog](https://github.com/yakworks/gradle-plugins/compare/v2.6.7...v2.6.8)
+- update vault and shipkit [link](https://github.com/yakworks/gradle-plugins/commit/2a8c7a9d3cbdc0c4c49de73a2c223bfa3ae52597)
+- cleanup for new grails plugin and pom conflicts. [link](https://github.com/yakworks/gradle-plugins/commit/f45b446035ffe29db4d38c4360888ab1f27292f8)
+
 ### v2.6.7
 
 [Full Changelog](https://github.com/yakworks/gradle-plugins/compare/v2.6.6...v2.6.7)
