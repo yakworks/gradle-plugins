@@ -7,6 +7,17 @@ group: org.yakworks
 github:
   fullName: yakworks/gradle-plugins # will try and pick this up based on checkout repo
 
+bot:
+  email: 9cibot@9ci.com
+  sign_commits: true
+
+vault:
+  repo: 9ci/vault
+
+version:
+  # after release, will set version.properties back to snapshot=true
+  set_snapshot: true
+
 team:
   developers: ['basejump: Joshua Burnett']
 
