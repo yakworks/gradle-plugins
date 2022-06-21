@@ -36,7 +36,7 @@ targetCompatibility = '1.8'
 dependencies {
   // gradle
   implementation gradleApi()
-  implementation localGroovy()
+  // implementation localGroovy()
 
   implementation "org.yakworks:commons:$vYakworksCommon"
   implementation "com.diffplug.spotless:spotless-plugin-gradle:$vSpotless"

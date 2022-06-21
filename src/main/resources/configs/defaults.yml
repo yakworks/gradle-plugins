@@ -99,7 +99,7 @@ spotless:
   #     - 'gradle/*.gradle'
 
 codenarc:
-  toolVersion: 2.1.0
+  toolVersion: 2.2.0
   config: prj.yakworks.getCodenarcRuleSet()
   reportFormat: 'html'
   maxPriority1Violations: 0

@@ -1,26 +1,22 @@
+# see defaults options https://github.com/yakworks/gradle-plugins/tree/master/src/main/resources/configs/defaults.yml
+title: ShipYak Gradle Plugins
+description: Plugin tools to automate CI versioning, releasing, tagging and publishing
+author: Yak.Works
+group: org.yakworks
 
-project:
-  # this is needed for url in pom for jar lib, doesnt pick up defaults from git
-  fullName: yakworks/gradle-plugins
-
-bot:
-  email: 9cibot@9ci.com
-  sign_commits: true
-
-vault:
-  repo: 9ci/vault
-
-version:
-  # after release, will set version.properties back to snapshot=true
-  set_snapshot: true
-
-release:
-  changelog: CHANGELOG.md
-  branch_regex: master|release/.+
+github:
+  fullName: yakworks/gradle-plugins # will try and pick this up based on checkout repo
 
 team:
   developers: ['basejump: Joshua Burnett']
 
+releaseNotes:
+  file: docs/release-notes.md
+  publicationRepository: https://plugins.gradle.org/plugin/yakworks.shipyak
+
 maven:
-#  repoUrl: https://oss.sonatype.org/service/local/staging/deploy/maven2
+  #repoUrl: http://repo.9ci.com/grails-plugins
   snapshotUrl: http://repo.9ci.com/oss-snapshots
+
+codenarc:
+  toolVersion: 2.2.0
