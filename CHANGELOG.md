@@ -1,3 +1,10 @@
+### v2.7.2
+
+[Full Changelog](https://github.com/yakworks/gradle-plugins/compare/v2.6.9...v2.7.2)
+- try to get version in sync [link](https://github.com/yakworks/gradle-plugins/commit/60d127851913bafe489044551518aadd3c82abc0)
+- fix build [link](https://github.com/yakworks/gradle-plugins/commit/dfaffc6d54e398b95aa304ec4b666124af5e14dd)
+- bump codenarc version and TestLogger [link](https://github.com/yakworks/gradle-plugins/commit/dd59635a89e5dafc79aa57958715be23711acf99)
+
 ### v2.6.9
 
 [Full Changelog](https://github.com/yakworks/gradle-plugins/compare/v2.6.8...v2.6.9)
