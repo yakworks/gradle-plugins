@@ -30,7 +30,16 @@ class YakVersionInfo {
         if (ver == null) {
             throw new IllegalArgumentException("Missing 'version=' properties in file: " + versionFile);
         }
-        def isSnap = properties.getProperty("snapshot")?.toBoolean()
+        boolean isSnap = false
+        def snapshotProp = properties.getProperty("snapshot")
+        def releaseProp = properties.getProperty("release")
+
+        if(releaseProp != null && releaseProp.toBoolean() == false){
+            isSnap = true
+        } else if(snapshotProp != null){
+            isSnap = snapshotProp.toBoolean()
+        }
+
         ver = maybeSnapshot(isSnap, ver);
         String publishedVersion = properties.getProperty("publishedVersion")
         return new YakVersionInfo(ver, publishedVersion, isSnap);
