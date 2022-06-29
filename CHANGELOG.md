@@ -1,3 +1,8 @@
+### v2.7.3
+
+[Full Changelog](https://github.com/yakworks/gradle-plugins/compare/v2.7.2...v2.7.3)
+- allow release in version.properties instead of snapshot [link](https://github.com/yakworks/gradle-plugins/commit/1a2e774714db4718479c9547afbe2bcfc4fb2acb)
+
 ### v2.7.2
 
 [Full Changelog](https://github.com/yakworks/gradle-plugins/compare/v2.6.9...v2.7.2)
