@@ -1,3 +1,8 @@
+### v2.7.4
+
+[Full Changelog](https://github.com/yakworks/gradle-plugins/compare/v2.7.3...v2.7.4)
+- fix the test logger [link](https://github.com/yakworks/gradle-plugins/commit/23e0ed52dfee57b59dce24a25aa85dbdf84c07c3)
+
 ### v2.7.3
 
 [Full Changelog](https://github.com/yakworks/gradle-plugins/compare/v2.7.2...v2.7.3)
