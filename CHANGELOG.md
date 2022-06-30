@@ -1,3 +1,9 @@
+### v2.7.5
+
+[Full Changelog](https://github.com/yakworks/gradle-plugins/compare/v2.7.4...v2.7.5)
+- fix vShipyak [link](https://github.com/yakworks/gradle-plugins/commit/e5166bf9dd30a406bf1aab620b6d57829e4a2285)
+- cleanup release, set test [link](https://github.com/yakworks/gradle-plugins/commit/14577af46a33627e5dd55d0eb85bfee0b98f1038)
+
 ### v2.7.4
 
 [Full Changelog](https://github.com/yakworks/gradle-plugins/compare/v2.7.3...v2.7.4)
