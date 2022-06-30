@@ -19,11 +19,11 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.specs.Spec
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.util.ClosureBackedAction
+import org.gradle.util.GradleVersion
 
 import yakworks.commons.ConfigMap
 import yakworks.gradle.util.team.TeamMember
 
-import static java.util.Arrays.asList
 import static yakworks.gradle.GradleHelpers.prop
 import static yakworks.gradle.util.team.TeamParser.parsePerson
 
@@ -77,6 +77,12 @@ class JavaPublishPlugin implements Plugin<Project> {
         // project.getTasks().getByName("build").dependsOn(MAVEN_LOCAL_TASK);
     }
 
+    private String isVersion5() {
+        def ver = GradleVersion.current().version.charAt(0)// as Integer
+        // println "gradle ver $ver"
+        return ver == '5'
+    }
+
     @CompileDynamic
     void configurePublications(Project project, ConfigMap config) {
 
@@ -91,7 +97,9 @@ class JavaPublishPlugin implements Plugin<Project> {
                         username config.maven.user
                         password config.maven.key
                     }
-                    allowInsecureProtocol = true
+                    if(!isVersion5() && config.maven.publishUrl.startsWith('http:')){
+                        allowInsecureProtocol = true
+                    }
                 }
             }
             publications {
@@ -112,7 +120,7 @@ class JavaPublishPlugin implements Plugin<Project> {
         List<String> taskNames = proj.getGradle().getStartParameter().getTaskNames()
         if (taskNames.contains(SNAPSHOT_TASK)) {
             // if its not a snapshot version then make it one
-            String ver = proj.getVersion().toString()
+            String ver = proj.getVersion()//.toString()
             if (!ver.endsWith("-SNAPSHOT")) {
                 proj.version = "${ver}-SNAPSHOT";
             }

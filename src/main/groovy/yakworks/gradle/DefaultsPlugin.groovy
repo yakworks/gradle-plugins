@@ -19,7 +19,6 @@ import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.logging.text.StyledTextOutputFactory
 
 import com.adarshr.gradle.testlogger.TestLoggerExtension
-import com.adarshr.gradle.testlogger.TestLoggerPlugin
 import com.adarshr.gradle.testlogger.renderer.AnsiTextRenderer
 import com.adarshr.gradle.testlogger.renderer.TextRenderer
 import com.adarshr.gradle.testlogger.theme.ThemeType
@@ -118,18 +117,20 @@ class DefaultsPlugin implements Plugin<Project> {
      */
     @CompileDynamic
     void applyTestLogger(Project project) {
-        project.plugins.apply(TestLoggerPlugin)
+        // project.plugins.apply(TestLoggerPlugin)
+        project.plugins.apply('com.adarshr.test-logger')
 
         def tle = project.extensions.getByType(TestLoggerExtension)
-        tle.setTheme(ThemeType.MOCHA)
+        tle.setTheme(ThemeType.MOCHA_PARALLEL)
 
         //Always show test url for report
         project.afterEvaluate {
             project.tasks.withType(Test) { testTask ->
                 afterSuite { desc, result ->
                     if (!desc.parent) {
-                        //Fix bad url on gradle tests.
+                        //Fix bad url on integration tests.
                         String reportUrl = testTask.reports.html.entryPoint
+                        //it merges int and unit so it mis-reports the index.
                         if (reportUrl.endsWith('integrationTest/index.html'))
                             reportUrl = reportUrl.replaceAll('integrationTest/index.html', 'index.html')
 //                        def tout = services.get(StyledTextOutputFactory).create("testReport")

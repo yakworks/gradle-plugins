@@ -21,9 +21,13 @@ version:
 team:
   developers: ['basejump: Joshua Burnett']
 
-releaseNotes:
-  file: docs/release-notes.md
-  publicationRepository: https://plugins.gradle.org/plugin/yakworks.shipyak
+release:
+  # after release, will set version.properties back to snapshot=true or releasable=false
+  reset_flag: true
+  # changelog: CHANGELOG.md
+
+# publish:
+#   branch_regex: master|dev|release/.+
 
 maven:
   #repoUrl: http://repo.9ci.com/grails-plugins

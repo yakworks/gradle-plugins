@@ -12,7 +12,6 @@ import org.gradle.api.Project
 import yakworks.commons.ConfigMap
 import yakworks.gradle.CodenarcPlugin
 import yakworks.gradle.DefaultsPlugin
-import yakworks.gradle.NotShippablePlugin
 import yakworks.gradle.ShippablePlugin
 import yakworks.gradle.util.ProjectUtil
 

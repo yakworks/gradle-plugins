@@ -3,10 +3,12 @@ buildscript {
   repositories {
     mavenLocal()        // for downstream test
     maven { url "https://plugins.gradle.org/m2/" }
+    mavenCentral()
   }
   dependencies {
     classpath "org.yakworks:gradle-plugins:$vShipyak"
     classpath "io.github.gradle-nexus:publish-plugin:1.1.0"
+    // classpath "com.adarshr:gradle-test-logger-plugin:$vTestLogger"
   }
 }
 
@@ -17,7 +19,7 @@ plugins {
   // id 'maven-publish'
   id "com.gradle.plugin-publish" version "0.16.0"
 }
-
+// apply plugin: 'com.adarshr.test-logger'
 apply plugin: 'signing'
 apply plugin: "io.github.gradle-nexus.publish-plugin"
 apply plugin: 'yakworks.gradle-plugin'
@@ -174,3 +176,24 @@ tasks.create('foo'){
     println "GOT IT"
   }
 }
+
+// testlogger {
+//     theme 'mocha'
+// }
+//     showExceptions true
+//     showStackTraces true
+//     showFullStackTraces false
+//     showCauses true
+//     slowThreshold 2000
+//     showSummary true
+//     showSimpleNames false
+//     showPassed true
+//     showSkipped true
+//     showFailed true
+//     showOnlySlow false
+//     showStandardStreams false
+//     showPassedStandardStreams true
+//     showSkippedStandardStreams true
+//     showFailedStandardStreams true
+//     logLevel 'lifecycle'
+// }
