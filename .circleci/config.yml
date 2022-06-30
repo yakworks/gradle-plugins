@@ -19,8 +19,7 @@ jobs:
 
       - run:
           name: gradle check tests.
-#          command: ./gradlew check --stacktrace
-          command: echo "foo"
+          command: ./gradlew check --stacktrace
 
       - save_cache:
           paths:

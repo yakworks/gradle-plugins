@@ -77,11 +77,11 @@ class JavaPublishPlugin implements Plugin<Project> {
         // project.getTasks().getByName("build").dependsOn(MAVEN_LOCAL_TASK);
     }
 
-    private String isVersion5() {
-        def ver = GradleVersion.current().version.charAt(0)// as Integer
-        // println "gradle ver $ver"
-        return ver == '5'
-    }
+    // private String isVersion5() {
+    //     def ver = GradleVersion.current().version.charAt(0)// as Integer
+    //     // println "gradle ver $ver"
+    //     return ver == '5'
+    // }
 
     @CompileDynamic
     void configurePublications(Project project, ConfigMap config) {
@@ -97,7 +97,7 @@ class JavaPublishPlugin implements Plugin<Project> {
                         username config.maven.user
                         password config.maven.key
                     }
-                    if(!isVersion5() && config.maven.publishUrl.startsWith('http:')){
+                    if(config.maven.publishUrl.startsWith('http:')){
                         allowInsecureProtocol = true
                     }
                 }

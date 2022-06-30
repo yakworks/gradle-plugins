@@ -121,7 +121,7 @@ class DefaultsPlugin implements Plugin<Project> {
         project.plugins.apply('com.adarshr.test-logger')
 
         def tle = project.extensions.getByType(TestLoggerExtension)
-        tle.setTheme(ThemeType.MOCHA_PARALLEL)
+        tle.setTheme(ThemeType.MOCHA)
 
         //Always show test url for report
         project.afterEvaluate {
