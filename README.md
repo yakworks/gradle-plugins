@@ -4,13 +4,22 @@ See it in action here https://github.com/yakworks/gorm-tools or in this project
 
 NOTE: publish this gradle plugin `gw login` and `gw publishPlugins` 
 
-Version 2.6+ for gradle5+
+- **Version 2.6+ for gradle5+**
+- **Version 2.7+ for gradle7+**
 
 ## What does it do?
 
+- [gradle-test-logger-plugin](https://github.com/radarsh/gradle-test-logger-plugin) for cleaner test reporting
+- [Spotless](https://github.com/diffplug/spotless/tree/main/plugin-gradle) to keep code clean and indened consitently. Also enforces license headers.
+- Codenarc and what we consder to be sane defaults, with a simple way to turn checks on or off in the build.gradle
+- Allows for the base configuration to be in a `build.yml`
+- Supports and helps with multi-project builds
+- Utility to merge groovyDocs into a single set when multi-project builds
+- Snapshot task to easily publish to mavenLocal in ~.m2/
+
 It's optimized for:
 
-* A Grails plugin or Groovy library that will be published to Artifactory
+* A Grails plugin or Groovy library that will be published to maven repos
 
 Its enforces a best pratice subproject layout.
 
@@ -75,3 +84,4 @@ ext.codenarcRuleset= '''
 see here for the defaults
 
 https://github.com/yakworks/gradle-plugins/blob/master/src/main/resources/configs/defaults.yml
+
